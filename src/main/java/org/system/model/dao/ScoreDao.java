@@ -1,4 +1,4 @@
-package org.system.dao;
+package org.system.model.dao;
 
 public interface ScoreDao {
 }

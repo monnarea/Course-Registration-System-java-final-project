@@ -1,4 +1,4 @@
-package org.system.model;
+package org.system.model.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @ToString
-public class Student {
+public class Students {
 
     private Integer id;
     private String fullName;
