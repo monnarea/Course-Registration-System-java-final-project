@@ -1,4 +1,12 @@
 package org.system.model.dto.request;
 
+import java.time.LocalDate;
+
 public class EnrollmentRequestDto {
+    private Integer enrollment_id;
+    private Integer course_id;
+    private Integer student_id;
+    private LocalDate enroll_date;
+    private String payment_method;
+    private String status;
 }
