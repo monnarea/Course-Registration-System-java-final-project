@@ -8,6 +8,7 @@ public class StudentResponseDto {
     private String email;
     private Integer phone_number;
     private Integer score;
+    private String address;
     private String semester;
     private Integer year;
 }

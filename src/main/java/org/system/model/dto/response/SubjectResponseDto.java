@@ -4,4 +4,5 @@ public class SubjectResponseDto {
     private Integer sub_id;
     private String sub_name;
     private String description;
+    private Double hour;
 }

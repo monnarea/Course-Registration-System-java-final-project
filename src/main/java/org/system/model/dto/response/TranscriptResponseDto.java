@@ -5,4 +5,8 @@ import java.util.Iterator;
 
 public class TranscriptResponseDto {
 
+    private Integer transcript_id;
+    private Integer student_id;
+    private LocalDate generated_at;
+
 }
