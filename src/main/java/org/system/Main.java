@@ -8,7 +8,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import static org.system.view.View.printTable;
+import static org.system.view.View.printCorseTable;
 
 public class Main {
     public static void main(String[] args) {
@@ -36,7 +36,7 @@ public class Main {
                 System.out.println("Total courses found: " + allCourses.size());
 
 
-                    printTable(allCourses);
+                    printCorseTable(allCourses);
 
             }
         } catch (SQLException e) {
@@ -53,7 +53,7 @@ public class Main {
             if (result.isEmpty()) {
                 System.out.println("No course found.");
             } else {
-                printTable(result); // reuse same printTable method
+                printCorseTable(result); // reuse same printTable method
             }
         } catch (SQLException e) {
             System.err.println("getById() failed: " + e.getMessage());

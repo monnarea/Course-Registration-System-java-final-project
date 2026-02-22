@@ -5,12 +5,12 @@ import org.system.model.dto.response.CourseResponseDto;
 import java.util.List;
 
 public class View {
-    public static void printTable(List<CourseResponseDto> courses) {
-        System.out.printf("%-5s %-20s %-8s %-8s %-8s %-12s %-12s %-15s %-8s %-12s%n",
+    public static void printCorseTable(List<CourseResponseDto> courses) {
+        System.out.printf("%-5s %-30s %-8s %-8s %-8s %-12s %-12s %-15s %-8s %-12s%n",
                 "ID", "Name", "Price", "Credit", "Cap", "Start", "End", "Instructor", "Room", "Created");
-        System.out.println("-".repeat(120));
+        System.out.println("-".repeat(130));
         for (CourseResponseDto c : courses) {
-            System.out.printf("%-5d %-20s %-8.2f %-8d %-8d %-12s %-12s %-15s %-8s %-12s%n",
+            System.out.printf("%-5d %-30s %-8.2f %-8d %-8d %-12s %-12s %-15s %-8s %-12s%n",
                     c.getCourse_id(),
                     c.getCourse_name(),
                     c.getPrice(),
