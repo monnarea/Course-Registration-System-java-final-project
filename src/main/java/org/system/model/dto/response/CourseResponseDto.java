@@ -19,7 +19,7 @@ public class CourseResponseDto {
     private Integer capacity;
     private LocalDate start_date;
     private LocalDate end_date;
-    private String instructor;
+    private Integer instructor_id;
     private String room;
     private LocalDate created_at;
 

@@ -45,18 +45,18 @@ public class Main {
 
         System.out.println();
 
-
-
-        System.out.println("===== Testing getById(1) =====");
-        try {
-            List<CourseResponseDto> result = courseDao.getById(1); // change 1 to any ID
-            if (result.isEmpty()) {
-                System.out.println("No course found.");
-            } else {
-                printCorseTable(result); // reuse same printTable method
-            }
-        } catch (SQLException e) {
-            System.err.println("getById() failed: " + e.getMessage());
-        }
+//
+//
+//        System.out.println("===== Testing getById(1) =====");
+//        try {
+//            List<CourseResponseDto> result = courseDao.getById(1); // change 1 to any ID
+//            if (result.isEmpty()) {
+//                System.out.println("No course found.");
+//            } else {
+//                printCorseTable(result); // reuse same printTable method
+//            }
+//        } catch (SQLException e) {
+//            System.err.println("getById() failed: " + e.getMessage());
+//        }
     }
 }
