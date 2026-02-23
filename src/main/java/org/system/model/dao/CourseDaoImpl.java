@@ -38,7 +38,9 @@ public class CourseDaoImpl implements CourseDao{
                             rs.getObject("end_date", LocalDate.class),
                             rs.getInt("instructor_id"),
                             rs.getString("room"),
-                            rs.getTimestamp("created_at").toLocalDateTime().toLocalDate()
+                            rs.getTimestamp("created_at").toLocalDateTime().toLocalDate(),
+                            rs.getString("major_id"),
+                            rs.getInt("level")
                     );
                     list.add(course);
                 }
@@ -72,8 +74,9 @@ public class CourseDaoImpl implements CourseDao{
                         rs.getInt("instructor_id"),
                         rs.getString("room"),
                         // Converting SQL Timestamp to Java LocalDate
-                        rs.getTimestamp("created_at") != null ?
-                                rs.getTimestamp("created_at").toLocalDateTime().toLocalDate() : null
+                        rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime().toLocalDate() : null,
+                        rs.getString("major_id"),
+                        rs.getInt("level")
                 );
                 list.add(dto);
             }

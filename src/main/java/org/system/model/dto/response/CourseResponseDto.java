@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.time.LocalDate;
+import java.util.List;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -22,6 +24,8 @@ public class CourseResponseDto {
     private Integer instructor_id;
     private String room;
     private LocalDate created_at;
+    private String major_id;
+    private Integer level;
 
 }
 

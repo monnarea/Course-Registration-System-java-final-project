@@ -2,13 +2,18 @@ package org.system;
 import org.system.config.DatabaseConfig;
 import org.system.model.dao.CourseDao;
 import org.system.model.dao.CourseDaoImpl;
+import org.system.model.dao.RoadmapDao;
+import org.system.model.dao.RoadmapDaoImpl;
 import org.system.model.dto.response.CourseResponseDto;
+import org.system.model.dto.response.RoadmapResponseDto;
 
+import java.awt.image.ByteLookupTable;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.system.view.View.printCorseTable;
+import static org.system.view.View.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -35,8 +40,7 @@ public class Main {
             } else {
                 System.out.println("Total courses found: " + allCourses.size());
 
-
-                    printCorseTable(allCourses);
+                printCourseTable(allCourses);
 
             }
         } catch (SQLException e) {
@@ -58,5 +62,36 @@ public class Main {
 //        } catch (SQLException e) {
 //            System.err.println("getById() failed: " + e.getMessage());
 //        }
+        RoadmapDao roadmapDao = new RoadmapDaoImpl();
+        try {
+            List<RoadmapResponseDto> allroadmap = roadmapDao.getAll();
+        if (allroadmap.isEmpty()) {
+            System.out.println("No courses found in database.");
+        } else {
+            System.out.println("Total courses found: " +allroadmap.size());
+
+
+            printRoadmapTable(allroadmap);
+
+        }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        RoadmapDao roadmapDaoByid = new RoadmapDaoImpl();
+        try {
+            List<RoadmapResponseDto> allroadmap1 = roadmapDaoByid.getById(2);
+            if (allroadmap1.isEmpty()) {
+                System.out.println("No courses found in database.");
+            } else {
+                System.out.println("Total courses found: " +allroadmap1.size());
+
+
+                printSingleRoadmapTable(allroadmap1);
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
