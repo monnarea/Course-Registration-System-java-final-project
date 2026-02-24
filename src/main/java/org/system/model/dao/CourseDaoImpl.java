@@ -73,7 +73,26 @@ public class CourseDaoImpl implements CourseDao{
 
     @Override
     public List<CourseResponseDto> getById(int course_id) throws SQLException {
-        String sql = "SELECT * FROM course WHERE course_id = ?";
+        String sql = """
+        SELECT 
+            c.course_id,
+            c.course_name,
+            c.price,
+            c.credit_score,
+            c.capacity,
+            c.start_date,
+            c.end_date,
+            c.instructor_id,
+            c.room,
+            c.created_at,
+            c.major_id,
+            c.level,
+            m.major_name
+        FROM course c
+        JOIN major m ON c.major_id = m.major_id
+        WHERE c.course_id = ?
+        ORDER BY c.level ASC
+    """;
 
         List<CourseResponseDto> list = new ArrayList<>();
 

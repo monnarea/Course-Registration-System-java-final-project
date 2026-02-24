@@ -10,15 +10,15 @@ public class CourseController {
     private final CourseService courseService = new CourseService();
     private final Scanner scanner = new Scanner(System.in);
 
-    private void displayAllCourse(){
+    public void displayAllCourse(){
         courseService.displayAllCourse();
 
     }
     public void displayCourseBy(){
         System.out.println("""
                 Do you want to display one course by
-                1. Course Id
-                2. Major Id
+                1. Major Id
+                2. Course Id
                 """);
         System.out.print("Please Enter Option: ");
         int option = scanner.nextInt();
@@ -26,7 +26,8 @@ public class CourseController {
             System.out.print("Enter Major Id: ");
             courseService.displaySingleCourse(scanner.nextInt());
         } else if (option==2) {
-
+            System.out.print("Enter Course Id: ");
+            courseService.displaySingleCourseByCourseId(scanner.nextInt());
         }else {
             System.out.println("Enter option( 1-2 )");
             displayCourseBy();

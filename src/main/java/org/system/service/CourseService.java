@@ -35,6 +35,27 @@ public class CourseService {
 
     }
 
+    public void displaySingleCourseByCourseId(int course_id){
+
+        try {
+            List<CourseResponseDto> Courses = courseDao.getById(course_id);
+
+            if (Courses.isEmpty()) {
+                System.out.println("No courses found in database.");
+            } else {
+                System.out.println("Total courses found: " + Courses.size());
+
+                printCourseTable(Courses);
+
+            }
+        } catch (SQLException e) {
+            System.err.println("getAll() failed: " + e.getMessage());
+        }
+
+        System.out.println();
+
+    }
+
     public void displaySingleCourse(int course_id){
                 try {
                     List<CourseResponseDto> result = singleCourseDao.getByMajorId(course_id);// change 1 to any ID
@@ -50,6 +71,7 @@ public class CourseService {
 
 
     }
+
 
 
 
