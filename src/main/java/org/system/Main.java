@@ -63,6 +63,8 @@ public class Main {
 ////        } catch (SQLException e) {
 ////            System.err.println("getById() failed: " + e.getMessage());
 ////        }
+
+
 //        RoadmapDao roadmapDao = new RoadmapDaoImpl();
 //        try {
 //            List<RoadmapResponseDto> allroadmap = roadmapDao.getAll();

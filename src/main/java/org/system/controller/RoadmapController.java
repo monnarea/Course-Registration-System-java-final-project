@@ -18,8 +18,12 @@ public class RoadmapController {
         int option = scanner.nextInt();
         if (option == 1) {
             displayAllRoadmap();
-        }else {
+        } else if (option == 2) {
             displaySingleRoadmap();
+        }else {
+            System.out.println("Please Enter option ( 1 - 2 )");
+            chooseIdOrAllRoadmap();
+
         }
     }
     public void displayAllRoadmap() {

@@ -18,7 +18,7 @@ public class View {
         }
 
         // Create table with 11 columns (like your header)
-        Table table = new Table(12, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+        Table table = new Table(13, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
         table.addCell("ID");
         table.addCell("Name");
@@ -30,7 +30,8 @@ public class View {
         table.addCell("Instructor");
         table.addCell("Room");
         table.addCell("Created");
-        table.addCell("Major_Id");
+        table.addCell("Major Id");
+        table.addCell("Major Name");
         table.addCell("Level");
 
         for (CourseResponseDto c : courses) {
@@ -45,10 +46,59 @@ public class View {
             table.addCell(c.getRoom() != null ? c.getRoom() : "");
             table.addCell(c.getCreated_at() != null ? c.getCreated_at().toString() : "");
             table.addCell(String.valueOf(c.getMajor_id()));
+            table.addCell(String.valueOf(c.getMajor_name()));
             table.addCell(String.valueOf(c.getLevel()));
         }
 
         // Print table
+        System.out.println(table.render());
+    }
+
+    public static void printSingleCourseTable(List<CourseResponseDto> courses) {
+
+        if (courses.isEmpty()) {
+            System.out.println("No courses found.");
+            return;
+        }
+
+        // 11 columns
+        Table table = new Table(11, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+
+        // First row: Major ID (1 col) + Major Name (10 cols)
+        if (!courses.isEmpty()) {
+            table.addCell("Major ID: " + courses.get(0).getMajor_id(),
+                    new CellStyle(CellStyle.HorizontalAlign.center), 1);
+            table.addCell(courses.get(0).getMajor_name(),
+                    new CellStyle(CellStyle.HorizontalAlign.center), 10);
+        }
+
+        // Headers
+        table.addCell("ID");
+        table.addCell("Name");
+        table.addCell("Price");
+        table.addCell("Credit");
+        table.addCell("Cap");
+        table.addCell("Start");
+        table.addCell("End");
+        table.addCell("Instructor");
+        table.addCell("Room");
+        table.addCell("Created");
+        table.addCell("Level");
+
+        for (CourseResponseDto c : courses) {
+            table.addCell(String.valueOf(c.getCourse_id()));
+            table.addCell(c.getCourse_name());
+            table.addCell(String.valueOf(c.getPrice()));
+            table.addCell(String.valueOf(c.getCredit_score()));
+            table.addCell(String.valueOf(c.getCapacity()));
+            table.addCell(c.getStart_date() != null ? c.getStart_date().toString() : "");
+            table.addCell(c.getEnd_date() != null ? c.getEnd_date().toString() : "");
+            table.addCell(String.valueOf(c.getInstructor_id()));
+            table.addCell(c.getRoom() != null ? c.getRoom() : "");
+            table.addCell(c.getCreated_at() != null ? c.getCreated_at().toString() : "");
+            table.addCell(String.valueOf(c.getLevel()));
+        }
+
         System.out.println(table.render());
     }
 
@@ -118,21 +168,6 @@ public class View {
         System.out.println(table.render());
     }
 
-    public static void start(){
-        System.out.println("╔═════════════════════════════════╗");
-        System.out.println("║   COURSE REGISTRATION SYSTEM    ║");
-        System.out.println("╚═════════════════════════════════╝");
-        System.out.println("""
-                1. Major
-                2. Course
-                3. Roadmap
-                4. Instructor
-                5. Transcript
-                6. Student
-                0. Exit
-                
-                """);
-    }
 
 
 }

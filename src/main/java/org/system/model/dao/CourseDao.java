@@ -7,7 +7,8 @@ import java.util.List;
 
 public interface CourseDao {
 
-    List<CourseResponseDto> getById(int courseId) throws SQLException;
+    List<CourseResponseDto> getByMajorId(int major_id) throws SQLException;
+    List<CourseResponseDto> getById(int course_id) throws SQLException;
 
     List<CourseResponseDto> getAll() throws SQLException;
 

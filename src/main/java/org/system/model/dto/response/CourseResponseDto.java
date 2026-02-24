@@ -24,7 +24,8 @@ public class CourseResponseDto {
     private Integer instructor_id;
     private String room;
     private LocalDate created_at;
-    private String major_id;
+    private Integer major_id;
+    private String major_name;
     private Integer level;
 
 }
