@@ -6,6 +6,7 @@ import org.system.model.dao.RoadmapDao;
 import org.system.model.dao.RoadmapDaoImpl;
 import org.system.model.dto.response.CourseResponseDto;
 import org.system.model.dto.response.RoadmapResponseDto;
+import org.system.view.MainMenu;
 
 import java.awt.image.ByteLookupTable;
 import java.sql.Connection;
@@ -17,7 +18,7 @@ import static org.system.view.View.*;
 
 public class Main {
     public static void main(String[] args) {
-
+        new MainMenu().start();
 //        Test database
         Connection con = DatabaseConfig.getConnection();
 
@@ -27,71 +28,71 @@ public class Main {
             System.out.println("Connection failed.");
         }
 
-//        Test course
-        CourseDaoImpl courseDao = new CourseDaoImpl();
-
-        // ✅ Test getAll()
-        System.out.println("===== Testing getAll() =====");
-        try {
-            List<CourseResponseDto> allCourses = courseDao.getAll();
-
-            if (allCourses.isEmpty()) {
-                System.out.println("No courses found in database.");
-            } else {
-                System.out.println("Total courses found: " + allCourses.size());
-
-                printCourseTable(allCourses);
-
-            }
-        } catch (SQLException e) {
-            System.err.println("getAll() failed: " + e.getMessage());
-        }
-
-        System.out.println();
-
+////        Test course
+//        CourseDaoImpl courseDao = new CourseDaoImpl();
 //
-//
-//        System.out.println("===== Testing getById(1) =====");
+//        // ✅ Test getAll()
+//        System.out.println("===== Testing getAll() =====");
 //        try {
-//            List<CourseResponseDto> result = courseDao.getById(1); // change 1 to any ID
-//            if (result.isEmpty()) {
-//                System.out.println("No course found.");
+//            List<CourseResponseDto> allCourses = courseDao.getAll();
+//
+//            if (allCourses.isEmpty()) {
+//                System.out.println("No courses found in database.");
 //            } else {
-//                printCorseTable(result); // reuse same printTable method
+//                System.out.println("Total courses found: " + allCourses.size());
+//
+//                printCourseTable(allCourses);
+//
 //            }
 //        } catch (SQLException e) {
-//            System.err.println("getById() failed: " + e.getMessage());
+//            System.err.println("getAll() failed: " + e.getMessage());
 //        }
-        RoadmapDao roadmapDao = new RoadmapDaoImpl();
-        try {
-            List<RoadmapResponseDto> allroadmap = roadmapDao.getAll();
-        if (allroadmap.isEmpty()) {
-            System.out.println("No courses found in database.");
-        } else {
-            System.out.println("Total courses found: " +allroadmap.size());
-
-
-            printRoadmapTable(allroadmap);
-
-        }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        RoadmapDao roadmapDaoByid = new RoadmapDaoImpl();
-        try {
-            List<RoadmapResponseDto> allroadmap1 = roadmapDaoByid.getById(2);
-            if (allroadmap1.isEmpty()) {
-                System.out.println("No courses found in database.");
-            } else {
-                System.out.println("Total courses found: " +allroadmap1.size());
-
-
-                printSingleRoadmapTable(allroadmap1);
-
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+//
+//        System.out.println();
+//
+////
+////
+////        System.out.println("===== Testing getById(1) =====");
+////        try {
+////            List<CourseResponseDto> result = courseDao.getById(1); // change 1 to any ID
+////            if (result.isEmpty()) {
+////                System.out.println("No course found.");
+////            } else {
+////                printCorseTable(result); // reuse same printTable method
+////            }
+////        } catch (SQLException e) {
+////            System.err.println("getById() failed: " + e.getMessage());
+////        }
+//        RoadmapDao roadmapDao = new RoadmapDaoImpl();
+//        try {
+//            List<RoadmapResponseDto> allroadmap = roadmapDao.getAll();
+//        if (allroadmap.isEmpty()) {
+//            System.out.println("No courses found in database.");
+//        } else {
+//            System.out.println("Total courses found: " +allroadmap.size());
+//
+//
+//            printRoadmapTable(allroadmap);
+//
+//        }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//
+//        RoadmapDao roadmapDaoByid = new RoadmapDaoImpl();
+//        try {
+//            List<RoadmapResponseDto> allroadmap1 = roadmapDaoByid.getById(2);
+//            if (allroadmap1.isEmpty()) {
+//                System.out.println("No courses found in database.");
+//            } else {
+//                System.out.println("Total courses found: " +allroadmap1.size());
+//
+//
+//                printSingleRoadmapTable(allroadmap1);
+//
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
     }
 }

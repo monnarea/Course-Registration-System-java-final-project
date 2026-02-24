@@ -118,5 +118,21 @@ public class View {
         System.out.println(table.render());
     }
 
+    public static void start(){
+        System.out.println("╔═════════════════════════════════╗");
+        System.out.println("║   COURSE REGISTRATION SYSTEM    ║");
+        System.out.println("╚═════════════════════════════════╝");
+        System.out.println("""
+                1. Major
+                2. Course
+                3. Roadmap
+                4. Instructor
+                5. Transcript
+                6. Student
+                0. Exit
+                
+                """);
+    }
+
 
 }
