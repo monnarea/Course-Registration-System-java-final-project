@@ -1,8 +1,6 @@
 package org.system.controller;
 
-import org.system.model.dao.CourseDaoImpl;
 import org.system.service.CourseService;
-import org.system.service.RoadmapService;
 
 import java.util.Scanner;
 
@@ -15,22 +13,57 @@ public class CourseController {
 
     }
     public void displayCourseBy(){
-        System.out.println("""
+
+        while (true)
+        {
+            System.out.println("""
                 Do you want to display one course by
                 1. Major Id
                 2. Course Id
+                0. Back
                 """);
-        System.out.print("Please Enter Option: ");
-        int option = scanner.nextInt();
-        if (option == 1){
-            System.out.print("Enter Major Id: ");
-            courseService.displaySingleCourse(scanner.nextInt());
-        } else if (option==2) {
-            System.out.print("Enter Course Id: ");
-            courseService.displaySingleCourseByCourseId(scanner.nextInt());
-        }else {
-            System.out.println("Enter option( 1-2 )");
-            displayCourseBy();
+            System.out.print("Please Enter Option: ");
+            int option = scanner.nextInt();
+            switch (option){
+                case 1 -> {
+                    System.out.print("Enter Major Id: ");
+                    courseService.displaySingleCourseByMajorId(scanner.nextInt());
+                }
+                case 2 -> {
+                    System.out.print("Enter Course Id: ");
+                    courseService.displaySingleCourseByCourseId(scanner.nextInt());
+                }
+                case 0 -> { return;}
+                default -> System.out.println("Invalid option. Please enter 1-2.");
+            }
         }
+
+    }
+    // ══════════════════════════════════════════════
+    // CREATE
+    // ══════════════════════════════════════════════
+
+    public void createCourse() {
+        courseService.createCourse();
+    }
+
+    // ══════════════════════════════════════════════
+    // UPDATE
+    // ══════════════════════════════════════════════
+
+    public void updateCourse() {
+        System.out.print("Enter Course ID to update: ");
+        int course_id = scanner.nextInt();
+        courseService.updateCourse(course_id);
+    }
+
+    // ══════════════════════════════════════════════
+    // DELETE
+    // ══════════════════════════════════════════════
+
+    public void deleteCourse() {
+        System.out.print("Enter Course ID to delete: ");
+        int course_id = scanner.nextInt();
+        courseService.deleteCourse(course_id);
     }
 }

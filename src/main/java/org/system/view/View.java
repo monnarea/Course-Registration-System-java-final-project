@@ -20,14 +20,14 @@ public class View {
         // Create table with 11 columns (like your header)
         Table table = new Table(13, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
-        table.addCell("ID");
-        table.addCell("Name");
+        table.addCell("Course ID");
+        table.addCell("Course Name");
         table.addCell("Price");
         table.addCell("Credit");
         table.addCell("Cap");
         table.addCell("Start");
         table.addCell("End");
-        table.addCell("Instructor");
+        table.addCell("Instructor Id");
         table.addCell("Room");
         table.addCell("Created");
         table.addCell("Major Id");
@@ -73,17 +73,17 @@ public class View {
         }
 
         // Headers
-        table.addCell("ID");
-        table.addCell("Name");
+        table.addCell("Course ID");
+        table.addCell("Course Name");
         table.addCell("Price");
         table.addCell("Credit");
-        table.addCell("Cap");
+        table.addCell("Capacity");
         table.addCell("Start");
         table.addCell("End");
-        table.addCell("Instructor");
+        table.addCell("Instructor Id");
         table.addCell("Room");
         table.addCell("Created");
-        table.addCell("Level");
+        table.addCell("Level Course In Major");
 
         for (CourseResponseDto c : courses) {
             table.addCell(String.valueOf(c.getCourse_id()));
@@ -102,27 +102,61 @@ public class View {
         System.out.println(table.render());
     }
 
-    public static void printRoadmapTable(List<RoadmapResponseDto> roadmapList){
+    public static void printRoadmapTable(List<RoadmapResponseDto> roadmapList) {
+        if (roadmapList == null || roadmapList.isEmpty()) {
+            System.out.println("No roadmap data to display.");
+            return;
+        }
 
         Table table = new Table(7, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
+        // Title spanning all columns
         table.addCell("Road map", new CellStyle(CellStyle.HorizontalAlign.center), 7);
-        table.addCell("Major",new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell("Course ID",new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell("Course Name",new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell("Subject ID",new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell("Subject Name",new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell("Price",new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell("Hour",new CellStyle(CellStyle.HorizontalAlign.center));
-        // new column
+
+        // Headers
+        table.addCell("Major",        new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell("Course ID",    new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell("Course Name",  new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell("Subject ID",   new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell("Subject Name", new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell("Price",        new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell("Hour",         new CellStyle(CellStyle.HorizontalAlign.center));
+
+        String lastMajor  = null;
+        String lastCourse = null;
+
         for (RoadmapResponseDto roadmap : roadmapList) {
-            table.addCell(roadmap.getMajor_name());
-         table.addCell(String.valueOf(roadmap.getCourse_id()));
-         table.addCell(roadmap.getCourse_name());
-         table.addCell(String.valueOf(roadmap.getSub_id()));
-         table.addCell(roadmap.getSub_name());
-         table.addCell(String.valueOf(roadmap.getPrice()));
-         table.addCell(String.valueOf(roadmap.getHour()));
+
+            boolean sameMajor  = roadmap.getMajor_name().equals(lastMajor);
+            boolean sameCourse = sameMajor && String.valueOf(roadmap.getCourse_id()).equals(lastCourse);
+
+            // Major: blank if same as previous row
+            table.addCell(
+                    sameMajor ? "" : roadmap.getMajor_name(),
+                    new CellStyle(CellStyle.HorizontalAlign.left)
+            );
+
+            // Course ID: blank if same course
+            table.addCell(
+                    sameCourse ? "" : String.valueOf(roadmap.getCourse_id()),
+                    new CellStyle(CellStyle.HorizontalAlign.center)
+            );
+
+            // Course Name: blank if same course
+            table.addCell(
+                    sameCourse ? "" : roadmap.getCourse_name(),
+                    new CellStyle(CellStyle.HorizontalAlign.left)
+            );
+
+            // Subject columns: always display
+            table.addCell(String.valueOf(roadmap.getSub_id()),   new CellStyle(CellStyle.HorizontalAlign.center));
+            table.addCell(roadmap.getSub_name(),                 new CellStyle(CellStyle.HorizontalAlign.left));
+            table.addCell(String.valueOf(roadmap.getPrice()),    new CellStyle(CellStyle.HorizontalAlign.center));
+            table.addCell(String.valueOf(roadmap.getHour()),     new CellStyle(CellStyle.HorizontalAlign.center));
+
+            // Update trackers
+            lastMajor  = roadmap.getMajor_name();
+            lastCourse = String.valueOf(roadmap.getCourse_id());
         }
 
         System.out.println(table.render());
@@ -134,37 +168,48 @@ public class View {
             return;
         }
 
-        // The table has 6 columns (Course ID, Course Name, Subject ID, Subject Name, Price, Hour)
-        int columns = 7;
-        Table table = new Table(columns, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+        Table table = new Table(6, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
-        // Get the major name from the first element (all same major)
+        // Major name as title
         String majorName = roadmapList.get(0).getMajor_name();
+        table.addCell(majorName, new CellStyle(CellStyle.HorizontalAlign.center), 6);
 
-        // Add major name as a centered header spanning all columns
-        table.addCell(majorName, new CellStyle(CellStyle.HorizontalAlign.center), columns);
-
-        // Add column headers
-        table.addCell("Level", new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell("Course ID", new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell("Course Name", new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell("Subject ID", new CellStyle(CellStyle.HorizontalAlign.center));
+        // Headers
+        table.addCell("Level",        new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell("Course Name",  new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell("Subject ID",   new CellStyle(CellStyle.HorizontalAlign.center));
         table.addCell("Subject Name", new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell("Price", new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell("Hour", new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell("Price",        new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell("Hour",         new CellStyle(CellStyle.HorizontalAlign.center));
 
-        // Add rows
+        String lastCourse = null;
+        String lastLevel  = null;
+
         for (RoadmapResponseDto roadmap : roadmapList) {
-            table.addCell(String.valueOf(roadmap.getLevel()), new CellStyle(CellStyle.HorizontalAlign.center));
-            table.addCell(String.valueOf(roadmap.getCourse_id()), new CellStyle(CellStyle.HorizontalAlign.center));
-            table.addCell(roadmap.getCourse_name(), new CellStyle(CellStyle.HorizontalAlign.center));
-            table.addCell(String.valueOf(roadmap.getSub_id()), new CellStyle(CellStyle.HorizontalAlign.center));
-            table.addCell(roadmap.getSub_name(), new CellStyle(CellStyle.HorizontalAlign.center));
-            table.addCell(String.valueOf(roadmap.getPrice()), new CellStyle(CellStyle.HorizontalAlign.center));
-            table.addCell(String.valueOf(roadmap.getHour()), new CellStyle(CellStyle.HorizontalAlign.center));
+
+            boolean sameCourse = String.valueOf(roadmap.getCourse_id()).equals(lastCourse);
+
+            // Level: blank if same course
+            table.addCell(
+                    sameCourse ? "" : String.valueOf(roadmap.getLevel()),
+                    new CellStyle(CellStyle.HorizontalAlign.center)
+            );
+
+            // Course Name: blank if same course
+            table.addCell(
+                    sameCourse ? "" : roadmap.getCourse_name(),
+                    new CellStyle(CellStyle.HorizontalAlign.left)
+            );
+
+            // Subject columns: always display
+            table.addCell(String.valueOf(roadmap.getSub_id()),  new CellStyle(CellStyle.HorizontalAlign.center));
+            table.addCell(roadmap.getSub_name(),                new CellStyle(CellStyle.HorizontalAlign.left));
+            table.addCell(String.valueOf(roadmap.getPrice()),   new CellStyle(CellStyle.HorizontalAlign.center));
+            table.addCell(String.valueOf(roadmap.getHour()),    new CellStyle(CellStyle.HorizontalAlign.center));
+
+            lastCourse = String.valueOf(roadmap.getCourse_id());
         }
 
-        // Print the table
         System.out.println(table.render());
     }
 

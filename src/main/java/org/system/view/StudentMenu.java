@@ -9,7 +9,7 @@ public class StudentMenu {
     private final Scanner scanner = new Scanner(System.in);
     private final RoadmapController roadmapController = new RoadmapController();
     private final CourseController courseController = new CourseController();
-    public void start() {
+    public void studentStart() {
         while (true) {
             System.out.println("""
         ╔═════════════════════════════════╗
@@ -18,9 +18,8 @@ public class StudentMenu {
         ║ 1. Course                       ║
         ║ 2. Enrollment                   ║
         ║ 3. Roadmap                      ║
-        ║ 4. Instructor                   ║
-        ║ 5. Transcript                   ║
-        ║ 0. Exit                         ║
+        ║ 4. Transcript                   ║
+        ║ 0. Back                         ║
         ╚═════════════════════════════════╝
         """);
             System.out.print("Enter option : ");
@@ -30,8 +29,14 @@ public class StudentMenu {
                     courseController.displayAllCourse();
                     courseController.displayCourseBy();
                 }
+                case 2 -> {
+                    System.out.println("Ot tn mean te bach jol merl te");
+                }
                 case 3 -> roadmapController.chooseIdOrAllRoadmap();
-                case 0 -> { System.out.println("Goodbye!"); return; }
+                case 4 -> {
+                    System.out.println("Ot tn mean te bach jol merl te");
+                }
+                case 0 -> { return; }
                 default  -> System.out.println("Invalid option.");
             }
         }
