@@ -2,11 +2,10 @@ package org.system.view;
 
 import org.system.controller.CourseController;
 import org.system.controller.RoadmapController;
-import org.system.service.CourseService;
 
 import java.util.Scanner;
 
-public class MainMenu {
+public class StudentMenu {
     private final Scanner scanner = new Scanner(System.in);
     private final RoadmapController roadmapController = new RoadmapController();
     private final CourseController courseController = new CourseController();
@@ -21,7 +20,6 @@ public class MainMenu {
         ║ 3. Roadmap                      ║
         ║ 4. Instructor                   ║
         ║ 5. Transcript                   ║
-        ║ 6. Student                      ║
         ║ 0. Exit                         ║
         ╚═════════════════════════════════╝
         """);

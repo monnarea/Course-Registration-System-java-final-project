@@ -1,12 +1,11 @@
 package org.system;
 import org.system.config.DatabaseConfig;
-import org.system.view.MainMenu;
+import org.system.view.StudentMenu;
 import java.sql.Connection;
-import static org.system.view.View.*;
 
 public class Main {
     public static void main(String[] args) {
-        new MainMenu().start();
+        new StudentMenu().start();
 //        Test database
         Connection con = DatabaseConfig.getConnection();
 
