@@ -2,7 +2,6 @@ package org.system.model.dao;
 
 import org.system.model.dto.response.SubjectResponseDto;
 
-import javax.security.auth.Subject;
 import java.util.List;
 
 public interface SubjectDao {
@@ -13,7 +12,7 @@ public interface SubjectDao {
     List<SubjectResponseDto> getAllSubjects();
 
     // READ BY ID
-    SubjectResponseDto getSubjectById(int subId);
+    List<SubjectResponseDto> getSubjectById(int subId);
 
     // READ BY COURSE ID
     List<SubjectResponseDto> getSubjectsByCourseId(int courseId);

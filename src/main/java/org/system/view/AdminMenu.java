@@ -1,6 +1,7 @@
 package org.system.view;
 
 import org.system.controller.CourseController;
+import org.system.controller.InstructorController;
 import org.system.controller.RoadmapController;
 import org.system.controller.SubjectController;
 import org.system.service.CourseService;
@@ -13,6 +14,7 @@ public class AdminMenu {
     private final CourseController courseController = new CourseController();
     private final RoadmapController roadmapController = new RoadmapController();
     private final SubjectController subjectController = new SubjectController();
+    private final InstructorController instructorController = new InstructorController();
 
     public void AdminStart() {
         while (true) {
@@ -22,11 +24,10 @@ public class AdminMenu {
                     ╠═════════════════════════════════╣
                     ║ 1. Manage Course                ║
                     ║ 2. Manage Roadmap               ║
-                    ║ 3. Manage Enrollment            ║
-                    ║ 4. Manage Instructor            ║
-                    ║ 5. Manage Transcript            ║
-                    ║ 6. Manage Student               ║
-                    ║ 7. Manage Subject               ║
+                    ║ 3. Manage Instructor            ║
+                    ║ 4. Manage Transcript            ║
+                    ║ 5. Manage Student               ║
+                    ║ 6. Manage Subject               ║
                     ║ 0. Back                         ║
                     ╚═════════════════════════════════╝
                     """);
@@ -40,7 +41,7 @@ public class AdminMenu {
                 case 3 -> InstructorMenu();
                 case 4 -> TranscriptMenu();
                 case 5 -> StudentMenu();
-                case 7 -> SubjectMenu();
+                case 6 -> SubjectMenu();
                 case 0 -> {
                     return;
                 }
@@ -115,7 +116,7 @@ public class AdminMenu {
 
         while (running) {
             System.out.println("""
-                    
+
                     ╔══════════════════════════════════╗
                     ║            INSTRUCTOR            ║
                     ╠══════════════════════════════════╣
@@ -128,16 +129,15 @@ public class AdminMenu {
                     ╚══════════════════════════════════╝""");
             System.out.print("Please Enter Option: ");
             int option = scanner.nextInt();
-//            switch (option) {
-//                case 1 -> courseService.displayAllCourse();
-//                case 2 -> courseService.displayCourseById();
-//                case 3 -> courseService.createCourse();
-//                case 4 -> courseService.deleteCourse(scanner.nextInt());
-//                case 5 -> courseService.updateCourse(scanner.nextInt());
-//                case 0 -> running = false;
-//                default -> System.out.println("Invalid option. Please enter 0–5.");
-//            }
-            return;
+            switch (option) {
+                case 1 -> instructorController.displayAllInstructors();
+                case 2 -> instructorController.displayInstructorById();
+                case 3 -> instructorController.createInstructor();
+                case 4 -> instructorController.updateInstructor();
+                case 5 -> instructorController.createInstructor();
+                case 0 -> running = false;
+                default -> System.out.println("Invalid option. Please enter 0–5.");
+            }
         }
     }
 
@@ -178,30 +178,28 @@ public class AdminMenu {
         while (running) {
             System.out.println("""
     
-    ╔══════════════════════════════╗
-    ║      SUBJECT MANAGEMENT      ║
-    ╠══════════════════════════════╣
-    ║  1. Create Subject           ║
-    ║  2. View All Subjects        ║
-    ║  3. View Subject by ID       ║
-    ║  4. View Subjects by Course  ║
-    ║  5. Update Subject           ║
-    ║  6. Delete Subject           ║
-    ║  0. Exit                     ║
-    ╚══════════════════════════════╝
+    ╔═══════════════════════════════════╗
+    ║        SUBJECT MANAGEMENT         ║
+    ╠═══════════════════════════════════╣
+    ║  1. Display All Subjects          ║
+    ║  2. View Subject by ID            ║
+    ║  3. Create Subject                ║
+    ║  4. Update Subject                ║
+    ║  5. Delete Subject                ║
+    ║  0. Exit                          ║
+    ╚═══════════════════════════════════╝
     """);
             System.out.print("Please Enter Option: ");
             int option = scanner.nextInt();
             switch (option) {
-//                case 1 -> subjectController.displayAllSubjects();
-//                case 2 -> courseService.displayCourseById();
-//                case 3 -> courseService.createCourse();
-//                case 4 -> courseService.deleteCourse(scanner.nextInt());
-//                case 5 -> courseService.updateCourse(scanner.nextInt());
+                case 1 -> subjectController.displayAllSubjects();
+                case 2 -> subjectController.displaySubjectById();
+                case 3 -> subjectController.createSubject();
+                case 4 -> subjectController.updateSubject();
+                case 5 -> subjectController.deleteSubject();
                 case 0 -> running = false;
                 default -> System.out.println("Invalid option. Please enter 0–5.");
             }
-            return;
         }
     }
 
@@ -231,4 +229,35 @@ public class AdminMenu {
             }
         }
     }
+
+//    public static void InstructorMenu() {
+//        boolean running = true;
+//        while (true) {
+//            System.out.println("""
+//
+//                    ╔══════════════════════════════╗
+//                    ║     INSTRUCTOR MANAGEMENT     ║
+//                    ╠══════════════════════════════╣
+//                    ║  1. Create Instructor         ║
+//                    ║  2. Display All Instructors   ║
+//                    ║  3. Display Instructor By ID  ║
+//                    ║  4. Update Instructor         ║
+//                    ║  5. Delete Instructor         ║
+//                    ║  0. Exit                      ║
+//                    ╚══════════════════════════════╝
+//                    """);
+//            System.out.print("Enter option: ");
+//
+//            int option = scanner.nextInt();
+//            switch (option) {
+//                case "1" -> instructorController.createInstructor();
+//                case "2" -> instructorController.displayAllInstructors();
+//                case "3" -> instructorController.displayInstructorById();
+//                case "4" -> instructorController.updateInstructor();
+//                case "5" -> instructorController.deleteInstructor();
+//                case "0" -> { running = false; }
+//                default  -> System.out.println("Invalid option. Please enter (0-5).");
+//            }
+//        }
+//    }
 }

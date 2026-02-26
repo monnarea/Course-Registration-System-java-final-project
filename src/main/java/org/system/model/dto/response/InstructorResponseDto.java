@@ -1,14 +1,20 @@
 package org.system.model.dto.response;
 
+import lombok.*;
+
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
 public class InstructorResponseDto {
-    private Integer instructor_id;
-    private String instructor_name;
+    private int instructorId;
+    private String instructorName;
     private String gender;
-    private Integer age;
+    private int age;
     private String email;
-    private Integer phone_number;
-    private Integer course_id;
-    private String qualification;
+    private String phoneNumber;
     private String address;
+    private String qualification;
 
 }

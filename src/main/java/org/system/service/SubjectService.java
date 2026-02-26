@@ -2,12 +2,15 @@ package org.system.service;
 
 import org.system.model.dao.SubjectDao;
 import org.system.model.dao.SubjectDaoImpl;
+import org.system.model.dto.response.RoadmapResponseDto;
 import org.system.model.dto.response.SubjectResponseDto;
 
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
+import static org.system.view.View.printRoadmapTable;
 import static org.system.view.View.printSubjectTable;
 
 public class SubjectService {
@@ -40,7 +43,7 @@ public class SubjectService {
     // =========================================================
     //  READ ALL
     // =========================================================
-    public void getAllSubjects() {
+    public void getAllSubjects()  {
         List<SubjectResponseDto> list = subjectDao.getAllSubjects();
         if (list.isEmpty()) {
             System.out.println("[SERVICE - READ ALL] No subjects found.");
@@ -53,11 +56,18 @@ public class SubjectService {
     //  READ BY ID
     // =========================================================
     public void getSubjectById(int subId) {
+
+
+        List<SubjectResponseDto> list = subjectDao.getSubjectById(subId);
+
+        if (list == null || list.isEmpty()) {
+            System.out.println("[SERVICE - READ BY ID] No subject found with sub_id = " + subId);
+            return;
+        }
         if (subId <= 0) {
             System.err.println("[SERVICE - READ BY ID] Invalid sub_id: " + subId);
             return;
         }
-        List<SubjectResponseDto> list = Collections.singletonList(subjectDao.getSubjectById(subId));
         if (list.isEmpty()) {
             System.out.println("[SERVICE - READ BY ID] No subject found with sub_id = " + subId);
             return;
@@ -69,11 +79,16 @@ public class SubjectService {
     //  READ BY COURSE ID
     // =========================================================
     public void getSubjectsByCourseId(int courseId) {
+        List<SubjectResponseDto> list = subjectDao.getSubjectById(courseId);
+
+        if (list == null || list.isEmpty()) {
+            System.out.println("[SERVICE - READ BY ID] No subject found with course_id = " + courseId);
+            return;
+        }
         if (courseId <= 0) {
             System.err.println("[SERVICE - READ BY COURSE] Invalid course_id: " + courseId);
             return;
         }
-        List<SubjectResponseDto> list = subjectDao.getSubjectsByCourseId(courseId);
         if (list.isEmpty()) {
             System.out.println("[SERVICE - READ BY COURSE] No subjects found for course_id = " + courseId);
             return;
@@ -115,7 +130,7 @@ public class SubjectService {
         }
 
         // Check subject exists before deleting
-        List<SubjectResponseDto> existing = Collections.singletonList(subjectDao.getSubjectById(subId));
+        List<SubjectResponseDto> existing = subjectDao.getSubjectById(subId);
         if (existing.isEmpty()) {
             System.err.println("[SERVICE - DELETE] Subject not found with sub_id: " + subId);
             return false;

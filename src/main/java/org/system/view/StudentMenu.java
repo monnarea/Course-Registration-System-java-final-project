@@ -2,6 +2,7 @@ package org.system.view;
 
 import org.system.controller.CourseController;
 import org.system.controller.RoadmapController;
+import org.system.controller.SubjectController;
 
 import java.util.Scanner;
 
@@ -9,6 +10,7 @@ public class StudentMenu {
     private final Scanner scanner = new Scanner(System.in);
     private final RoadmapController roadmapController = new RoadmapController();
     private final CourseController courseController = new CourseController();
+    private final SubjectController subjectController = new SubjectController();
     public void studentStart() {
         while (true) {
             System.out.println("""
@@ -16,9 +18,10 @@ public class StudentMenu {
         ║   COURSE REGISTRATION SYSTEM    ║
         ╠═════════════════════════════════╣
         ║ 1. Course                       ║
-        ║ 2. Enrollment                   ║
-        ║ 3. Roadmap                      ║
-        ║ 4. Transcript                   ║
+        ║ 2. Subject In Course            ║
+        ║ 3. Enrollment                   ║
+        ║ 4. Roadmap                      ║
+        ║ 5. Transcript                   ║
         ║ 0. Back                         ║
         ╚═════════════════════════════════╝
         """);
@@ -30,10 +33,14 @@ public class StudentMenu {
                     courseController.displayCourseBy();
                 }
                 case 2 -> {
+                    subjectController.displayAllSubjects();
+                    subjectController.displaySubjectById();
+                }
+                case 3 -> {
                     System.out.println("Ot tn mean te bach jol merl te");
                 }
-                case 3 -> roadmapController.chooseIdOrAllRoadmap();
-                case 4 -> {
+                case 4 -> roadmapController.chooseIdOrAllRoadmap();
+                case 5 -> {
                     System.out.println("Ot tn mean te bach jol merl te");
                 }
                 case 0 -> { return; }

@@ -3,12 +3,11 @@ package org.system.model.dao;
 import org.system.config.DatabaseConfig;
 import org.system.model.dto.response.SubjectResponseDto;
 
-import javax.security.auth.Subject;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SubjectDaoImpl implements SubjectDao{
+public class SubjectDaoImpl implements SubjectDao {
     @Override
     public boolean createSubject(SubjectResponseDto subject) {
         String sql = "INSERT INTO subject (sub_name, description, hour, course_id) "
@@ -19,8 +18,8 @@ public class SubjectDaoImpl implements SubjectDao{
 
             ps.setString(1, subject.getSub_name());
             ps.setString(2, subject.getDescription());
-            ps.setDouble  (3, subject.getHour());
-            ps.setInt   (4, subject.getCourseId());
+            ps.setDouble(3, subject.getHour());
+            ps.setInt(4, subject.getCourseId());
 
             int rows = ps.executeUpdate();
 
@@ -44,8 +43,7 @@ public class SubjectDaoImpl implements SubjectDao{
     //  READ ALL
     // =========================================================
     @Override
-    public
-    List<SubjectResponseDto> getAllSubjects() {
+    public List<SubjectResponseDto> getAllSubjects() {
         List<SubjectResponseDto> list = new ArrayList<>();
         String sql = "SELECT sub_id, sub_name, description, hour, course_id "
                 + "FROM subject ORDER BY sub_id";
@@ -55,7 +53,14 @@ public class SubjectDaoImpl implements SubjectDao{
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                list.add(mapRow(rs));
+                SubjectResponseDto dto =new SubjectResponseDto(
+                        rs.getInt   ("sub_id"),
+                        rs.getString("sub_name"),
+                        rs.getString("description"),
+                        rs.getDouble  ("hour"),
+                        rs.getInt   ("course_id")
+                );
+                list.add(dto);
             }
             System.out.println("[READ ALL] Total subjects found: " + list.size());
 
@@ -69,7 +74,8 @@ public class SubjectDaoImpl implements SubjectDao{
     //  READ BY ID
     // =========================================================
     @Override
-    public SubjectResponseDto getSubjectById(int subId) {
+    public List<SubjectResponseDto> getSubjectById(int subId) {
+        List<SubjectResponseDto> list = new ArrayList<>();
         String sql = "SELECT sub_id, sub_name, description, hour, course_id "
                 + "FROM subject WHERE sub_id = ?";
 
@@ -79,18 +85,21 @@ public class SubjectDaoImpl implements SubjectDao{
             ps.setInt(1, subId);
             ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                SubjectResponseDto s = mapRow(rs);
-                System.out.println("[READ BY ID] Found: " + s);
-                return s;
-            } else {
-                System.out.println("[READ BY ID] No subject found with sub_id = " + subId);
+            while (rs.next()) {
+                SubjectResponseDto dto =new SubjectResponseDto(
+                        rs.getInt   ("sub_id"),
+                        rs.getString("sub_name"),
+                        rs.getString("description"),
+                        rs.getDouble  ("hour"),
+                        rs.getInt   ("course_id")
+                );
+                list.add(dto);
             }
 
         } catch (SQLException e) {
             System.err.println("[READ BY ID] Error: " + e.getMessage());
         }
-        return null;
+        return list;
     }
 
     // =========================================================
@@ -109,7 +118,14 @@ public class SubjectDaoImpl implements SubjectDao{
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                list.add(mapRow(rs));
+                SubjectResponseDto dto =new SubjectResponseDto(
+                        rs.getInt   ("sub_id"),
+                        rs.getString("sub_name"),
+                        rs.getString("description"),
+                        rs.getDouble  ("hour"),
+                        rs.getInt   ("course_id")
+                );
+                list.add(dto);
             }
             System.out.println("[READ BY COURSE] Subjects in course_id " + courseId + ": " + list.size());
 
@@ -117,6 +133,7 @@ public class SubjectDaoImpl implements SubjectDao{
             System.err.println("[READ BY COURSE] Error: " + e.getMessage());
         }
         return list;
+
     }
 
     // =========================================================
@@ -133,9 +150,9 @@ public class SubjectDaoImpl implements SubjectDao{
 
             ps.setString(1, subject.getSub_name());
             ps.setString(2, subject.getDescription());
-            ps.setDouble  (3, subject.getHour());
-            ps.setInt   (4, subject.getCourseId());
-            ps.setInt   (5, subject.getSub_id());
+            ps.setDouble(3, subject.getHour());
+            ps.setInt(4, subject.getCourseId());
+            ps.setInt(5, subject.getSub_id());
 
             int rows = ps.executeUpdate();
             if (rows > 0) {
@@ -176,17 +193,18 @@ public class SubjectDaoImpl implements SubjectDao{
         }
         return false;
     }
+}
 
     // =========================================================
     //  HELPER: map a ResultSet row → Subject object
     // =========================================================
-    private SubjectResponseDto mapRow(ResultSet rs) throws SQLException {
-        return new SubjectResponseDto(
-                rs.getInt   ("sub_id"),
-                rs.getString("sub_name"),
-                rs.getString("description"),
-                rs.getDouble  ("hour"),
-                rs.getInt   ("course_id")
-        );
-    }
-}
+//    private SubjectResponseDto mapRow(ResultSet rs) throws SQLException {
+//        SubjectResponseDto subjectResponseDto =new SubjectResponseDto(
+//                rs.getInt   ("sub_id"),
+//                rs.getString("sub_name"),
+//                rs.getString("description"),
+//                rs.getDouble  ("hour"),
+//                rs.getInt   ("course_id")
+//        );
+//    }
+//}

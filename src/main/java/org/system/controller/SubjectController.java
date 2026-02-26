@@ -3,8 +3,11 @@ package org.system.controller;
 import org.system.model.dto.response.SubjectResponseDto;
 import org.system.service.SubjectService;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
+
+import static jdk.internal.jimage.decompressor.CompressIndexes.readInt;
 
 public class SubjectController {
     private final Scanner scanner = new Scanner(System.in);
@@ -12,7 +15,7 @@ public class SubjectController {
     // =========================================================
     //  CREATE
     // =========================================================
-    private void createSubject() {
+    public void createSubject() {
         System.out.println("\n--- CREATE SUBJECT ---");
 
         System.out.print("Subject Name : ");
@@ -37,29 +40,51 @@ public class SubjectController {
         }
     }
 
+
+
     // =========================================================
     //  READ ALL
     // =========================================================
-    private void displayAllSubjects() {
-        System.out.println("\n--- ALL SUBJECTS ---");
+    public void displayAllSubjects() {
         subjectService.getAllSubjects();
     }
 
     // =========================================================
     //  READ BY ID
     // =========================================================
-    private void displaySubjectById() {
-        System.out.println("\n--- FIND SUBJECT BY ID ---");
+    public void displaySubjectById() {
+        while (true) {
+            System.out.println("""
+                    Do you want to Display One Subject:
+                    1. Display By Subject Id
+                    2. Display By Course Id
+                    0. Back
+                    """);
+            System.out.print("Enter option: ");
+            int option = Integer.parseInt(scanner.nextLine());
+
+            switch (option) {
+                case 1 -> displaySubjectBySubjectId();
+                case 2 -> displaySubjectsByCourse();
+                case 0 -> { return; }
+                default -> {
+                    System.out.println("Please enter option (1-2)");
+                }
+            }
+        }
+    }
+
+    public void displaySubjectBySubjectId() {
         System.out.print("Enter sub_id : ");
         int id = readInt();
         subjectService.getSubjectById(id);
     }
 
+
     // =========================================================
     //  READ BY COURSE ID
     // =========================================================
-    private void displaySubjectsByCourse() {
-        System.out.println("\n--- SUBJECTS BY COURSE ---");
+    public void displaySubjectsByCourse() {
         System.out.print("Enter course_id : ");
         int courseId = readInt();
         subjectService.getSubjectsByCourseId(courseId);
@@ -68,11 +93,10 @@ public class SubjectController {
     // =========================================================
     //  UPDATE
     // =========================================================
-    private void updateSubject() {
+    public void updateSubject() {
         System.out.println("\n--- UPDATE SUBJECT ---");
         System.out.print("Enter sub_id to update : ");
         int id = readInt();
-
         // Show current data first
         System.out.println("Current data:");
         subjectService.getSubjectById(id);
@@ -112,10 +136,10 @@ public class SubjectController {
     // =========================================================
     //  DELETE
     // =========================================================
-    private void deleteSubject() {
+    public void deleteSubject() {
         System.out.println("\n--- DELETE SUBJECT ---");
         System.out.print("Enter sub_id to delete : ");
-        int id = readInt();
+        int id = scanner.nextInt();
 
         // Show subject before confirming
         System.out.println("Subject to delete:");

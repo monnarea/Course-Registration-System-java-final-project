@@ -4,6 +4,7 @@ import org.nocrala.tools.texttablefmt.BorderStyle;
 import org.nocrala.tools.texttablefmt.CellStyle;
 import org.nocrala.tools.texttablefmt.Table;
 import org.system.model.dto.response.CourseResponseDto;
+import org.system.model.dto.response.InstructorResponseDto;
 import org.system.model.dto.response.RoadmapResponseDto;
 import org.system.model.dto.response.SubjectResponseDto;
 
@@ -243,6 +244,7 @@ public class View {
             table.addCell(String.valueOf(s.getHour()));
             table.addCell(String.valueOf(s.getCourseId()));
         }
+        System.out.println(table.render());
     }
 
     public static void printSingleSubjectTable(List<SubjectResponseDto> subject){
@@ -267,6 +269,37 @@ public class View {
         }
     }
 
+    public static void printInstructorTable(List<InstructorResponseDto> instructors) {
+        if (instructors.isEmpty()) {
+            System.out.println("No instructors found.");
+            return;
+        }
 
+        Table table = new Table(8, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+
+        // Headers
+        table.addCell("ID");
+        table.addCell("Name");
+        table.addCell("Gender");
+        table.addCell("Age");
+        table.addCell("Email");
+        table.addCell("Phone");
+        table.addCell("Address");
+        table.addCell("Qualification");
+
+        // Rows
+        for (InstructorResponseDto i : instructors) {
+            table.addCell(String.valueOf(i.getInstructorId()));
+            table.addCell(i.getInstructorName());
+            table.addCell(i.getGender() != null ? i.getGender() : "-");
+            table.addCell(String.valueOf(i.getAge()));
+            table.addCell(i.getEmail());
+            table.addCell(i.getPhoneNumber() != null ? i.getPhoneNumber() : "-");
+            table.addCell(i.getAddress() != null ? i.getAddress() : "-");
+            table.addCell(i.getQualification() != null ? i.getQualification() : "-");
+        }
+
+        System.out.println(table.render()); // ← Don't forget this!
+    }
 
 }
