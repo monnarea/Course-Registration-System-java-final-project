@@ -91,9 +91,13 @@ public class RoadmapService {
             System.out.print("Subject ID: ");
             int subId = Integer.parseInt(scanner.nextLine());
 
+            System.out.print("Major ID: ");
+            int majorId = Integer.parseInt(scanner.nextLine());
+
             RoadmapRequestDto request = RoadmapRequestDto.builder()
                     .courseId(courseId)
                     .subId(subId)
+                    .majorId(majorId)
                     .build();
 
             RoadmapResponseDto created = roadmapDao.create(request);
@@ -102,9 +106,9 @@ public class RoadmapService {
             printSingleRoadmapTable(List.of(created));
 
         } catch (NumberFormatException e) {
-            System.err.println("Invalid number format. Please enter numeric values.");
+            System.out.println("Invalid number format. Please enter numeric values.");
         } catch (SQLException e) {
-            System.err.println("Create roadmap failed: " + e.getMessage());
+            System.out.println("Create roadmap failed: " + e.getMessage());
         }
 
         System.out.println();

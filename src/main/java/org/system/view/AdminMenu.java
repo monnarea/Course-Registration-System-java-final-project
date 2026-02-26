@@ -2,6 +2,7 @@ package org.system.view;
 
 import org.system.controller.CourseController;
 import org.system.controller.RoadmapController;
+import org.system.controller.SubjectController;
 import org.system.service.CourseService;
 
 import java.util.Random;
@@ -11,6 +12,7 @@ public class AdminMenu {
     private final Scanner scanner = new Scanner(System.in);
     private final CourseController courseController = new CourseController();
     private final RoadmapController roadmapController = new RoadmapController();
+    private final SubjectController subjectController = new SubjectController();
 
     public void AdminStart() {
         while (true) {
@@ -24,6 +26,7 @@ public class AdminMenu {
                     ║ 4. Manage Instructor            ║
                     ║ 5. Manage Transcript            ║
                     ║ 6. Manage Student               ║
+                    ║ 7. Manage Subject               ║
                     ║ 0. Back                         ║
                     ╚═════════════════════════════════╝
                     """);
@@ -37,6 +40,7 @@ public class AdminMenu {
                 case 3 -> InstructorMenu();
                 case 4 -> TranscriptMenu();
                 case 5 -> StudentMenu();
+                case 7 -> SubjectMenu();
                 case 0 -> {
                     return;
                 }
@@ -168,18 +172,51 @@ public class AdminMenu {
         }
     }
 
+    public void SubjectMenu() {
+        boolean running = true;
+
+        while (running) {
+            System.out.println("""
+    
+    ╔══════════════════════════════╗
+    ║      SUBJECT MANAGEMENT      ║
+    ╠══════════════════════════════╣
+    ║  1. Create Subject           ║
+    ║  2. View All Subjects        ║
+    ║  3. View Subject by ID       ║
+    ║  4. View Subjects by Course  ║
+    ║  5. Update Subject           ║
+    ║  6. Delete Subject           ║
+    ║  0. Exit                     ║
+    ╚══════════════════════════════╝
+    """);
+            System.out.print("Please Enter Option: ");
+            int option = scanner.nextInt();
+            switch (option) {
+//                case 1 -> subjectController.displayAllSubjects();
+//                case 2 -> courseService.displayCourseById();
+//                case 3 -> courseService.createCourse();
+//                case 4 -> courseService.deleteCourse(scanner.nextInt());
+//                case 5 -> courseService.updateCourse(scanner.nextInt());
+                case 0 -> running = false;
+                default -> System.out.println("Invalid option. Please enter 0–5.");
+            }
+            return;
+        }
+    }
+
     public void roadmapMenu() {
         boolean running = true;
 
         while (running) {
             System.out.println("""
-                    
                     ╔══════════════════════════════════╗
                     ║             ROADMAP              ║
                     ╠══════════════════════════════════╣
                     ║  1. Display All Roadmap          ║
                     ║  2. Display Roadmap By ID        ║
                     ║  3. Delete Roadmap               ║
+                    ║  4. Create Roadmap               ║
                     ║  0. Back                         ║
                     ╚══════════════════════════════════╝""");
             System.out.print("Please Enter Option: ");

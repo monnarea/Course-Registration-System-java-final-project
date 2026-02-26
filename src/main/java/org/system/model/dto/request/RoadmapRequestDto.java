@@ -10,4 +10,5 @@ public class RoadmapRequestDto {
 
     private int courseId;
     private int subId;
+    private int majorId;
 }

@@ -5,8 +5,8 @@ import org.nocrala.tools.texttablefmt.CellStyle;
 import org.nocrala.tools.texttablefmt.Table;
 import org.system.model.dto.response.CourseResponseDto;
 import org.system.model.dto.response.RoadmapResponseDto;
+import org.system.model.dto.response.SubjectResponseDto;
 
-import java.text.StringCharacterIterator;
 import java.util.List;
 
 public class View {
@@ -108,12 +108,14 @@ public class View {
             return;
         }
 
-        Table table = new Table(7, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+        Table table = new Table(9, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
         // Title spanning all columns
-        table.addCell("Road map", new CellStyle(CellStyle.HorizontalAlign.center), 7);
+        table.addCell("Road map", new CellStyle(CellStyle.HorizontalAlign.center), 9);
 
         // Headers
+        table.addCell("Roadmap Id",        new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell("Major Id",        new CellStyle(CellStyle.HorizontalAlign.center));
         table.addCell("Major",        new CellStyle(CellStyle.HorizontalAlign.center));
         table.addCell("Course ID",    new CellStyle(CellStyle.HorizontalAlign.center));
         table.addCell("Course Name",  new CellStyle(CellStyle.HorizontalAlign.center));
@@ -124,13 +126,20 @@ public class View {
 
         String lastMajor  = null;
         String lastCourse = null;
+        Integer lastMajorId = null;
 
         for (RoadmapResponseDto roadmap : roadmapList) {
 
             boolean sameMajor  = roadmap.getMajor_name().equals(lastMajor);
             boolean sameCourse = sameMajor && String.valueOf(roadmap.getCourse_id()).equals(lastCourse);
-
+            boolean sameMajorId = lastMajorId != null && roadmap.getMajor_id().equals(lastMajorId);
+            table.addCell(String.valueOf(roadmap.getRoadmap_id()),   new CellStyle(CellStyle.HorizontalAlign.center));
+//            table.addCell(String.valueOf(roadmap.getMajor_id()),   new CellStyle(CellStyle.HorizontalAlign.center));
             // Major: blank if same as previous row
+            table.addCell(
+                    sameMajorId ? "" : String.valueOf(roadmap.getMajor_id()),
+                    new CellStyle(CellStyle.HorizontalAlign.center)
+            );
             table.addCell(
                     sameMajor ? "" : roadmap.getMajor_name(),
                     new CellStyle(CellStyle.HorizontalAlign.left)
@@ -157,6 +166,7 @@ public class View {
             // Update trackers
             lastMajor  = roadmap.getMajor_name();
             lastCourse = String.valueOf(roadmap.getCourse_id());
+            lastMajorId = roadmap.getMajor_id();
         }
 
         System.out.println(table.render());
@@ -211,6 +221,50 @@ public class View {
         }
 
         System.out.println(table.render());
+    }
+
+    public static void printSubjectTable(List<SubjectResponseDto> subject){
+        if (subject.isEmpty()) {
+            System.out.println("No courses found.");
+            return;
+        }
+        Table table = new Table(5, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+
+        table.addCell("Subject ID");
+        table.addCell("Subject Name");
+        table.addCell("Description");
+        table.addCell("Hours");
+        table.addCell("Course Id");
+
+        for (SubjectResponseDto s : subject){
+            table.addCell(String.valueOf(s.getSub_id()));
+            table.addCell(String.valueOf(s.getSub_name()));
+            table.addCell(String.valueOf(s.getDescription()));
+            table.addCell(String.valueOf(s.getHour()));
+            table.addCell(String.valueOf(s.getCourseId()));
+        }
+    }
+
+    public static void printSingleSubjectTable(List<SubjectResponseDto> subject){
+        if (subject.isEmpty()) {
+            System.out.println("No courses found.");
+            return;
+        }
+        Table table = new Table(5, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+
+        table.addCell("Subject ID");
+        table.addCell("Subject Name");
+        table.addCell("Description");
+        table.addCell("Hours");
+        table.addCell("Course Id");
+
+        for (SubjectResponseDto s : subject){
+            table.addCell(String.valueOf(s.getSub_id()));
+            table.addCell(String.valueOf(s.getSub_name()));
+            table.addCell(String.valueOf(s.getDescription()));
+            table.addCell(String.valueOf(s.getHour()));
+            table.addCell(String.valueOf(s.getCourseId()));
+        }
     }
 
 

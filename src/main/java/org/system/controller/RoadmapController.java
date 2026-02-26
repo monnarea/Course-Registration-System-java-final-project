@@ -70,7 +70,7 @@ public class RoadmapController {
     // ===============================
     private void displayByMajorId() {
         System.out.print("Enter Major ID: ");
-        var majorId = Integer.parseInt(scanner.nextLine());
+        Integer majorId = Integer.parseInt(scanner.nextLine());
         roadmapService.displaySingleRoadmap(majorId);
     }
 
@@ -79,7 +79,7 @@ public class RoadmapController {
     // ===============================
     private void displayByRoadmapId() {
         System.out.print("Enter Roadmap ID: ");
-        var roadmapId = Integer.parseInt(scanner.nextLine());
+        Integer roadmapId = Integer.parseInt(scanner.nextLine());
         roadmapService.displayRoadmapById(roadmapId);
     }
 

@@ -154,7 +154,7 @@ public class RoadmapDaoImpl implements RoadmapDao {
             pstmt.setInt(1, id);
 
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
+                while (rs.next()) {
                     RoadmapResponseDto dto = new RoadmapResponseDto(
                             rs.getInt("roadmap_id"),
                             rs.getInt("major_id"),
@@ -179,7 +179,7 @@ public class RoadmapDaoImpl implements RoadmapDao {
     public RoadmapResponseDto create( RoadmapRequestDto request) throws SQLException {
 
         String sql = """
-        INSERT INTO academic_roadmap (course_id, sub_id)
+        INSERT INTO academic_roadmap (course_id, sub_id,major_id )
         VALUES (?, ?)
     """;
 
@@ -188,6 +188,7 @@ public class RoadmapDaoImpl implements RoadmapDao {
 
             pstmt.setInt(1, request.getCourseId());
             pstmt.setInt(2, request.getSubId());
+            pstmt.setInt(3, request.getMajorId());
 
             int affected = pstmt.executeUpdate();
             if (affected == 0) {
