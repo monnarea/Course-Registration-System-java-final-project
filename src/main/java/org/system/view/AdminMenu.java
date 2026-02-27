@@ -1,10 +1,8 @@
 package org.system.view;
 
-import org.system.controller.CourseController;
-import org.system.controller.InstructorController;
-import org.system.controller.RoadmapController;
-import org.system.controller.SubjectController;
+import org.system.controller.*;
 import org.system.service.CourseService;
+import org.system.service.MajorService;
 
 import java.util.Random;
 import java.util.Scanner;
@@ -15,6 +13,7 @@ public class AdminMenu {
     private final RoadmapController roadmapController = new RoadmapController();
     private final SubjectController subjectController = new SubjectController();
     private final InstructorController instructorController = new InstructorController();
+    private final MajorController majorController = new MajorController();
 
     public void AdminStart() {
         while (true) {
@@ -28,6 +27,7 @@ public class AdminMenu {
                     ║ 4. Manage Transcript            ║
                     ║ 5. Manage Student               ║
                     ║ 6. Manage Subject               ║
+                    ║ 7. Manage Major                 ║
                     ║ 0. Back                         ║
                     ╚═════════════════════════════════╝
                     """);
@@ -38,10 +38,11 @@ public class AdminMenu {
             switch (option) {
                 case 1 -> courseMenu();
                 case 2 -> roadmapMenu();
-                case 3 -> InstructorMenu();
-                case 4 -> TranscriptMenu();
-                case 5 -> StudentMenu();
-                case 6 -> SubjectMenu();
+                case 3 -> instructorMenu();
+                case 4 -> transcriptMenu();
+                case 5 -> studentMenu();
+                case 6 -> subjectMenu();
+                case 7 -> majorMenu();
                 case 0 -> {
                     return;
                 }
@@ -80,7 +81,7 @@ public class AdminMenu {
         }
     }
 
-    public void StudentMenu() {
+    public void studentMenu() {
         boolean running = true;
 
         while (running) {
@@ -110,8 +111,7 @@ public class AdminMenu {
         return;
     }
 
-
-    public void InstructorMenu() {
+    public void instructorMenu() {
         boolean running = true;
 
         while (running) {
@@ -141,7 +141,7 @@ public class AdminMenu {
         }
     }
 
-    public void TranscriptMenu() {
+    public void transcriptMenu() {
         boolean running = true;
 
         while (running) {
@@ -172,7 +172,7 @@ public class AdminMenu {
         }
     }
 
-    public void SubjectMenu() {
+    public void subjectMenu() {
         boolean running = true;
 
         while (running) {
@@ -230,34 +230,34 @@ public class AdminMenu {
         }
     }
 
-//    public static void InstructorMenu() {
-//        boolean running = true;
-//        while (true) {
-//            System.out.println("""
-//
-//                    ╔══════════════════════════════╗
-//                    ║     INSTRUCTOR MANAGEMENT     ║
-//                    ╠══════════════════════════════╣
-//                    ║  1. Create Instructor         ║
-//                    ║  2. Display All Instructors   ║
-//                    ║  3. Display Instructor By ID  ║
-//                    ║  4. Update Instructor         ║
-//                    ║  5. Delete Instructor         ║
-//                    ║  0. Exit                      ║
-//                    ╚══════════════════════════════╝
-//                    """);
-//            System.out.print("Enter option: ");
-//
-//            int option = scanner.nextInt();
-//            switch (option) {
-//                case "1" -> instructorController.createInstructor();
-//                case "2" -> instructorController.displayAllInstructors();
-//                case "3" -> instructorController.displayInstructorById();
-//                case "4" -> instructorController.updateInstructor();
-//                case "5" -> instructorController.deleteInstructor();
-//                case "0" -> { running = false; }
-//                default  -> System.out.println("Invalid option. Please enter (0-5).");
-//            }
-//        }
-//    }
+    public void majorMenu() {
+        boolean running = true;
+
+        while (running) {
+            System.out.println("""
+                    
+                    ╔══════════════════════════════════╗
+                    ║              MAJOR               ║
+                    ╠══════════════════════════════════╣
+                    ║  1. Display All Major            ║
+                    ║  2. Display Major By ID          ║
+                    ║  3. Create New Major             ║
+                    ║  4. Update Major                 ║
+                    ║  5. Delete Major                 ║
+                    ║  0. Back                         ║
+                    ╚══════════════════════════════════╝""");
+            System.out.print("Please Enter Option: ");
+            int option = scanner.nextInt();
+            switch (option) {
+                case 1 -> majorController.displayAllMajor();
+                case 2 -> majorController.displayMajorById();
+                case 3 -> majorController.create();
+                case 4 -> majorController.update();
+                case 5 -> majorController.delete();
+                case 0 -> running = false;
+                default -> System.out.println("Invalid option. Please enter 0–5.");
+            }
+        }
+    }
+
 }

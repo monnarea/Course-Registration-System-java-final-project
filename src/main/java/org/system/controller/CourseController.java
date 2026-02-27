@@ -39,27 +39,16 @@ public class CourseController {
         }
 
     }
-    // ══════════════════════════════════════════════
-    // CREATE
-    // ══════════════════════════════════════════════
 
     public void createCourse() {
         courseService.createCourse();
     }
-
-    // ══════════════════════════════════════════════
-    // UPDATE
-    // ══════════════════════════════════════════════
 
     public void updateCourse() {
         System.out.print("Enter Course ID to update: ");
         int course_id = scanner.nextInt();
         courseService.updateCourse(course_id);
     }
-
-    // ══════════════════════════════════════════════
-    // DELETE
-    // ══════════════════════════════════════════════
 
     public void deleteCourse() {
         System.out.print("Enter Course ID to delete: ");

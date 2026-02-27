@@ -78,10 +78,6 @@ public class CourseService {
 
     }
 
-    // ══════════════════════════════════════════════
-    // CREATE
-    // ══════════════════════════════════════════════
-
     public void createCourse() {
         System.out.println("\n========== Create New Course ==========");
 
@@ -135,9 +131,6 @@ public class CourseService {
         System.out.println();
     }
 
-    // ══════════════════════════════════════════════
-    // UPDATE
-    // ══════════════════════════════════════════════
 
     public void updateCourse(int course_id) {
         System.out.println("\n========== Update Course (ID: " + course_id + ") ==========");
@@ -235,9 +228,6 @@ public class CourseService {
         System.out.println();
     }
 
-    // ══════════════════════════════════════════════
-    // DELETE
-    // ══════════════════════════════════════════════
 
     public void deleteCourse(int course_id) {
         System.out.println("\n========== Delete Course (ID: " + course_id + ") ==========");

@@ -3,10 +3,7 @@ package org.system.view;
 import org.nocrala.tools.texttablefmt.BorderStyle;
 import org.nocrala.tools.texttablefmt.CellStyle;
 import org.nocrala.tools.texttablefmt.Table;
-import org.system.model.dto.response.CourseResponseDto;
-import org.system.model.dto.response.InstructorResponseDto;
-import org.system.model.dto.response.RoadmapResponseDto;
-import org.system.model.dto.response.SubjectResponseDto;
+import org.system.model.dto.response.*;
 
 import java.util.List;
 
@@ -302,4 +299,26 @@ public class View {
         System.out.println(table.render()); // ← Don't forget this!
     }
 
+    public static void printMajorTable(List<MajorResponseDto> majorResponseDto) {
+        if (majorResponseDto.isEmpty()) {
+            System.out.println("No Major found.");
+            return;
+        }
+
+        Table table = new Table(3, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+
+        // Headers
+        table.addCell("Major ID");
+        table.addCell("Major Name");
+        table.addCell("Description");
+
+        // Rows
+        for (MajorResponseDto m : majorResponseDto) {
+            table.addCell(String.valueOf(m.getMajor_id()));
+            table.addCell(m.getMajor_name());
+            table.addCell(m.getDescription());
+        }
+
+        System.out.println(table.render());
+    }
 }
