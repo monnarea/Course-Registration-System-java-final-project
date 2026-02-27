@@ -1,13 +1,12 @@
 package org.system;
 import org.system.config.DatabaseConfig;
+import org.system.poi.ExcelSpreadSheetGenerator;
 import org.system.view.MainMenu;
 import java.sql.Connection;
-import static org.system.view.View.*;
 
 public class Main {
-    public static void main(String[] args) {
-        new MainMenu().start();
-//        Test database
+    public static void main(String[] args) throws Exception {
+        ExcelSpreadSheetGenerator.execute();
         Connection con = DatabaseConfig.getConnection();
 
         if (con != null) {
@@ -15,5 +14,9 @@ public class Main {
         } else {
             System.out.println("Connection failed.");
         }
+
+        new MainMenu().start();
+//        Test database
+
     }
 }
