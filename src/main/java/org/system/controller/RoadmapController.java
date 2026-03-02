@@ -15,30 +15,25 @@ public class RoadmapController {
     // ===============================
     public void chooseIdOrAllRoadmap() {
         while (true) {
-
             try {
                 System.out.println("""
-                    Choose roadmap:
-                    1. Show All Roadmap
-                    2. Show 1 Major Roadmap
-                    0. Back
-                    """);
+                Choose roadmap:
+                1. Show All Roadmap
+                2. Show 1 Major Roadmap
+                0. Back
+                """);
                 System.out.print("Enter option: ");
                 int option = Integer.parseInt(scanner.nextLine());
 
                 switch (option) {
                     case 1 -> displayAllRoadmap();
                     case 2 -> displaySingleRoadmap();
-                    case 0 -> { return; }
-                    default -> {
-                        System.out.println("Please enter option (1-2)");
-                        chooseIdOrAllRoadmap();
-                    }
+                    case 0 -> { return; }                              // ✅ Now actually exits
+                    default -> System.out.println("Please enter option (1-2)"); // ✅ No recursion
                 }
-            }catch (InputMismatchException e){
-                System.out.println("Invalid input ! please input number");
+            } catch (NumberFormatException e) {                        // ✅ Correct exception
+                System.out.println("Invalid input! Please input a number");
             }
-
         }
     }
 
@@ -57,7 +52,7 @@ public class RoadmapController {
                     """);
 try {
     System.out.print("Please Enter Option: ");
-    var option = Integer.parseInt(scanner.nextLine());
+    int option = Integer.parseInt(scanner.nextLine());
 
     switch (option) {
         case 1 -> displayByRoadmapId();
@@ -65,13 +60,13 @@ try {
         case 0 -> { return; }
         default -> System.out.println("Invalid option. Please enter 0-2.");
                     }
-        }catch (NumberFormatException e){
-
-    System.out.println("Invalid input ! please input number");
+        } catch (NumberFormatException e) {
+    System.out.println("Invalid input! Please input a number");
+            }
        }
     }
 
-}
+
 
 
 

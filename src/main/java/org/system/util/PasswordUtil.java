@@ -14,4 +14,7 @@ public class PasswordUtil {
         return BCrypt.checkpw(plainPassword, storedHash);
     }
 
+//    static void main() {
+//        System.out.println(hashPassword("narea123"));
+//    }
 }
