@@ -12,26 +12,64 @@ import static jdk.internal.jimage.decompressor.CompressIndexes.readInt;
 public class SubjectController {
     private final Scanner scanner = new Scanner(System.in);
     private final SubjectService subjectService = new SubjectService();
-    // =========================================================
-    //  CREATE
-    // =========================================================
+
     public void createSubject() {
         System.out.println("\n--- CREATE SUBJECT ---");
+        boolean validInput;
 
-        System.out.print("Subject Name : ");
-        String name = scanner.nextLine().trim();
+        // ── Subject Name ─────────────────────────────────────────
+        String name = "";
+        validInput = false;
+        while (!validInput) {
+            System.out.print("Subject Name : ");
+            name = scanner.nextLine().trim();
+            if (!name.isBlank() && name.matches("^[a-zA-Z\\s]+$")) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid! Name must be letters only and not empty.");
+            }
+        }
 
-        System.out.print("Description  : ");
-        String desc = scanner.nextLine().trim();
+        // ── Description ──────────────────────────────────────────
+        String desc = "";
+        validInput = false;
+        while (!validInput) {
+            System.out.print("Description  : ");
+            desc = scanner.nextLine().trim();
+            if (!desc.isBlank()) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid! Description cannot be empty.");
+            }
+        }
 
-        System.out.print("Hours        : ");
-        double hour = readDouble();
+        // ── Hours ────────────────────────────────────────────────
+        double hour = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Hours        : ");
+                hour = Double.parseDouble(scanner.nextLine().trim());
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
 
-        System.out.print("Course ID    : ");
-        int courseId = readInt();
+        // ── Course ID ────────────────────────────────────────────
+        int courseId = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Course ID    : ");
+                courseId = Integer.parseInt(scanner.nextLine().trim());
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
 
         SubjectResponseDto subject = new SubjectResponseDto(0, name, desc, hour, courseId);
-
         boolean success = subjectService.createSubject(subject);
         if (success) {
             System.out.println("[CONTROLLER] Subject created successfully! sub_id = " + subject.getSub_id());
@@ -40,89 +78,143 @@ public class SubjectController {
         }
     }
 
-
-
-    // =========================================================
-    //  READ ALL
-    // =========================================================
     public void displayAllSubjects() {
         subjectService.getAllSubjects();
     }
 
-    // =========================================================
-    //  READ BY ID
-    // =========================================================
     public void displaySubjectById() {
+        boolean validInput;
         while (true) {
             System.out.println("""
-                    Do you want to Display One Subject:
-                    1. Display By Subject Id
-                    2. Display By Course Id
-                    0. Back
-                    """);
-            System.out.print("Enter option: ");
-            int option = Integer.parseInt(scanner.nextLine());
+                Do you want to Display One Subject:
+                1. Display By Subject Id
+                2. Display By Course Id
+                0. Back
+                """);
+
+            int option = -1;
+            validInput = false;
+            while (!validInput) {
+                try {
+                    System.out.print("Enter option: ");
+                    option = Integer.parseInt(scanner.nextLine().trim());
+                    validInput = true;
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid! Please enter a valid number.");
+                }
+            }
 
             switch (option) {
                 case 1 -> displaySubjectBySubjectId();
                 case 2 -> displaySubjectsByCourse();
                 case 0 -> { return; }
-                default -> {
-                    System.out.println("Please enter option (1-2)");
-                }
+                default -> System.out.println("Please enter option (0-2)");
             }
         }
     }
 
     public void displaySubjectBySubjectId() {
-        System.out.print("Enter sub_id : ");
-        int id = readInt();
+        boolean validInput = false;
+        int id = 0;
+        while (!validInput) {
+            try {
+                System.out.print("Enter sub_id : ");
+                id = Integer.parseInt(scanner.nextLine().trim());
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
         subjectService.getSubjectById(id);
     }
 
-
-    // =========================================================
-    //  READ BY COURSE ID
-    // =========================================================
     public void displaySubjectsByCourse() {
-        System.out.print("Enter course_id : ");
-        int courseId = readInt();
+        boolean validInput = false;
+        int courseId = 0;
+        while (!validInput) {
+            try {
+                System.out.print("Enter course_id : ");
+                courseId = Integer.parseInt(scanner.nextLine().trim());
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
         subjectService.getSubjectsByCourseId(courseId);
     }
 
-    // =========================================================
-    //  UPDATE
-    // =========================================================
     public void updateSubject() {
         System.out.println("\n--- UPDATE SUBJECT ---");
-        System.out.print("Enter sub_id to update : ");
-        int id = readInt();
-        // Show current data first
+        boolean validInput;
+
+        // ── Sub ID ───────────────────────────────────────────────
+        int id = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Enter sub_id to update : ");
+                id = Integer.parseInt(scanner.nextLine().trim());
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
+
         System.out.println("Current data:");
         subjectService.getSubjectById(id);
-
         System.out.println("(Press Enter to keep current value)\n");
 
-        System.out.print("New Subject Name : ");
-        String name = scanner.nextLine().trim();
+        // ── Subject Name ─────────────────────────────────────────
+        String name = "";
+        validInput = false;
+        while (!validInput) {
+            System.out.print("New Subject Name : ");
+            name = scanner.nextLine().trim();
+            if (name.isEmpty() || name.matches("^[a-zA-Z\\s]+$")) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid! Name must be letters only.");
+            }
+        }
 
+        // ── Description ──────────────────────────────────────────
         System.out.print("New Description  : ");
         String desc = scanner.nextLine().trim();
 
-        System.out.print("New Hours        : ");
-        String hourInput = scanner.nextLine().trim();
+        // ── Hours ────────────────────────────────────────────────
+        double hour = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("New Hours        : ");
+                String hourInput = scanner.nextLine().trim();
+                hour = hourInput.isEmpty() ? 0 : Double.parseDouble(hourInput);
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
 
-        System.out.print("New Course ID    : ");
-        String courseInput = scanner.nextLine().trim();
+        // ── Course ID ────────────────────────────────────────────
+        int courseId = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("New Course ID    : ");
+                String courseInput = scanner.nextLine().trim();
+                courseId = courseInput.isEmpty() ? 0 : Integer.parseInt(courseInput);
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
 
-        // Build updated DTO only with provided values
-        // (fetch existing first to keep unchanged fields)
         SubjectResponseDto updated = new SubjectResponseDto(
                 id,
-                name.isEmpty()       ? null                        : name,
-                desc.isEmpty()       ? null                        : desc,
-                hourInput.isEmpty()  ? 0                           : Double.parseDouble(hourInput),
-                courseInput.isEmpty()? 0                           : Integer.parseInt(courseInput)
+                name.isEmpty()  ? null : name,
+                desc.isEmpty()  ? null : desc,
+                hour,
+                courseId
         );
 
         boolean success = subjectService.updateSubject(updated);
@@ -133,36 +225,48 @@ public class SubjectController {
         }
     }
 
-    // =========================================================
-    //  DELETE
-    // =========================================================
     public void deleteSubject() {
         System.out.println("\n--- DELETE SUBJECT ---");
-        System.out.print("Enter sub_id to delete : ");
-        int id = scanner.nextInt();
+        boolean validInput;
 
-        // Show subject before confirming
+        // ── Sub ID ───────────────────────────────────────────────
+        int id = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Enter sub_id to delete : ");
+                id = Integer.parseInt(scanner.nextLine().trim());
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
+
         System.out.println("Subject to delete:");
         subjectService.getSubjectById(id);
 
-        System.out.print("Are you sure? (yes/no) : ");
-        String confirm = scanner.nextLine().trim().toLowerCase();
-
-        if (confirm.equals("yes")) {
-            boolean success = subjectService.deleteSubject(id);
-            if (success) {
-                System.out.println("[CONTROLLER] Subject deleted successfully.");
+        // ── Confirm ──────────────────────────────────────────────
+        validInput = false;
+        while (!validInput) {
+            System.out.print("Are you sure? (yes/no) : ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+            if (confirm.equals("yes") || confirm.equals("no")) {
+                validInput = true;
+                if (confirm.equals("yes")) {
+                    boolean success = subjectService.deleteSubject(id);
+                    if (success) {
+                        System.out.println("[CONTROLLER] Subject deleted successfully.");
+                    } else {
+                        System.out.println("[CONTROLLER] Failed to delete subject.");
+                    }
+                } else {
+                    System.out.println("[CONTROLLER] Delete cancelled.");
+                }
             } else {
-                System.out.println("[CONTROLLER] Failed to delete subject.");
+                System.out.println("Invalid! Please enter 'yes' or 'no'.");
             }
-        } else {
-            System.out.println("[CONTROLLER] Delete cancelled.");
         }
     }
-
-    // =========================================================
-    //  HELPERS — Safe input reading
-    // =========================================================
     private int readInt() {
         while (true) {
             try {

@@ -178,9 +178,10 @@ public class RoadmapDaoImpl implements RoadmapDao {
     @Override
     public RoadmapResponseDto create( RoadmapRequestDto request) throws SQLException {
 
+
         String sql = """
         INSERT INTO academic_roadmap (course_id, sub_id,major_id )
-        VALUES (?, ?)
+        VALUES (?, ?, ?)
     """;
 
         try (Connection conn = DatabaseConfig.getConnection();
@@ -198,12 +199,14 @@ public class RoadmapDaoImpl implements RoadmapDao {
             try (ResultSet keys = pstmt.getGeneratedKeys()) {
                 if (keys.next()) {
                     int newId = keys.getInt(1);
-                    return (RoadmapResponseDto) getById(newId);
+                    List<RoadmapResponseDto> result = getById(newId); // ✅ List
+                    if (!result.isEmpty()) {
+                        return result.get(0);                          // ✅ first element
+                    }
                 }
             }
 
             throw new SQLException("No ID obtained.");
-
         }
     }
 

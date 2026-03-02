@@ -2,6 +2,7 @@ package org.system.controller;
 
 import org.system.service.CourseService;
 
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class CourseController {
@@ -13,34 +14,35 @@ public class CourseController {
 
     }
     public void displayCourseBy(){
+        courseService.displayCourseById();
 
-        while (true)
-        {
-            System.out.println("""
-                Do you want to display one course by
-                1. Major Id
-                2. Course Id
-                0. Back
-                """);
-            System.out.print("Please Enter Option: ");
-            int option = scanner.nextInt();
-            switch (option){
-                case 1 -> {
-                    System.out.print("Enter Major Id: ");
-                    courseService.displaySingleCourseByMajorId(scanner.nextInt());
-                }
-                case 2 -> {
-                    System.out.print("Enter Course Id: ");
-                    courseService.displaySingleCourseByCourseId(scanner.nextInt());
-                }
-                case 0 -> { return;}
-                default -> System.out.println("Invalid option. Please enter 1-2.");
-            }
-        }
+//        while (true)
+//        {
+//            System.out.println("""
+//                Do you want to display one course by
+//                1. Major Id
+//                2. Course Id
+//                0. Back
+//                """);
+//            System.out.print("Please Enter Option: ");
+//            int option = scanner.nextInt();
+//            switch (option){
+//                case 1 -> {
+//                    System.out.print("Enter Major Id: ");
+//                    courseService.displaySingleCourseByMajorId(scanner.nextInt());
+//                }
+//                case 2 -> {
+//                    System.out.print("Enter Course Id: ");
+//                    courseService.displaySingleCourseByCourseId(scanner.nextInt());
+//                }
+//                case 0 -> { return;}
+//                default -> System.out.println("Invalid option. Please enter 1-2.");
+//            }
+//        }
 
     }
 
-    public void createCourse() {
+    public void createCourse() throws SQLException {
         courseService.createCourse();
     }
 

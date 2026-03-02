@@ -16,9 +16,7 @@ import static org.system.view.View.printSubjectTable;
 public class SubjectService {
     private final Scanner scanner= new Scanner(System.in);
     private  final SubjectDao subjectDao =new SubjectDaoImpl();
-    // =========================================================
-    //  CREATE
-    // =========================================================
+
     public boolean createSubject(SubjectResponseDto subject) {
         if (subject == null) {
             System.err.println("[SERVICE - CREATE] Subject cannot be null.");
@@ -40,9 +38,6 @@ public class SubjectService {
         return subjectDao.createSubject(subject);
     }
 
-    // =========================================================
-    //  READ ALL
-    // =========================================================
     public void getAllSubjects()  {
         List<SubjectResponseDto> list = subjectDao.getAllSubjects();
         if (list.isEmpty()) {
@@ -52,9 +47,6 @@ public class SubjectService {
         printSubjectTable(list);
     }
 
-    // =========================================================
-    //  READ BY ID
-    // =========================================================
     public void getSubjectById(int subId) {
 
 
@@ -75,9 +67,6 @@ public class SubjectService {
         printSubjectTable(list);
     }
 
-    // =========================================================
-    //  READ BY COURSE ID
-    // =========================================================
     public void getSubjectsByCourseId(int courseId) {
         List<SubjectResponseDto> list = subjectDao.getSubjectById(courseId);
 
@@ -96,9 +85,6 @@ public class SubjectService {
         printSubjectTable(list);
     }
 
-    // =========================================================
-    //  UPDATE
-    // =========================================================
     public boolean updateSubject(SubjectResponseDto subject) {
         if (subject == null) {
             System.err.println("[SERVICE - UPDATE] Subject cannot be null.");
@@ -120,9 +106,6 @@ public class SubjectService {
         return subjectDao.updateSubject(subject);
     }
 
-    // =========================================================
-    //  DELETE
-    // =========================================================
     public boolean deleteSubject(int subId) {
         if (subId <= 0) {
             System.err.println("[SERVICE - DELETE] Invalid sub_id: " + subId);

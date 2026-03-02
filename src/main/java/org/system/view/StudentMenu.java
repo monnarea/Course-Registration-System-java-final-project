@@ -4,6 +4,7 @@ import org.system.controller.CourseController;
 import org.system.controller.RoadmapController;
 import org.system.controller.SubjectController;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class StudentMenu {
@@ -25,6 +26,7 @@ public class StudentMenu {
         ║ 0. Back                         ║
         ╚═════════════════════════════════╝
         """);
+            try{
             System.out.print("Enter option : ");
             int choice = scanner.nextInt();
             switch (choice) {
@@ -40,11 +42,13 @@ public class StudentMenu {
                     System.out.println("Ot tn mean te bach jol merl te");
                 }
                 case 4 -> roadmapController.chooseIdOrAllRoadmap();
-                case 5 -> {
-                    System.out.println("Ot tn mean te bach jol merl te");
-                }
+                case 5 -> System.out.println("Ot tn mean te bach jol merl te");
                 case 0 -> { return; }
                 default  -> System.out.println("Invalid option.");
+            }
+            }catch (InputMismatchException e){
+                System.out.println("Invalid input ! Please input number");
+                scanner.nextLine();
             }
         }
     }

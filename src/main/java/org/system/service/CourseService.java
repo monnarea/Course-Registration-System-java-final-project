@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -21,7 +22,7 @@ public class CourseService {
     private final Scanner scanner = new Scanner(System.in);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public void displayAllCourse(){
+    public void displayAllCourse() {
 
         try {
             List<CourseResponseDto> allCourses = courseDao.getAll();
@@ -42,7 +43,7 @@ public class CourseService {
 
     }
 
-    public void displaySingleCourseByCourseId(int course_id){
+    public void displaySingleCourseByCourseId(int course_id) {
 
         try {
             List<CourseResponseDto> Courses = courseDao.getById(course_id);
@@ -63,7 +64,7 @@ public class CourseService {
 
     }
 
-    public void displaySingleCourseByMajorId(int major_id){
+    public void displaySingleCourseByMajorId(int major_id) {
         try {
             List<CourseResponseDto> result = singleCourseDao.getByMajorId(major_id);// change 1 to any ID
             if (result.isEmpty()) {
@@ -78,64 +79,164 @@ public class CourseService {
 
     }
 
-    public void createCourse() {
+    public void createCourse() throws SQLException {
         System.out.println("\n========== Create New Course ==========");
 
-        try {
+        // Declare all variables up front
+        String courseName = "";
+        double price = 0;
+        int creditScore = 0, capacity = 0, instructorId = 0, majorId = 0, level = 0;
+        String room = "";
+        LocalDate startDate = null, endDate = null;
+        boolean validInput;
+
+        // Course Name
+        validInput = false;
+        while (!validInput) {
             System.out.print("Course Name      : ");
-            // flush
-            String courseName = scanner.nextLine();
-
-            System.out.print("Price            : ");
-            double price = scanner.nextDouble();
-
-            System.out.print("Credit Score     : ");
-            int creditScore = scanner.nextInt();
-
-            System.out.print("Capacity         : ");
-            int capacity = scanner.nextInt();
-
-            System.out.print("Start Date (yyyy-MM-dd): ");
-            LocalDate startDate = parseDate(scanner.next());
-
-            System.out.print("End Date   (yyyy-MM-dd): ");
-            LocalDate endDate = parseDate(scanner.next());
-
-            System.out.print("Instructor ID    : ");
-            int instructorId = scanner.nextInt();
-
-            System.out.print("Room             : ");
-//            String room = scanner.nextLine();
-            String room = scanner.next();
-
-            System.out.print("Major ID         : ");
-            int majorId = scanner.nextInt();
-
-            System.out.print("Level            : ");
-            int level = scanner.nextInt();
-
-            CourseRequestDto request = new CourseRequestDto(
-                    courseName, price, creditScore, capacity,
-                    startDate, endDate, instructorId, room, majorId, level
-            );
-
-            CourseResponseDto created = courseDao.create(request);
-            System.out.println("\n✔ Course created successfully!");
-            printCourseTable(List.of(created));
-
-        } catch (DateTimeParseException e) {
-            System.err.println("Invalid date format. Please use yyyy-MM-dd.");
-        } catch (SQLException e) {
-            System.err.println("create() failed: " + e.getMessage());
+            courseName = scanner.nextLine();
+            if (!courseName.isBlank() && courseName.matches("^[a-zA-Z\\s]+$")) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid! Name must be letters only and not empty.");
+            }
         }
-        System.out.println();
+
+        // Price
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Price            : ");
+                price = scanner.nextDouble();
+                scanner.nextLine();
+                validInput = true; // ✅ success
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input! Please enter a number.");
+                scanner.nextLine(); // ✅ clear buffer
+            }
+        }
+
+        // Credit Score
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Credit Score     : ");
+                creditScore = scanner.nextInt();
+                scanner.nextLine();
+                validInput = true;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input! Please enter a number.");
+                scanner.nextLine();
+            }
+        }
+
+        // Capacity
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Capacity         : ");
+                capacity = scanner.nextInt();
+                scanner.nextLine();
+                validInput = true;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input! Please enter a number.");
+                scanner.nextLine();
+            }
+        }
+
+        // Instructor ID
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Instructor ID    : ");
+                instructorId = scanner.nextInt();
+                scanner.nextLine();
+                validInput = true;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input! Please enter a number.");
+                scanner.nextLine();
+            }
+        }
+
+        // Room
+        validInput = false;
+        while (!validInput) {
+            System.out.print("Room             : ");
+            room = scanner.nextLine();
+            if (!room.isBlank()) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid! Room cannot be empty.");
+            }
+        }
+
+        // Major ID
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Major ID         : ");
+                majorId = scanner.nextInt();
+                scanner.nextLine();
+                validInput = true;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input! Please enter a number.");
+                scanner.nextLine();
+            }
+        }
+
+        // Level
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Level            : ");
+                level = scanner.nextInt();
+                scanner.nextLine();
+                validInput = true;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input! Please enter a number.");
+                scanner.nextLine();
+            }
+        }
+
+        // Start Date
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Start Date (yyyy-MM-dd): ");
+                startDate = LocalDate.parse(scanner.nextLine().trim());
+                validInput = true;
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Please use yyyy-MM-dd.");
+            }
+        }
+
+        // End Date
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("End Date (yyyy-MM-dd): ");
+                endDate = LocalDate.parse(scanner.nextLine().trim());
+                validInput = true;
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Please use yyyy-MM-dd.");
+            }
+        }
+
+        // Create course
+        CourseRequestDto request = new CourseRequestDto(
+                courseName, price, creditScore, capacity,
+                startDate, endDate, instructorId, room, majorId, level
+        );
+        CourseResponseDto created = courseDao.create(request);
+        System.out.println("\n✔ Course created successfully!");
+        printCourseTable(List.of(created));
     }
 
 
     public void updateCourse(int course_id) {
+        boolean validInput;
         System.out.println("\n========== Update Course (ID: " + course_id + ") ==========");
 
-        // Step 1: Fetch existing course
         CourseResponseDto current;
         try {
             List<CourseResponseDto> existing = courseDao.getById(course_id);
@@ -153,79 +254,152 @@ public class CourseService {
 
         System.out.println("\nPress Enter to keep the current value, or type a new one:");
 
-        try {
-            // Flush any leftover newline
-//            if (scanner.hasNextLine()) scanner.nextLine();
-            // ── Course Name ──────────────────────────────────────────
-            System.out.print("Course Name      [" + current.getCourse_name() + "]: ");
-            String courseNameInput = scanner.nextLine().trim();
-            String courseName = courseNameInput.isEmpty() ? current.getCourse_name() : courseNameInput;
+        String courseName = "";
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Course Name      [" + current.getCourse_name() + "]: ");
+                String courseNameInput = scanner.nextLine().trim();
+                courseName = courseNameInput.isEmpty() ? current.getCourse_name() : courseNameInput;
+                if (!courseName.isBlank() && courseName.matches("^[a-zA-Z\\s]+$")) {
+                    validInput = true;
+                } else {
+                    System.out.println("Invalid! Name must be letters only and not empty.");
+                }
+            } catch (Exception e) {
+                System.out.println("Invalid input!");
+                scanner.nextLine();
+            }
+        }
 
-            // ── Price ────────────────────────────────────────────────
-            System.out.print("Price            [" + current.getPrice() + "]: ");
-            String priceInput = scanner.nextLine().trim();
-            double price = priceInput.isEmpty() ? current.getPrice() : Double.parseDouble(priceInput);
+        double price = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Price            [" + current.getPrice() + "]: ");
+                String priceInput = scanner.nextLine().trim();
+                price = priceInput.isEmpty() ? current.getPrice() : Double.parseDouble(priceInput);
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
 
-            // ── Credit Score ─────────────────────────────────────────
-            System.out.print("Credit Score     [" + current.getCredit_score() + "]: ");
-            String creditInput = scanner.nextLine().trim();
-            int creditScore = creditInput.isEmpty() ? current.getCredit_score() : Integer.parseInt(creditInput);
+        int creditScore = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Credit Score     [" + current.getCredit_score() + "]: ");
+                String creditInput = scanner.nextLine().trim();
+                creditScore = creditInput.isEmpty() ? current.getCredit_score() : Integer.parseInt(creditInput);
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
 
-            // ── Capacity ─────────────────────────────────────────────
-            System.out.print("Capacity         [" + current.getCapacity() + "]: ");
-            String capacityInput = scanner.nextLine().trim();
-            int capacity = capacityInput.isEmpty() ? current.getCapacity() : Integer.parseInt(capacityInput);
+        int capacity = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Capacity         [" + current.getCapacity() + "]: ");
+                String capacityInput = scanner.nextLine().trim();
+                capacity = capacityInput.isEmpty() ? current.getCapacity() : Integer.parseInt(capacityInput);
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
 
-            // ── Start Date ───────────────────────────────────────────
-            System.out.print("Start Date       [" + current.getStart_date() + "] (yyyy-MM-dd): ");
-            String startInput = scanner.nextLine().trim();
-            LocalDate startDate = startInput.isEmpty() ? current.getStart_date() : parseDate(startInput);
+        LocalDate startDate = null;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Start Date       [" + current.getStart_date() + "] (yyyy-MM-dd): ");
+                String startInput = scanner.nextLine().trim();
+                startDate = startInput.isEmpty() ? current.getStart_date() : LocalDate.parse(startInput);
+                validInput = true;
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Please use yyyy-MM-dd.");
+            }
+        }
 
-            // ── End Date ─────────────────────────────────────────────
-            System.out.print("End Date         [" + current.getEnd_date() + "] (yyyy-MM-dd): ");
-            String endInput = scanner.nextLine().trim();
-            LocalDate endDate = endInput.isEmpty() ? current.getEnd_date() : parseDate(endInput);
+        LocalDate endDate = null;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("End Date         [" + current.getEnd_date() + "] (yyyy-MM-dd): ");
+                String endInput = scanner.nextLine().trim();
+                endDate = endInput.isEmpty() ? current.getEnd_date() : LocalDate.parse(endInput);
+                validInput = true;
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Please use yyyy-MM-dd.");
+            }
+        }
 
-            // ── Instructor ID ────────────────────────────────────────
-            System.out.print("Instructor ID    [" + current.getInstructor_id() + "]: ");
-            String instructorInput = scanner.nextLine().trim();
-            int instructorId = instructorInput.isEmpty() ? current.getInstructor_id() : Integer.parseInt(instructorInput);
+        int instructorId = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Instructor ID    [" + current.getInstructor_id() + "]: ");
+                String instructorInput = scanner.nextLine().trim();
+                instructorId = instructorInput.isEmpty() ? current.getInstructor_id() : Integer.parseInt(instructorInput);
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
 
-            // ── Room ─────────────────────────────────────────────────
+        String room = "";
+        validInput = false;
+        while (!validInput) {
             System.out.print("Room             [" + current.getRoom() + "]: ");
             String roomInput = scanner.nextLine().trim();
-            String room = roomInput.isEmpty() ? current.getRoom() : roomInput;
+            room = roomInput.isEmpty() ? current.getRoom() : roomInput;
+            if (!room.isBlank()) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid! Room cannot be empty.");
+            }
+        }
 
-            // ── Major ID ─────────────────────────────────────────────
-            System.out.print("Major ID         [" + current.getMajor_id() + "]: ");
-            String majorInput = scanner.nextLine().trim();
-            int majorId = majorInput.isEmpty() ? current.getMajor_id() : Integer.parseInt(majorInput);
+        int majorId = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Major ID         [" + current.getMajor_id() + "]: ");
+                String majorInput = scanner.nextLine().trim();
+                majorId = majorInput.isEmpty() ? current.getMajor_id() : Integer.parseInt(majorInput);
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
 
-            // ── Level ────────────────────────────────────────────────
-            System.out.print("Level            [" + current.getLevel() + "]: ");
-            String levelInput = scanner.nextLine().trim();
-            int level = levelInput.isEmpty() ? current.getLevel() : Integer.parseInt(levelInput);
+        int level = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Level            [" + current.getLevel() + "]: ");
+                String levelInput = scanner.nextLine().trim();
+                level = levelInput.isEmpty() ? current.getLevel() : Integer.parseInt(levelInput);
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
 
-            // Step 2: Build request with final values (mixed old + new)
+        try {
             CourseRequestDto request = new CourseRequestDto(
                     courseName, price, creditScore, capacity,
                     startDate, endDate, instructorId, room, majorId, level
             );
-
-            // Step 3: Send to DAO
             CourseResponseDto updated = courseDao.update(course_id, request);
             System.out.println("\n✔ Course updated successfully!");
             printCourseTable(List.of(updated));
-
-        } catch (NumberFormatException e) {
-            System.err.println("Invalid number format entered: " + e.getMessage());
-        } catch (DateTimeParseException e) {
-            System.err.println("Invalid date format. Please use yyyy-MM-dd.");
         } catch (SQLException e) {
             System.err.println("update() failed: " + e.getMessage());
         }
-
-        System.out.println();
     }
 
 
@@ -240,6 +414,8 @@ public class CourseService {
                 return;
             }
             printCourseTable(existing);
+        } catch (InputMismatchException i) {
+            System.out.println("Invalid input! Please input number");
         } catch (SQLException e) {
             System.err.println("Could not fetch course: " + e.getMessage());
             return;
@@ -273,29 +449,40 @@ public class CourseService {
     private LocalDate parseDate(String input) {
         return LocalDate.parse(input, DATE_FORMATTER);
     }
+
     public void displayCourseById() {
+
+        while (true){
         System.out.println("""
                 ┌─────────────────────────────────┐
                 │     Display Course By           │
                 │  1. Major ID                    │
                 │  2. Course ID                   │
+                │  0. Back                        │
                 └─────────────────────────────────┘""");
-        System.out.print("Please Enter Option: ");
-        int option = scanner.nextInt();
+        try {
+            System.out.print("Please Enter Option: ");
+            int option = scanner.nextInt();
 
-        switch (option) {
-            case 1 -> {
-                System.out.print("Enter Major ID: ");
-                displaySingleCourseByMajorId(scanner.nextInt());
+            switch (option) {
+                case 1 -> {
+                    System.out.print("Enter Major ID: ");
+                    displaySingleCourseByMajorId(scanner.nextInt());
+                }
+                case 2 -> {
+                    System.out.print("Enter Course ID: ");
+                    displaySingleCourseByCourseId(scanner.nextInt());
+                }
+                case 0 ->{return ;}
+                default -> {
+                    System.out.println("Invalid option. Please enter 1, 2 or 0.");
+                }
             }
-            case 2 -> {
-                System.out.print("Enter Course ID: ");
-                displaySingleCourseByCourseId(scanner.nextInt());
-            }
-            default -> {
-                System.out.println("Invalid option. Please enter 1 or 2.");
-                displayCourseById();
-            }
+        } catch (InputMismatchException e) {
+            System.out.println("Invalid input ! Please input number");
+            scanner.nextLine();
+        }
         }
     }
 }
+

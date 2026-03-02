@@ -9,6 +9,7 @@ import org.system.model.dto.response.MajorResponseDto;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -60,18 +61,47 @@ public class MajorService {
     }
 
     public void create(){
+
         System.out.println("\n========== Create New Major ==========");
 
+        boolean validInput;
+
+        // Course Name
+//        validInput = false;
+//        while (!validInput) {
+//            System.out.print("Major Name       : ");
+//            String MajorName = scanner.nextLine();
+//            if (!MajorName.isBlank() && MajorName.matches("^[a-zA-Z\\s]+$")) {
+//                validInput = true;
+//            } else {
+//                System.out.println("Invalid! Name must be letters only and not empty.");
+//            }
+//        }
+//        validInput = false;
+//        System.out.print("Major description: ");
+//        String Description = scanner.nextLine();
+//        MajorRequestDto request = new MajorRequestDto(
+//                MajorName,Description
+//        );
         try {
-            System.out.print("Major Name       : ");
-            String MajorName = scanner.nextLine();
+            validInput = false;
+            String MajorName = null;
+            while (!validInput) {
+                System.out.print("Major Name       : ");
+                MajorName = scanner.nextLine();
+                if (!MajorName.isBlank() && MajorName.matches("^[a-zA-Z\\s]+$")) {
+                    validInput = true;
+                } else {
+                    System.out.println("Invalid! Name must be letters only and not empty.");
+                }
+            }
 
             System.out.print("Major description: ");
             String Description = scanner.nextLine();
 
 
             MajorRequestDto request = new MajorRequestDto(
-                    MajorName,Description
+                    MajorName, Description
             );
 
             MajorResponseDto created = majorDao.create(request);

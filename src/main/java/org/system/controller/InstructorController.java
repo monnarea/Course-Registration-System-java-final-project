@@ -10,33 +10,106 @@ public class InstructorController {
     private final Scanner scanner = new Scanner(System.in);
     private final InstructorService instructorService = new InstructorService();
 
-    // =========================================================
-    //  CREATE
-    // =========================================================
     public void createInstructor() {
         System.out.println("\n--- CREATE INSTRUCTOR ---");
+        boolean validInput;
 
-        System.out.print("Instructor Name : ");
-        String name = scanner.nextLine().trim();
+        // ── Instructor Name ──────────────────────────────────────
+        String name = "";
+        validInput = false;
+        while (!validInput) {
+            System.out.print("Instructor Name : ");
+            name = scanner.nextLine().trim();
+            if (!name.isBlank() && name.matches("^[a-zA-Z\\s]+$")) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid! Name must be letters only and not empty.");
+            }
+        }
 
-        System.out.print("Gender          : ");
-        String gender = scanner.nextLine().trim();
+        // ── Gender ───────────────────────────────────────────────
+        String gender = "";
+        validInput = false;
+        while (!validInput) {
+            System.out.print("Gender (Male/Female) : ");
+            gender = scanner.nextLine().trim();
+            if (gender.equalsIgnoreCase("Male") || gender.equalsIgnoreCase("Female")) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid! Please enter Male or Female.");
+            }
+        }
 
-        System.out.print("Age             : ");
-        int age = readInt();
+        // ── Age ──────────────────────────────────────────────────
+        int age = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print("Age              : ");
+                age = Integer.parseInt(scanner.nextLine().trim());
+                if (age > 0 && age < 120) {
+                    validInput = true;
+                } else {
+                    System.out.println("Invalid! Please enter a realistic age.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid! Please enter a valid number.");
+            }
+        }
 
-        System.out.print("Email           : ");
-        String email = scanner.nextLine().trim();
+        // ── Email ────────────────────────────────────────────────
+        String email = "";
+        validInput = false;
+        while (!validInput) {
+            System.out.print("Email            : ");
+            email = scanner.nextLine().trim();
+            if (!email.isBlank() && email.matches("^[\\w._%+\\-]+@[\\w.\\-]+\\.[a-zA-Z]{2,}$")) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid! Please enter a valid email (e.g. example@mail.com).");
+            }
+        }
 
-        System.out.print("Phone Number    : ");
-        String phone = scanner.nextLine().trim();
+        // ── Phone Number ─────────────────────────────────────────
+        String phone = "";
+        validInput = false;
+        while (!validInput) {
+            System.out.print("Phone Number     : ");
+            phone = scanner.nextLine().trim();
+            if (!phone.isBlank() && phone.matches("^[0-9+\\-\\s]{7,15}$")) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid! Please enter a valid phone number.");
+            }
+        }
 
-        System.out.print("Address         : ");
-        String address = scanner.nextLine().trim();
+        // ── Address ──────────────────────────────────────────────
+        String address = "";
+        validInput = false;
+        while (!validInput) {
+            System.out.print("Address          : ");
+            address = scanner.nextLine().trim();
+            if (!address.isBlank()) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid! Address cannot be empty.");
+            }
+        }
 
-        System.out.print("Qualification   : ");
-        String qualification = scanner.nextLine().trim();
+        // ── Qualification ────────────────────────────────────────
+        String qualification = "";
+        validInput = false;
+        while (!validInput) {
+            System.out.print("Qualification    : ");
+            qualification = scanner.nextLine().trim();
+            if (!qualification.isBlank()) {
+                validInput = true;
+            } else {
+                System.out.println("Invalid! Qualification cannot be empty.");
+            }
+        }
 
+        // ── Build & Send ─────────────────────────────────────────
         InstructorResponseDto instructor = new InstructorResponseDto(
                 0, name, gender, age, email, phone, address, qualification
         );
@@ -47,25 +120,16 @@ public class InstructorController {
                 : "[CONTROLLER] Failed to create instructor.");
     }
 
-    // =========================================================
-    //  READ ALL
-    // =========================================================
     public void displayAllInstructors() {
         instructorService.getAllInstructors();
     }
 
-    // =========================================================
-    //  READ BY ID
-    // =========================================================
     public void displayInstructorById() {
         System.out.print("Enter instructor_id : ");
         int id = readInt();
         instructorService.getInstructorById(id);
     }
 
-    // =========================================================
-    //  UPDATE
-    // =========================================================
     public void updateInstructor() {
         System.out.println("\n--- UPDATE INSTRUCTOR ---");
         System.out.print("Enter instructor_id to update : ");
@@ -100,9 +164,6 @@ public class InstructorController {
                 : "[CONTROLLER] Failed to update instructor.");
     }
 
-    // =========================================================
-    //  DELETE
-    // =========================================================
     public void deleteInstructor() {
         System.out.println("\n--- DELETE INSTRUCTOR ---");
         System.out.print("Enter instructor_id to delete : ");
@@ -124,9 +185,6 @@ public class InstructorController {
         }
     }
 
-    // =========================================================
-    //  HELPERS
-    // =========================================================
     private int readInt() {
         while (true) {
             try {

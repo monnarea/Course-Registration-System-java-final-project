@@ -2,6 +2,7 @@ package org.system.controller;
 
 import org.system.service.RoadmapService;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class RoadmapController {
@@ -14,36 +15,38 @@ public class RoadmapController {
     // ===============================
     public void chooseIdOrAllRoadmap() {
         while (true) {
-            System.out.println("""
+
+            try {
+                System.out.println("""
                     Choose roadmap:
                     1. Show All Roadmap
                     2. Show 1 Major Roadmap
+                    0. Back
                     """);
-            System.out.print("Enter option: ");
-            int option = Integer.parseInt(scanner.nextLine());
+                System.out.print("Enter option: ");
+                int option = Integer.parseInt(scanner.nextLine());
 
-            switch (option) {
-                case 1 -> displayAllRoadmap();
-                case 2 -> displaySingleRoadmap();
-                case 0 -> { return; }
-                default -> {
-                    System.out.println("Please enter option (1-2)");
-                    chooseIdOrAllRoadmap();
+                switch (option) {
+                    case 1 -> displayAllRoadmap();
+                    case 2 -> displaySingleRoadmap();
+                    case 0 -> { return; }
+                    default -> {
+                        System.out.println("Please enter option (1-2)");
+                        chooseIdOrAllRoadmap();
+                    }
                 }
+            }catch (InputMismatchException e){
+                System.out.println("Invalid input ! please input number");
             }
+
         }
     }
 
-    // ===============================
-    // DISPLAY ALL
-    // ===============================
+
     public void displayAllRoadmap() {
         roadmapService.displayAllRoadmap();
     }
 
-    // ===============================
-    // DISPLAY SINGLE ROADMAP
-    // ===============================
     public void displaySingleRoadmap() {
         while (true) {
             System.out.println("""
@@ -52,50 +55,72 @@ public class RoadmapController {
                     2. Major ID
                     0. Back
                     """);
+try {
+    System.out.print("Please Enter Option: ");
+    var option = Integer.parseInt(scanner.nextLine());
 
-            System.out.print("Please Enter Option: ");
-            var option = Integer.parseInt(scanner.nextLine());
+    switch (option) {
+        case 1 -> displayByRoadmapId();
+        case 2 -> displayByMajorId();
+        case 0 -> { return; }
+        default -> System.out.println("Invalid option. Please enter 0-2.");
+                    }
+        }catch (NumberFormatException e){
 
-            switch (option) {
-                case 1 -> displayByRoadmapId();
-                case 2 -> displayByMajorId();
-                case 0 -> { return; }
-                default -> System.out.println("Invalid option. Please enter 0-2.");
+    System.out.println("Invalid input ! please input number");
+       }
+    }
+
+}
+
+
+
+    private void displayByMajorId() {
+        while (true) {
+            try {
+                System.out.print("Enter Major ID: ");
+                Integer majorId = Integer.parseInt(scanner.nextLine());
+                roadmapService.displaySingleRoadmap(majorId);
+                return;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input ! please input number");
             }
         }
     }
 
-    // ===============================
-    // DISPLAY BY MAJOR
-    // ===============================
-    private void displayByMajorId() {
-        System.out.print("Enter Major ID: ");
-        Integer majorId = Integer.parseInt(scanner.nextLine());
-        roadmapService.displaySingleRoadmap(majorId);
-    }
 
-    // ===============================
-    // DISPLAY BY ROADMAP ID
-    // ===============================
+
     private void displayByRoadmapId() {
-        System.out.print("Enter Roadmap ID: ");
-        Integer roadmapId = Integer.parseInt(scanner.nextLine());
-        roadmapService.displayRoadmapById(roadmapId);
+        while (true) {
+            try {
+                System.out.print("Enter Roadmap ID: ");
+                Integer roadmapId = Integer.parseInt(scanner.nextLine());
+                roadmapService.displayRoadmapById(roadmapId);
+                return;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input ! please input number");
+            }
+        }
     }
 
-    // ===============================
-    // CREATE ROADMAP
-    // ===============================
+
+
     public void create() {
         roadmapService.createRoadmap();
     }
 
-    // ===============================
-    // DELETE ROADMAP
-    // ===============================
+
+
     public void delete() {
-        System.out.print("Enter Roadmap ID to delete: ");
-        var roadmapId = Integer.parseInt(scanner.nextLine());
-        roadmapService.deleteRoadmap(roadmapId);
+        while (true) {
+            try {
+                System.out.print("Enter Roadmap ID to delete: ");
+                var roadmapId = Integer.parseInt(scanner.nextLine());
+                roadmapService.deleteRoadmap(roadmapId);
+                return;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input ! please input number");
+            }
+        }
     }
 }

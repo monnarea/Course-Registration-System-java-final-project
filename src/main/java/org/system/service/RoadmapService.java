@@ -6,6 +6,7 @@ import org.system.model.dto.request.RoadmapRequestDto;
 import org.system.model.dto.response.RoadmapResponseDto;
 
 import java.sql.SQLException;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -16,9 +17,6 @@ public class RoadmapService {
     private final Scanner scanner = new Scanner(System.in);
     private final RoadmapDao roadmapDao = new RoadmapDaoImpl();
 
-    // ===============================
-    // DISPLAY ALL
-    // ===============================
     public void displayAllRoadmap() {
         try {
             List<RoadmapResponseDto> list = roadmapDao.getAll();
@@ -55,9 +53,7 @@ public class RoadmapService {
         }
     }
 
-    // ===============================
-    // DISPLAY BY MAJOR
-    // ===============================
+
     public void displaySingleRoadmap(int majorId) {
         try {
             List<RoadmapResponseDto> list = roadmapDao.getByMajorId(majorId);
@@ -76,47 +72,51 @@ public class RoadmapService {
         }
     }
 
-    // ===============================
-    // CREATE ROADMAP
-    // ===============================
     public void createRoadmap() {
         System.out.println("\n========== Create New Roadmap ==========");
+        int courseId = 0;
+        int subId = 0;
+        int majorId =0 ;
+            try {
+                System.out.print("Course ID : ");
+                courseId = Integer.parseInt(scanner.nextLine());
+            }catch (NumberFormatException e){
+                System.out.println("Invalid input ! Please input number");
 
-        try {
-            Scanner scanner = new Scanner(System.in);
+            }
+            try {
+                System.out.print("Subject ID: ");
+                subId = Integer.parseInt(scanner.nextLine());
+            }catch (NumberFormatException e){
+                System.out.println("Invalid input ! Please input number");
 
-            System.out.print("Course ID : ");
-            int courseId = Integer.parseInt(scanner.nextLine());
+            }
+            try {
+                System.out.print("Major ID: ");
+                majorId = Integer.parseInt(scanner.nextLine());
+            }catch (NumberFormatException e){
+                System.out.println("Invalid input ! Please input number");
 
-            System.out.print("Subject ID: ");
-            int subId = Integer.parseInt(scanner.nextLine());
+            }
+            try {
+                RoadmapRequestDto request = RoadmapRequestDto.builder()
+                       .courseId(courseId)
+                       .subId(subId)
+                       .majorId(majorId)
+                       .build();
 
-            System.out.print("Major ID: ");
-            int majorId = Integer.parseInt(scanner.nextLine());
+               RoadmapResponseDto created = roadmapDao.create(request);
 
-            RoadmapRequestDto request = RoadmapRequestDto.builder()
-                    .courseId(courseId)
-                    .subId(subId)
-                    .majorId(majorId)
-                    .build();
-
-            RoadmapResponseDto created = roadmapDao.create(request);
-
-            System.out.println("\n✔ Roadmap created successfully!");
-            printSingleRoadmapTable(List.of(created));
-
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid number format. Please enter numeric values.");
-        } catch (SQLException e) {
+               System.out.println("\n✔ Roadmap created successfully!");
+               printSingleRoadmapTable(List.of(created));
+           } catch (SQLException e) {
             System.out.println("Create roadmap failed: " + e.getMessage());
         }
 
         System.out.println();
     }
 
-    // ===============================
-    // DELETE ROADMAP
-    // ===============================
+
     public void deleteRoadmap(int roadmapId) {
 
         System.out.println("\n========== Delete Roadmap ==========");

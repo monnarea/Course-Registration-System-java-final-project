@@ -4,6 +4,8 @@ import org.system.controller.*;
 import org.system.service.CourseService;
 import org.system.service.MajorService;
 
+import java.sql.SQLException;
+import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -31,22 +33,27 @@ public class AdminMenu {
                     ║ 0. Back                         ║
                     ╚═════════════════════════════════╝
                     """);
-            System.out.print("Please Enter Option: ");
-            int option = scanner.nextInt();
-            boolean running = true;
 
-            switch (option) {
-                case 1 -> courseMenu();
-                case 2 -> roadmapMenu();
-                case 3 -> instructorMenu();
-                case 4 -> transcriptMenu();
-                case 5 -> studentMenu();
-                case 6 -> subjectMenu();
-                case 7 -> majorMenu();
-                case 0 -> {
-                    return;
-                }
-                default -> System.out.println("Invalid option. Please enter 0–5.");
+            try {
+                System.out.print("Please Enter Option: ");
+                int option = scanner.nextInt();
+
+                switch (option) {
+                    case 1 -> courseMenu();
+                    case 2 -> roadmapMenu();
+                    case 3 -> instructorMenu();
+                    case 4 -> transcriptMenu();
+                    case 5 -> studentMenu();
+                    case 6 -> subjectMenu();
+                    case 7 -> majorMenu();
+                    case 0 -> {
+                        return;
+                    }
+                    default -> System.out.println("Invalid option. Please enter 0–5.");
+            }
+            }catch (InputMismatchException e){
+                System.out.println("Invalid input! Please input number");
+                scanner.nextLine();
             }
         }
     }
@@ -67,6 +74,7 @@ public class AdminMenu {
                     ║  5. Delete Course                ║
                     ║  0. Back                         ║
                     ╚══════════════════════════════════╝""");
+        try {
             System.out.print("Please Enter Option: ");
             int option = scanner.nextInt();
             switch (option) {
@@ -78,6 +86,12 @@ public class AdminMenu {
                 case 0 -> running = false;
                 default -> System.out.println("Invalid option. Please enter 0–5.");
             }
+        }catch (InputMismatchException e){
+            System.out.println("Invalid input ! Please input number");
+            scanner.nextLine();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         }
     }
 
@@ -113,10 +127,9 @@ public class AdminMenu {
 
     public void instructorMenu() {
         boolean running = true;
-
         while (running) {
             System.out.println("""
-
+                    
                     ╔══════════════════════════════════╗
                     ║            INSTRUCTOR            ║
                     ╠══════════════════════════════════╣
@@ -127,16 +140,21 @@ public class AdminMenu {
                     ║  5. Delete Instructors           ║
                     ║  0. Back                         ║
                     ╚══════════════════════════════════╝""");
-            System.out.print("Please Enter Option: ");
-            int option = scanner.nextInt();
-            switch (option) {
-                case 1 -> instructorController.displayAllInstructors();
-                case 2 -> instructorController.displayInstructorById();
-                case 3 -> instructorController.createInstructor();
-                case 4 -> instructorController.updateInstructor();
-                case 5 -> instructorController.createInstructor();
-                case 0 -> running = false;
-                default -> System.out.println("Invalid option. Please enter 0–5.");
+            try {
+                System.out.print("Please Enter Option: ");
+                int option = scanner.nextInt();
+                switch (option) {
+                    case 1 -> instructorController.displayAllInstructors();
+                    case 2 -> instructorController.displayInstructorById();
+                    case 3 -> instructorController.createInstructor();
+                    case 4 -> instructorController.updateInstructor();
+                    case 5 -> instructorController.deleteInstructor();
+                    case 0 -> running = false;
+                    default -> System.out.println("Invalid option. Please enter 0–5.");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input ! Please input number");
+                scanner.nextLine();
             }
         }
     }
@@ -179,7 +197,7 @@ public class AdminMenu {
             System.out.println("""
     
     ╔═══════════════════════════════════╗
-    ║        SUBJECT MANAGEMENT         ║
+    ║              SUBJECT              ║
     ╠═══════════════════════════════════╣
     ║  1. Display All Subjects          ║
     ║  2. View Subject by ID            ║
@@ -189,17 +207,27 @@ public class AdminMenu {
     ║  0. Exit                          ║
     ╚═══════════════════════════════════╝
     """);
-            System.out.print("Please Enter Option: ");
-            int option = scanner.nextInt();
-            switch (option) {
-                case 1 -> subjectController.displayAllSubjects();
-                case 2 -> subjectController.displaySubjectById();
-                case 3 -> subjectController.createSubject();
-                case 4 -> subjectController.updateSubject();
-                case 5 -> subjectController.deleteSubject();
-                case 0 -> running = false;
-                default -> System.out.println("Invalid option. Please enter 0–5.");
+            try
+            {
+                System.out.print("Please Enter Option: ");
+                int option = scanner.nextInt();
+                switch (option) {
+                    case 1 -> subjectController.displayAllSubjects();
+                    case 2 -> subjectController.displaySubjectById();
+                    case 3 -> subjectController.createSubject();
+                    case 4 -> subjectController.updateSubject();
+                    case 5 -> subjectController.deleteSubject();
+                    case 0 -> running = false;
+                    default -> System.out.println("Invalid option. Please enter 0–5.");
+                }
+            }catch (InputMismatchException e){
+
+                System.out.println("Invalid input! Please input number") ;
+                scanner.nextInt();
+
             }
+
+
         }
     }
 
@@ -217,16 +245,21 @@ public class AdminMenu {
                     ║  4. Create Roadmap               ║
                     ║  0. Back                         ║
                     ╚══════════════════════════════════╝""");
-            System.out.print("Please Enter Option: ");
-            int option = scanner.nextInt();
-            switch (option) {
-                case 1 -> roadmapController.displayAllRoadmap();
-                case 2 -> roadmapController.displaySingleRoadmap();
-                case 3 -> roadmapController.delete();
-                case 4 -> roadmapController.create();
-                case 0 -> running = false;
-                default -> System.out.println("Invalid option. Please enter 0–5.");
-            }
+            try {
+                System.out.print("Please Enter Option: ");
+                int option = scanner.nextInt();
+                switch (option) {
+                    case 1 -> roadmapController.displayAllRoadmap();
+                    case 2 -> roadmapController.displaySingleRoadmap();
+                    case 3 -> roadmapController.delete();
+                    case 4 -> roadmapController.create();
+                    case 0 -> running = false;
+                    default -> System.out.println("Invalid option. Please enter 0–5.");
+                }
+            }catch (InputMismatchException e){
+            System.out.println("Invalid input ! Please input number");
+            scanner.nextLine();
+        }
         }
     }
 
@@ -246,18 +279,22 @@ public class AdminMenu {
                     ║  5. Delete Major                 ║
                     ║  0. Back                         ║
                     ╚══════════════════════════════════╝""");
-            System.out.print("Please Enter Option: ");
-            int option = scanner.nextInt();
-            switch (option) {
-                case 1 -> majorController.displayAllMajor();
-                case 2 -> majorController.displayMajorById();
-                case 3 -> majorController.create();
-                case 4 -> majorController.update();
-                case 5 -> majorController.delete();
-                case 0 -> running = false;
-                default -> System.out.println("Invalid option. Please enter 0–5.");
+            try {
+                System.out.print("Please Enter Option: ");
+                int option = scanner.nextInt();
+                switch (option) {
+                    case 1 -> majorController.displayAllMajor();
+                    case 2 -> majorController.displayMajorById();
+                    case 3 -> majorController.create();
+                    case 4 -> majorController.update();
+                    case 5 -> majorController.delete();
+                    case 0 -> running = false;
+                    default -> System.out.println("Invalid option. Please enter 0–5.");
+                }
+            }catch (InputMismatchException e){
+                System.out.println("Invalid input! Please input number");
+                scanner.nextLine();
+                }
             }
         }
     }
-
-}
