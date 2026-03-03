@@ -7,7 +7,7 @@ public class DatabaseConfig {
         public static Connection getConnection() {
             try {
                 return DriverManager.getConnection(
-                        "jdbc:postgresql://localhost:5432/student",
+                        "jdbc:postgresql://localhost:5432/students",
                     "postgres",
                     "128028");
             } catch (SQLException e) {

@@ -14,7 +14,6 @@ public class Main {
         } else {
             System.out.println("Connection failed.");
         }
-
         new MainMenu().start();
 //        Test database
 
