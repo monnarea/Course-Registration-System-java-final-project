@@ -141,4 +141,83 @@ public class RoadmapService {
             e.printStackTrace();
         }
     }
+    public void updateRoadmap(int id) {
+        boolean validInput;
+        System.out.println(cyan + "\n========== Update Roadmap (ID: " + id + ") ==========");
+
+        // ── Fetch current data ───────────────────────────────────
+        RoadmapResponseDto current;
+        try {
+            List<RoadmapResponseDto> existing = roadmapDao.getById(id);
+            if (existing.isEmpty()) {
+                System.out.println(yellow + "No roadmap found with ID: " + id);
+                return;
+            }
+            current = existing.get(0);
+            System.out.println(yellow + "Current details:");
+            printSingleRoadmapTable(existing);
+        } catch (SQLException e) {
+            System.err.println(red + "Could not fetch roadmap: " + e.getMessage());
+            return;
+        }
+
+        System.out.println(cyan + "\nPress Enter to keep the current value, or type a new one:");
+
+        // ── Course ID ────────────────────────────────────────────
+        int courseId = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print(yellow + "Course ID  [" + current.getCourse_id() + "]: ");
+                String input = scanner.nextLine().trim();
+                courseId = input.isEmpty() ? current.getCourse_id() : Integer.parseInt(input);
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println(red + "Invalid! Please enter a valid number.");
+            }
+        }
+
+        // ── Subject ID ───────────────────────────────────────────
+        int subId = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print(yellow + "Subject ID [" + current.getSub_id() + "]: ");
+                String input = scanner.nextLine().trim();
+                subId = input.isEmpty() ? current.getSub_id() : Integer.parseInt(input);
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println(red + "Invalid! Please enter a valid number.");
+            }
+        }
+
+        // ── Major ID ─────────────────────────────────────────────
+        int majorId = 0;
+        validInput = false;
+        while (!validInput) {
+            try {
+                System.out.print(yellow + "Major ID   [" + current.getMajor_id() + "]: ");
+                String input = scanner.nextLine().trim();
+                majorId = input.isEmpty() ? current.getMajor_id() : Integer.parseInt(input);
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println(red + "Invalid! Please enter a valid number.");
+            }
+        }
+
+        // ── Build & Send ─────────────────────────────────────────
+        try {
+            RoadmapRequestDto request = RoadmapRequestDto.builder()
+                    .courseId(courseId)
+                    .subId(subId)
+                    .majorId(majorId)
+                    .build();
+
+            RoadmapResponseDto updated = roadmapDao.update(id, request);
+            System.out.println(green + "\n✔ Roadmap updated successfully!");
+            printSingleRoadmapTable(List.of(updated));
+        } catch (SQLException e) {
+            System.err.println(red + "Update failed: " + e.getMessage());
+        }
+    }
 }

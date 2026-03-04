@@ -11,6 +11,7 @@ public interface RoadmapDao {
     List<RoadmapResponseDto> getByMajorId(int major_id) throws SQLException;
     List<RoadmapResponseDto> getById(int major_id) throws SQLException;
     RoadmapResponseDto create(RoadmapRequestDto request) throws SQLException;
+    RoadmapResponseDto update(int roadmap_id, RoadmapRequestDto request) throws SQLException;
     boolean delete(int roadMap_id) throws SQLException;
 
 }

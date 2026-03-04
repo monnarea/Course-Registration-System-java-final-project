@@ -215,7 +215,39 @@ public class RoadmapDaoImpl implements RoadmapDao {
             throw new SQLException("No ID obtained.");
         }
     }
+    @Override
+    public RoadmapResponseDto update(int roadmap_id, RoadmapRequestDto request) throws SQLException {
+        String sql = """
+        UPDATE academic_roadmap SET
+            course_id = ?,
+            sub_id    = ?,
+            major_id  = ?
+        WHERE roadmap_id = ?
+    """;
 
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, request.getCourseId());
+            pstmt.setInt(2, request.getSubId());
+            pstmt.setInt(3, request.getMajorId());
+            pstmt.setInt(4, roadmap_id);
+
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Update failed — no roadmap found with ID: " + roadmap_id);
+            }
+
+            // Return updated record
+            List<RoadmapResponseDto> result = getById(roadmap_id);
+            if (!result.isEmpty()) return result.get(0);
+
+            throw new SQLException("Could not retrieve updated roadmap with ID: " + roadmap_id);
+
+        } catch (SQLException e) {
+            throw new SQLException("Error updating roadmap with ID: " + roadmap_id, e);
+        }
+    }
     @Override
     public boolean delete(int roadmapId) throws SQLException {
         String sql = "DELETE FROM academic_roadmap WHERE roadmap_id = ?";
