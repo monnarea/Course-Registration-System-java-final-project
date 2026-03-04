@@ -26,6 +26,7 @@ public class RoadmapDaoImpl implements RoadmapDao {
             c.course_id,
             c.course_name,
             c.price,
+            c.capacity,
             s.sub_id,
             s.sub_name,
             s.hour
@@ -52,6 +53,7 @@ public class RoadmapDaoImpl implements RoadmapDao {
                         rs.getString("course_name"),
                         rs.getInt("sub_id"),
                         rs.getString("sub_name"),
+                        rs.getInt("capacity"),
                         rs.getDouble("price"),
                         rs.getLong("hour")
                 );
@@ -79,6 +81,7 @@ public class RoadmapDaoImpl implements RoadmapDao {
             c.course_id,
             c.course_name,
             c.price,
+            c.capacity,
             s.sub_id,
             s.sub_name,
             s.hour
@@ -110,6 +113,7 @@ public class RoadmapDaoImpl implements RoadmapDao {
                             rs.getString("course_name"),
                             rs.getInt("sub_id"),
                             rs.getString("sub_name"),
+                            rs.getInt("capacity"),
                             rs.getDouble("price"),
                             rs.getLong("hour")
 
@@ -137,6 +141,7 @@ public class RoadmapDaoImpl implements RoadmapDao {
             c.course_id,
             c.course_name,
             c.price,
+            c.capacity,
             s.sub_id,
             s.sub_name,
             s.hour
@@ -164,6 +169,7 @@ public class RoadmapDaoImpl implements RoadmapDao {
                             rs.getString("course_name"),
                             rs.getInt("sub_id"),
                             rs.getString("sub_name"),
+                            rs.getInt("capacity"),
                             rs.getDouble("price"),
                             rs.getLong("hour")
                     );

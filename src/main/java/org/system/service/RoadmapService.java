@@ -16,21 +16,28 @@ import static org.system.view.View.printSingleRoadmapTable;
 public class RoadmapService {
     private final Scanner scanner = new Scanner(System.in);
     private final RoadmapDao roadmapDao = new RoadmapDaoImpl();
+    public static final String green = "\u001B[32m";
+    public static final String blue = "\u001B[34m";
+    public static final String yellow = "\u001B[33m";
+    public static final String purple = "\u001B[35m";
+    public static final String red = "\u001B[31m";
+    public static final String cyan = "\u001B[36m";
+    public static final String white = "\u001B[37m";
 
     public void displayAllRoadmap() {
         try {
             List<RoadmapResponseDto> list = roadmapDao.getAll();
 
             if (list.isEmpty()) {
-                System.out.println("No roadmap data found.");
+                System.out.println(roadmapDao+"No roadmap data found.");
                 return;
             }
 
-            System.out.println("Total roadmap records: " + list.size());
+            System.out.println(cyan+"Total roadmap records: " + list.size());
             printRoadmapTable(list);
 
         } catch (SQLException e) {
-            System.out.println("Error retrieving roadmap data.");
+            System.out.println(red+"Error retrieving roadmap data.");
             e.printStackTrace();
         }
     }
@@ -40,15 +47,15 @@ public class RoadmapService {
             List<RoadmapResponseDto> list = roadmapDao.getById(id);
 
             if (list.isEmpty()) {
-                System.out.println("No roadmap data found.");
+                System.out.println(red+"No roadmap data found.");
                 return;
             }
 
-            System.out.println("Total roadmap records: " + list.size());
+            System.out.println(cyan+"Total roadmap records: " + list.size());
             printRoadmapTable(list);
 
         } catch (SQLException e) {
-            System.out.println("Error retrieving roadmap data.");
+            System.out.println(red+"Error retrieving roadmap data.");
             e.printStackTrace();
         }
     }
@@ -73,29 +80,29 @@ public class RoadmapService {
     }
 
     public void createRoadmap() {
-        System.out.println("\n========== Create New Roadmap ==========");
+        System.out.println(cyan+"\n========== Create New Roadmap ==========");
         int courseId = 0;
         int subId = 0;
         int majorId =0 ;
             try {
-                System.out.print("Course ID : ");
+                System.out.print(yellow+"Course ID : ");
                 courseId = Integer.parseInt(scanner.nextLine());
             }catch (NumberFormatException e){
-                System.out.println("Invalid input ! Please input number");
+                System.out.println(red+"Invalid input ! Please input number");
 
             }
             try {
-                System.out.print("Subject ID: ");
+                System.out.print(yellow+"Subject ID: ");
                 subId = Integer.parseInt(scanner.nextLine());
             }catch (NumberFormatException e){
-                System.out.println("Invalid input ! Please input number");
+                System.out.println(red+"Invalid input ! Please input number");
 
             }
             try {
-                System.out.print("Major ID: ");
+                System.out.print(yellow+"Major ID: ");
                 majorId = Integer.parseInt(scanner.nextLine());
             }catch (NumberFormatException e){
-                System.out.println("Invalid input ! Please input number");
+                System.out.println(red+"Invalid input ! Please input number");
 
             }
             try {
@@ -107,10 +114,10 @@ public class RoadmapService {
 
                RoadmapResponseDto created = roadmapDao.create(request);
 
-               System.out.println("\n✔ Roadmap created successfully!");
+               System.out.println(green+"\n✔ Roadmap created successfully!");
                printSingleRoadmapTable(List.of(created));
            } catch (SQLException e) {
-            System.out.println("Create roadmap failed: " + e.getMessage());
+            System.out.println(red+"Create roadmap failed: " + e.getMessage());
         }
 
         System.out.println();
@@ -119,18 +126,18 @@ public class RoadmapService {
 
     public void deleteRoadmap(int roadmapId) {
 
-        System.out.println("\n========== Delete Roadmap ==========");
+        System.out.println(cyan+"\n========== Delete Roadmap ==========");
         try {
             boolean deleted = roadmapDao.delete(roadmapId);
 
             if (deleted) {
-                System.out.println("Roadmap deleted successfully!");
+                System.out.println(green+"Roadmap deleted successfully!");
             } else {
-                System.out.println("No roadmap found with ID: " + roadmapId);
+                System.out.println(red+"No roadmap found with ID: " + roadmapId);
             }
 
         } catch (SQLException e) {
-            System.out.println("Error deleting roadmap.");
+            System.out.println(red+"Error deleting roadmap.");
             e.printStackTrace();
         }
     }

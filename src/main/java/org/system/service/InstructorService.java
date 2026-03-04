@@ -41,7 +41,7 @@ public class InstructorService {
     public void getAllInstructors() {
         List<InstructorResponseDto> list = instructorDao.getAllInstructors();
         if (list.isEmpty()) {
-            System.out.println("[SERVICE - READ ALL] No instructors found.");
+            System.err.println("[SERVICE - READ ALL] No instructors found.");
             return;
         }
         printInstructorTable(list);
@@ -57,7 +57,7 @@ public class InstructorService {
         }
         List<InstructorResponseDto> list = instructorDao.getInstructorById(instructorId);
         if (list.isEmpty()) {
-            System.out.println("[SERVICE - READ BY ID] No instructor found with id = " + instructorId);
+            System.err.println("[SERVICE - READ BY ID] No instructor found with id = " + instructorId);
             return;
         }
         printInstructorTable(list);

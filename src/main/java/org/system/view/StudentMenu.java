@@ -12,9 +12,17 @@ public class StudentMenu {
     private final RoadmapController roadmapController = new RoadmapController();
     private final CourseController courseController = new CourseController();
     private final SubjectController subjectController = new SubjectController();
+    public static final String green = "\u001B[32m";
+    public static final String blue = "\u001B[34m";
+    public static final String yellow = "\u001B[33m";
+    public static final String purple = "\u001B[35m";
+    public static final String red = "\u001B[31m";
+    public static final String cyan = "\u001B[36m";
+    public static final String white = "\u001B[37m";
+
     public void studentStart() {
         while (true) {
-            System.out.println("""
+            System.out.println(blue+"""
         ╔═════════════════════════════════╗
         ║   COURSE REGISTRATION SYSTEM    ║
         ╠═════════════════════════════════╣
@@ -27,7 +35,7 @@ public class StudentMenu {
         ╚═════════════════════════════════╝
         """);
             try{
-            System.out.print("Enter option : ");
+            System.out.print(yellow+"Enter option : ");
             int choice = scanner.nextInt();
             switch (choice) {
                 case 1 -> {

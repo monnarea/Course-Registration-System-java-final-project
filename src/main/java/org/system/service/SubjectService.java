@@ -41,7 +41,7 @@ public class SubjectService {
     public void getAllSubjects()  {
         List<SubjectResponseDto> list = subjectDao.getAllSubjects();
         if (list.isEmpty()) {
-            System.out.println("[SERVICE - READ ALL] No subjects found.");
+            System.err.println("[SERVICE - READ ALL] No subjects found.");
             return;
         }
         printSubjectTable(list);
@@ -53,7 +53,7 @@ public class SubjectService {
         List<SubjectResponseDto> list = subjectDao.getSubjectById(subId);
 
         if (list == null || list.isEmpty()) {
-            System.out.println("[SERVICE - READ BY ID] No subject found with sub_id = " + subId);
+            System.err.println("[SERVICE - READ BY ID] No subject found with sub_id = " + subId);
             return;
         }
         if (subId <= 0) {
@@ -71,7 +71,7 @@ public class SubjectService {
         List<SubjectResponseDto> list = subjectDao.getSubjectById(courseId);
 
         if (list == null || list.isEmpty()) {
-            System.out.println("[SERVICE - READ BY ID] No subject found with course_id = " + courseId);
+            System.err.println("[SERVICE - READ BY ID] No subject found with course_id = " + courseId);
             return;
         }
         if (courseId <= 0) {
@@ -79,7 +79,7 @@ public class SubjectService {
             return;
         }
         if (list.isEmpty()) {
-            System.out.println("[SERVICE - READ BY COURSE] No subjects found for course_id = " + courseId);
+            System.err.println("[SERVICE - READ BY COURSE] No subjects found for course_id = " + courseId);
             return;
         }
         printSubjectTable(list);

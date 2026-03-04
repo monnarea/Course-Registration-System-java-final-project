@@ -16,6 +16,7 @@ public class RoadmapResponseDto {
     private String course_name;
     private Integer sub_id;
     private String sub_name;
+    private Integer capacity;
     private Double price;
     private Long hour;
 

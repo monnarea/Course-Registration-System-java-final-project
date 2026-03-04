@@ -19,7 +19,8 @@ public class RoadmapController {
                 System.out.println("""
                 Choose roadmap:
                 1. Show All Roadmap
-                2. Show 1 Major Roadmap
+                2. Show Roadmap By Major Is
+                3. Show By Road Id
                 0. Back
                 """);
                 System.out.print("Enter option: ");
@@ -27,7 +28,8 @@ public class RoadmapController {
 
                 switch (option) {
                     case 1 -> displayAllRoadmap();
-                    case 2 -> displaySingleRoadmap();
+                    case 2 -> displayByMajorId();
+                    case 3 -> displayByRoadmapId();
                     case 0 -> { return; }                              // ✅ Now actually exits
                     default -> System.out.println("Please enter option (1-2)"); // ✅ No recursion
                 }
@@ -42,29 +44,29 @@ public class RoadmapController {
         roadmapService.displayAllRoadmap();
     }
 
-    public void displaySingleRoadmap() {
-        while (true) {
-            System.out.println("""
-                    Display one Roadmap by:
-                    1. Roadmap ID
-                    2. Major ID
-                    0. Back
-                    """);
-try {
-    System.out.print("Please Enter Option: ");
-    int option = Integer.parseInt(scanner.nextLine());
-
-    switch (option) {
-        case 1 -> displayByRoadmapId();
-        case 2 -> displayByMajorId();
-        case 0 -> { return; }
-        default -> System.out.println("Invalid option. Please enter 0-2.");
-                    }
-        } catch (NumberFormatException e) {
-    System.out.println("Invalid input! Please input a number");
-            }
-       }
-    }
+//    public void displaySingleRoadmap() {
+//        while (true) {
+//            System.out.println("""
+//                    Display one Roadmap by:
+//                    1. Roadmap ID
+//                    2. Major ID
+//                    0. Back
+//                    """);
+//try {
+//    System.out.print("Please Enter Option: ");
+//    int option = Integer.parseInt(scanner.nextLine());
+//
+//    switch (option) {
+//        case 1 -> displayByRoadmapId();
+//        case 2 -> displayByMajorId();
+//        case 0 -> { return; }
+//        default -> System.out.println("Invalid option. Please enter 0-2.");
+//                    }
+//        } catch (NumberFormatException e) {
+//    System.out.println("Invalid input! Please input a number");
+//            }
+//       }
+//    }
 
 
 
