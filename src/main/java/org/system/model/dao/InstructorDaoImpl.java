@@ -1,6 +1,7 @@
 package org.system.model.dao;
 
 import org.system.config.DatabaseConfig;
+import org.system.model.dto.response.CourseResponseDto;
 import org.system.model.dto.response.InstructorResponseDto;
 
 import java.sql.*;
@@ -88,40 +89,78 @@ public class InstructorDaoImpl implements InstructorDao {
     //  UPDATE
     // =========================================================
     @Override
-    public boolean updateInstructor(InstructorResponseDto instructor) {
-        StringBuilder sql = new StringBuilder("UPDATE instructor SET ");
-        List<Object> params = new ArrayList<>();
-
-        if (instructor.getInstructorName() != null) { sql.append("instructor_name=?, "); params.add(instructor.getInstructorName()); }
-        if (instructor.getGender() != null)          { sql.append("gender=?, ");          params.add(instructor.getGender()); }
-        if (instructor.getAge() > 0)                 { sql.append("age=?, ");             params.add(instructor.getAge()); }
-        if (instructor.getEmail() != null)            { sql.append("email=?, ");           params.add(instructor.getEmail()); }
-        if (instructor.getPhoneNumber() != null)      { sql.append("phone_number=?, ");    params.add(instructor.getPhoneNumber()); }
-        if (instructor.getAddress() != null)          { sql.append("address=?, ");         params.add(instructor.getAddress()); }
-        if (instructor.getQualification() != null)    { sql.append("qualification=?, ");   params.add(instructor.getQualification()); }
-
-        if (params.isEmpty()) {
-            System.err.println("[UPDATE] Nothing to update.");
-            return false;
-        }
-
-        // Remove trailing comma+space
-        String query = sql.substring(0, sql.length() - 2) + " WHERE instructor_id = ?";
-        params.add(instructor.getInstructorId());
+    public InstructorResponseDto updateInstructor(int id, InstructorResponseDto instructor) throws SQLException {
+        String sql = """
+            UPDATE instructor SET
+                instructor_name   = ?,
+                gender         = ?,
+                age  = ?,
+                email      = ?,
+                phone_number    = ?,
+                address      = ?,
+                qualification = ?
+            WHERE instructor_id = ?
+        """;
 
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            for (int i = 0; i < params.size(); i++) {
-                ps.setObject(i + 1, params.get(i));
+
+            pstmt.setString(1,instructor.getInstructorName());
+            pstmt.setString(2,instructor.getGender());
+            pstmt.setInt(3,instructor.getAge());
+            pstmt.setString(4,instructor.getEmail());
+            pstmt.setString(5,instructor.getPhoneNumber());
+            pstmt.setString(6,instructor.getAddress());
+            pstmt.setString(7,instructor.getQualification());
+            pstmt.setInt(8,id);
+
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Update failed — no Instructor found with ID: " + id);
             }
-            int rows = ps.executeUpdate();
-            System.out.println("[UPDATE] Rows affected: " + rows);
-            return rows > 0;
+
+            // Return the updated record
+            List<InstructorResponseDto> result = getInstructorById(id);
+            if (!result.isEmpty()) return result.get(0);
+            throw new SQLException("Could not retrieve updated Instructor with ID: " + id);
+
         } catch (SQLException e) {
-            System.err.println("[UPDATE] Error: " + e.getMessage());
+            throw new SQLException("Error updating Instructor with ID: " + id, e);
         }
-        return false;
+//        StringBuilder sql = new StringBuilder("UPDATE instructor SET ");
+//        List<Object> params = new ArrayList<>();
+//
+//        if (instructor.getInstructorName() != null) { sql.append("instructor_name=?, "); params.add(instructor.getInstructorName()); }
+//        if (instructor.getGender() != null)          { sql.append("gender=?, ");          params.add(instructor.getGender()); }
+//        if (instructor.getAge() > 0)                 { sql.append("age=?, ");             params.add(instructor.getAge()); }
+//        if (instructor.getEmail() != null)            { sql.append("email=?, ");           params.add(instructor.getEmail()); }
+//        if (instructor.getPhoneNumber() != null)      { sql.append("phone_number=?, ");    params.add(instructor.getPhoneNumber()); }
+//        if (instructor.getAddress() != null)          { sql.append("address=?, ");         params.add(instructor.getAddress()); }
+//        if (instructor.getQualification() != null)    { sql.append("qualification=?, ");   params.add(instructor.getQualification()); }
+//
+//        if (params.isEmpty()) {
+//            System.err.println("[UPDATE] Nothing to update.");
+//            return false;
+//        }
+//
+//        // Remove trailing comma+space
+//        String query = sql.substring(0, sql.length() - 2) + " WHERE instructor_id = ?";
+//        params.add(instructor.getInstructorId());
+//
+//        try (Connection conn = DatabaseConfig.getConnection();
+//             PreparedStatement ps = conn.prepareStatement(query)) {
+//
+//            for (int i = 0; i < params.size(); i++) {
+//                ps.setObject(i + 1, params.get(i));
+//            }
+//            int rows = ps.executeUpdate();
+//            System.out.println("[UPDATE] Rows affected: " + rows);
+//            return rows > 0;
+//        } catch (SQLException e) {
+//            System.err.println("[UPDATE] Error: " + e.getMessage());
+//        }
+//        return false;
     }
 
     // =========================================================

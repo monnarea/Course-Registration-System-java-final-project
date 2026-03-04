@@ -52,10 +52,10 @@ public class StudentMenu {
                 case 4 -> roadmapController.chooseIdOrAllRoadmap();
                 case 5 -> System.out.println("Ot tn mean te bach jol merl te");
                 case 0 -> { return; }
-                default  -> System.out.println("Invalid option.");
+                default  -> System.out.println(red+"Invalid option.");
             }
             }catch (InputMismatchException e){
-                System.out.println("Invalid input ! Please input number");
+                System.out.println(red+"Invalid input ! Please input number");
                 scanner.nextLine();
             }
         }

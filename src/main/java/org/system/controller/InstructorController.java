@@ -3,6 +3,7 @@ package org.system.controller;
 import org.system.model.dto.response.InstructorResponseDto;
 import org.system.service.InstructorService;
 
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class InstructorController {
@@ -136,40 +137,141 @@ public class InstructorController {
         int id = readInt();
         instructorService.getInstructorById(id);
     }
-
     public void updateInstructor() {
-        System.out.println(cyan+"\n--- UPDATE INSTRUCTOR ---");
-        System.out.print(yellow+"Enter instructor_id to update : ");
-        int id = readInt();
-
-        System.out.println(yellow+"Current data:");
-        instructorService.getInstructorById(id);
-        System.out.println(cyan+"(Press Enter to keep current value)\n");
-
-        System.out.print(yellow+"New Name          : "); String name  = scanner.nextLine().trim();
-        System.out.print(yellow+"New Gender        : "); String gender = scanner.nextLine().trim();
-        System.out.print(yellow+"New Age           : "); String ageInput = scanner.nextLine().trim();
-        System.out.print(yellow+"New Email         : "); String email = scanner.nextLine().trim();
-        System.out.print(yellow+"New Phone Number  : "); String phone = scanner.nextLine().trim();
-        System.out.print(yellow+"New Address       : "); String address = scanner.nextLine().trim();
-        System.out.print(yellow+"New Qualification : "); String qualification = scanner.nextLine().trim();
-
-        InstructorResponseDto updated = new InstructorResponseDto(
-                id,
-                name.isEmpty()         ? null : name,
-                gender.isEmpty()       ? null : gender,
-                ageInput.isEmpty()     ? 0    : Integer.parseInt(ageInput),
-                email.isEmpty()        ? null : email,
-                phone.isEmpty()        ? null : phone,
-                address.isEmpty()      ? null : address,
-                qualification.isEmpty()? null : qualification
-        );
-
-        boolean success = instructorService.updateInstructor(updated);
-        System.out.println(success
-                ?green+ "[CONTROLLER] Instructor updated successfully."
-                : green+"[CONTROLLER] Failed to update instructor.");
+        try{
+            System.out.print(yellow+"Enter Instructor Id to update: ");
+            int id = scanner.nextInt();
+            instructorService.updateInstructor(id);
+        }catch (NumberFormatException e){
+            System.out.println(red+"Invalid input! Please input number");
+        }
     }
+//    public void updateInstructor() {
+//        System.out.println(cyan + "\n--- UPDATE INSTRUCTOR ---");
+//        boolean validInput;
+//
+//        // ── Instructor ID ────────────────────────────────────────
+//        int id = 0;
+//        validInput = false;
+//        while (!validInput) {
+//            try {
+//                System.out.print(yellow + "Enter instructor_id to update : ");
+//                id = Integer.parseInt(scanner.nextLine().trim());
+//                validInput = true;
+//            } catch (NumberFormatException e) {
+//                System.out.println("Invalid! Please enter a valid number.");
+//            }
+//        }
+//
+//        System.out.println(yellow + "Current data:");
+//        instructorService.getInstructorById(id);
+//        System.out.println(cyan + "(Press Enter to keep current value)\n");
+//
+//        // ── Name ─────────────────────────────────────────────────
+//        String name = "";
+//        validInput = false;
+//        while (!validInput) {
+//            System.out.print(yellow + "New Name          : ");
+//            name = scanner.nextLine().trim();
+//            if (name.isEmpty() || name.matches("^[a-zA-Z\\s]+$")) {
+//                validInput = true;
+//            } else {
+//                System.out.println("Invalid! Name must be letters only.");
+//            }
+//        }
+//
+//        // ── Gender ───────────────────────────────────────────────
+//        String gender = "";
+//        validInput = false;
+//        while (!validInput) {
+//            System.out.print(yellow + "New Gender (Male/Female) : ");
+//            gender = scanner.nextLine().trim();
+//            if (gender.isEmpty() || gender.equalsIgnoreCase("Male") || gender.equalsIgnoreCase("Female")) {
+//                validInput = true;
+//            } else {
+//                System.out.println("Invalid! Please enter Male or Female.");
+//            }
+//        }
+//
+//        // ── Age ──────────────────────────────────────────────────
+//        int age = 0;
+//        validInput = false;
+//        while (!validInput) {
+//            try {
+//                System.out.print(yellow + "New Age           : ");
+//                String ageInput = scanner.nextLine().trim();
+//                if (ageInput.isEmpty()) {
+//                    validInput = true;
+//                } else {
+//                    age = Integer.parseInt(ageInput);
+//                    if (age > 0 && age < 120) {
+//                        validInput = true;
+//                    } else {
+//                        System.out.println("Invalid! Please enter a realistic age.");
+//                    }
+//                }
+//            } catch (NumberFormatException e) {
+//                System.out.println("Invalid! Please enter a valid number.");
+//            }
+//        }
+//
+//        // ── Email ────────────────────────────────────────────────
+//        String email = "";
+//        validInput = false;
+//        while (!validInput) {
+//            System.out.print(yellow + "New Email         : ");
+//            email = scanner.nextLine().trim();
+//            if (email.isEmpty() || email.matches("^[\\w._%+\\-]+@[\\w.\\-]+\\.[a-zA-Z]{2,}$")) {
+//                validInput = true;
+//            } else {
+//                System.out.println("Invalid! Please enter a valid email (e.g. example@mail.com).");
+//            }
+//        }
+//
+//        // ── Phone ────────────────────────────────────────────────
+//        String phone = "";
+//        validInput = false;
+//        while (!validInput) {
+//            System.out.print(yellow + "New Phone Number  : ");
+//            phone = scanner.nextLine().trim();
+//            if (phone.isEmpty() || phone.matches("^[0-9+\\-\\s]{7,15}$")) {
+//                validInput = true;
+//            } else {
+//                System.out.println("Invalid! Please enter a valid phone number.");
+//            }
+//        }
+//
+//        // ── Address ──────────────────────────────────────────────
+//        System.out.print(yellow + "New Address       : ");
+//        String address = scanner.nextLine().trim();
+//
+//        // ── Qualification ────────────────────────────────────────
+//        System.out.print(yellow + "New Qualification : ");
+//        String qualification = scanner.nextLine().trim();
+//
+//        // ── Build & Send ─────────────────────────────────────────
+//        InstructorResponseDto updated = new InstructorResponseDto(
+//                id,
+//                name.isEmpty()          ? null : name,
+//                gender.isEmpty()        ? null : gender,
+//                age == 0                ? 0    : age,
+//                email.isEmpty()         ? null : email,
+//                phone.isEmpty()         ? null : phone,
+//                address.isEmpty()       ? null : address,
+//                qualification.isEmpty() ? null : qualification
+//        );
+//
+//        try {
+//            InstructorResponseDto result = instructorService.updateInstructor(id, updated);
+//            if (result != null) {
+//                System.out.println(green + "[CONTROLLER] Instructor updated successfully.");
+//            } else {
+//                System.out.println(red + "[CONTROLLER] Failed to update instructor.");
+//            }
+//        } catch (SQLException e) {
+//            System.out.println(red + "[CONTROLLER] Error: " + e.getMessage());
+//        }
+//    }
 
     public void deleteInstructor() {
         System.out.println(cyan+"\n--- DELETE INSTRUCTOR ---");
