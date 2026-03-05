@@ -83,6 +83,7 @@ public class View {
         }
 
         // 11 columns
+        System.out.println(reset);
         Table table = new Table(11, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
         // First row: Major ID (1 col) + Major Name (10 cols)

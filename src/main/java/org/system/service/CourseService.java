@@ -1,8 +1,10 @@
 package org.system.service;
 
 import org.system.model.dao.CourseDaoImpl;
+import org.system.model.dao.InstructorDaoImpl;
 import org.system.model.dto.request.CourseRequestDto;
 import org.system.model.dto.response.CourseResponseDto;
+import org.system.model.dto.response.InstructorResponseDto;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -19,6 +21,7 @@ public class CourseService {
 
     private final CourseDaoImpl courseDao = new CourseDaoImpl();
     private final CourseDaoImpl singleCourseDao = new CourseDaoImpl();
+    private final InstructorDaoImpl instructorDao = new InstructorDaoImpl();
     private final Scanner scanner = new Scanner(System.in);
     public static final String green = "\u001B[32m";
     public static final String blue = "\u001B[34m";
@@ -104,7 +107,7 @@ public class CourseService {
         while (!validInput) {
             System.out.print(yellow+"Course Name      : ");
             courseName = scanner.nextLine();
-            if (!courseName.isBlank() && courseName.matches("^[a-zA-Z\\s]+$")) {
+            if (!courseName.isBlank() && courseName.matches("^[a-zA-Z\\s+#-]+$")) {
                 validInput = true;
             } else {
                 System.out.println(red+"Invalid! Name must be letters only and not empty.");
@@ -157,11 +160,14 @@ public class CourseService {
         validInput = false;
         while (!validInput) {
             try {
-                System.out.print(yellow+"Instructor ID    : ");
+                System.out.print(yellow + "Instructor ID    : ");
                 instructorId = scanner.nextInt();
-                scanner.nextLine();
+                List<InstructorResponseDto> instructor = instructorDao.getInstructorById(instructorId);
                 validInput = true;
-            } catch (InputMismatchException e) {
+                if (instructor.isEmpty()) {
+                    System.out.println(red + " Instructor with ID " + instructorId + " does not exist!");
+                }
+            }catch (InputMismatchException e) {
                 System.out.println(red+"Invalid input! Please enter a number.");
                 scanner.nextLine();
             }

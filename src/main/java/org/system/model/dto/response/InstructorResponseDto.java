@@ -2,6 +2,8 @@ package org.system.model.dto.response;
 
 import lombok.*;
 
+import java.util.List;
+
 @Setter
 @Getter
 @AllArgsConstructor
