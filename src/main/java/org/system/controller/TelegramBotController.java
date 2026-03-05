@@ -1,5 +1,6 @@
 package org.system.controller;
 
+import ch.qos.logback.classic.Logger;
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.*;
@@ -12,19 +13,16 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.io.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -104,6 +102,10 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
             case "/hello"  -> handleHello(chatId, update);
             case "/clear"  -> clearBotMessages(chatId);
             case "/cancel" -> handleCancel(chatId, userId);
+            case "📚 enroll in a course" -> handleEnroll(chatId, userId, isPrivate);
+            case "📅 get schedule"       -> handleGetSchedule(chatId, userId, isPrivate);
+            case "🎓 my enrollments"     -> handleMyEnrollments(chatId, userId);
+            case "❓ help"               -> handleHelp(chatId);
             default        -> { if (isPrivate) sendMessage(chatId, "Please use /start to see available options."); }
         }
     }
@@ -116,13 +118,12 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
         userState.remove(userId);
         userSelectedCourse.remove(userId);
 
-        InlineKeyboardMarkup keyboard = InlineKeyboardMarkup.builder()
-                .keyboardRow(new InlineKeyboardRow(InlineKeyboardButton.builder().text("📚 Enroll in a Course").callbackData("action:enroll").build()))
-                .keyboardRow(new InlineKeyboardRow(InlineKeyboardButton.builder().text("📅 Get Schedule").callbackData("action:get_schedule").build()))
-                .keyboardRow(new InlineKeyboardRow(
-                        InlineKeyboardButton.builder().text("🎓 My Enrollments").callbackData("action:my_enrollments").build(),
-                        InlineKeyboardButton.builder().text("❓ Help").callbackData("action:help").build()
-                ))
+        // ── NEW: Reply Keyboard (persistent bottom board) ──────────────────────
+        ReplyKeyboardMarkup keyboard = ReplyKeyboardMarkup.builder()
+                .keyboardRow(new KeyboardRow("📚 Enroll in a Course"))
+                .keyboardRow(new KeyboardRow("📅 Get Schedule"))
+                .keyboardRow(new KeyboardRow("🎓 My Enrollments", "❓ Help"))
+                .resizeKeyboard(true)
                 .build();
 
         try {
@@ -619,27 +620,42 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
 
     // ── Build course list (LATERAL JOIN — no duplicates) ─────────────────────
     private String buildCourseList() {
-        StringBuilder sb = new StringBuilder("*Available Courses*\n\n");
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(COURSE_LIST_QUERY);
              ResultSet rs = stmt.executeQuery()) {
 
+            StringBuilder sb = new StringBuilder();
+            sb.append("AVAILABLE COURSES\n");
+            sb.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n");
+
             while (rs.next()) {
-                sb.append("*").append(rs.getString("course_id")).append(". ").append(rs.getString("course_name")).append("*\n");
-                sb.append("Price : `$").append(rs.getString("price")).append("`")
-                        .append("  |  Room : `").append(rs.getString("room")).append("`")
-                        .append("  |  Date : `").append(rs.getString("start_date")).append(" - ").append(rs.getString("end_date")).append("`\n");
-                sb.append("Morning : `").append(nullToDash(rs.getString("morning"))).append("`")
-                        .append("  |  Afternoon : `").append(nullToDash(rs.getString("afternoon"))).append("`")
-                        .append("  |  Evening : `").append(nullToDash(rs.getString("evening"))).append("`\n");
-                sb.append("────────────────────\n\n");
+                String courseId   = rs.getString("course_id");
+                String courseName = rs.getString("course_name");
+                String price      = rs.getString("price");
+                String room       = rs.getString("room");
+                String startDate  = rs.getString("start_date");
+                String endDate    = rs.getString("end_date");
+                String morning    = nullToDash(rs.getString("morning"));
+                String afternoon  = nullToDash(rs.getString("afternoon"));
+                String evening    = nullToDash(rs.getString("evening"));
+
+                sb.append(String.format("  %s · %s%n", courseId, courseName));
+                sb.append(String.format("  $%-10s  %s  %s → %s%n", price, room, startDate, endDate));
+                sb.append(String.format("  Morning %-14s  Afternoon %-14s  Evening %s%n",
+                        morning, afternoon, evening));
+                sb.append("\n  ─────────────────────────────────────\n\n");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Could not load courses.\n\n";
+
+            return sb.toString();
+
+        } catch (SQLException e) {
+            Logger log = null;
+            log.error("Failed to load course list", e);
+            return "Could not load courses. Please try again later.\n";
         }
-        return sb.toString();
     }
+
+
 
     // ── My Enrollments ────────────────────────────────────────────────────────
     private void handleMyEnrollments(String chatId, String userId) {
