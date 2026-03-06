@@ -3,46 +3,42 @@ package org.system.controller;
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.*;
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.poi.ss.usermodel.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Shape;
-import java.awt.geom.RoundRectangle2D;
-import java.awt.image.BufferedImage;
 import java.io.*;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TelegramBotController implements LongPollingSingleThreadUpdateConsumer {
 
-    private static final Logger log = LoggerFactory.getLogger(TelegramBotController.class);
-
     private final TelegramClient telegramClient;
-    private final Map<String, List<Integer>> botMessageIds      = new HashMap<>();
-    private final Map<String, String>        userState          = new HashMap<>();
-    private final Map<String, List<String>>  userEnrollments    = new HashMap<>();
-    private final Map<String, String>        userSelectedCourse = new HashMap<>();
-    private final Map<String, String>        userGroupOrigin    = new HashMap<>();
+    private final Map<String, List<Integer>> botMessageIds = new HashMap<>();
+    private final Map<String, String> userState = new HashMap<>();
+    private final Map<String, List<String>> userEnrollments = new HashMap<>();
+    private final Map<String, String> userSelectedCourse = new HashMap<>();
+    private final Map<String, String> userGroupOrigin = new HashMap<>();
     private final Map<String, List<Map<String, String>>> userEnrollmentData = new HashMap<>();
 
     private static final String DB_URL      = "jdbc:postgresql://localhost:5432/students";
@@ -79,16 +75,40 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
             ORDER BY c.course_id
             """;
 
+    // ── Button label constants (used in consume() switch and keyboard builder) ─
+    private static final String BTN_ENROLL      = "📚 Enroll in a Course";
+    private static final String BTN_SCHEDULE    = "📅 Get Schedule";
+    private static final String BTN_ENROLLMENTS = "🎓 My Enrollments";
+    private static final String BTN_HELP        = "❓ Help";
+
     public TelegramBotController(String botToken) {
         this.telegramClient = new OkHttpTelegramClient(botToken);
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  CONSUME
-    // ═══════════════════════════════════════════════════════════════════════════
+    // ── Build persistent bottom reply keyboard ────────────────────────────────
+    private ReplyKeyboardMarkup buildMainReplyKeyboard() {
+        KeyboardRow row1 = new KeyboardRow();
+        row1.add(new KeyboardButton(BTN_ENROLL));
+        row1.add(new KeyboardButton(BTN_SCHEDULE));
+
+        KeyboardRow row2 = new KeyboardRow();
+        row2.add(new KeyboardButton(BTN_ENROLLMENTS));
+        row2.add(new KeyboardButton(BTN_HELP));
+
+        return ReplyKeyboardMarkup.builder()
+                .keyboardRow(row1)
+                .keyboardRow(row2)
+                .resizeKeyboard(true)
+                .isPersistent(true)
+                .build();
+    }
+
     @Override
     public void consume(Update update) {
-        if (update.hasCallbackQuery()) { handleCallbackQuery(update); return; }
+        if (update.hasCallbackQuery()) {
+            handleCallbackQuery(update);
+            return;
+        }
         if (!update.hasMessage() || !update.getMessage().hasText()) return;
 
         String text           = update.getMessage().getText();
@@ -97,28 +117,27 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
         boolean isPrivate     = update.getMessage().getChatId() > 0;
         String normalizedText = text.split("@")[0].toLowerCase().trim();
 
-        if (isPrivate && !normalizedText.startsWith("/")) {
-            String state = userState.get(userId);
-            if ("awaiting_shift".equals(state))       { handleShiftInput(chatId, userId, text.trim()); return; }
-            if ("awaiting_course_name".equals(state)) { handleEnrollmentInput(chatId, userId, text.trim()); return; }
-        }
+        // Handle free-text input states first (enrollment flow)
+        // All enrollment steps are now handled via inline button callbacks
 
         switch (normalizedText) {
+            // Commands
             case "/start"  -> handleStart(chatId, userId, update, isPrivate);
             case "/hello"  -> handleHello(chatId, update);
             case "/clear"  -> clearBotMessages(chatId);
             case "/cancel" -> handleCancel(chatId, userId);
+
+            // Board keyboard buttons (lowercase match)
             case "📚 enroll in a course" -> handleEnroll(chatId, userId, isPrivate);
             case "📅 get schedule"       -> handleGetSchedule(chatId, userId, isPrivate);
             case "🎓 my enrollments"     -> handleMyEnrollments(chatId, userId);
             case "❓ help"               -> handleHelp(chatId);
-            default -> { if (isPrivate) sendMessage(chatId, "Please use /start to see available options."); }
+
+            default -> { if (isPrivate) sendMessage(chatId, "Please use /start or the menu buttons below."); }
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  /start
-    // ═══════════════════════════════════════════════════════════════════════════
+    // ── /start ────────────────────────────────────────────────────────────────
     private void handleStart(String chatId, String userId, Update update, boolean isPrivate) {
         String name = update.getMessage().getFrom().getUserName();
         name = (name != null) ? "@" + name : update.getMessage().getFrom().getFirstName();
@@ -126,115 +145,146 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
         userState.remove(userId);
         userSelectedCourse.remove(userId);
 
-        ReplyKeyboardMarkup keyboard = ReplyKeyboardMarkup.builder()
-                .keyboardRow(new KeyboardRow("📚 Enroll in a Course"))
-                .keyboardRow(new KeyboardRow("📅 Get Schedule"))
-                .keyboardRow(new KeyboardRow("🎓 My Enrollments", "❓ Help"))
-                .resizeKeyboard(true)
-                .build();
-
         try {
             var sent = telegramClient.execute(SendMessage.builder()
                     .chatId(chatId)
-                    .text("👋 Welcome, " + name + "!\n\nWhat would you like to do?")
-                    .replyMarkup(keyboard).build());
+                    .text("👋 Welcome, " + name + "!\n\nWhat would you like to do?\nUse the buttons below ⬇️")
+                    .replyMarkup(buildMainReplyKeyboard())
+                    .build());
             trackMessage(chatId, sent.getMessageId());
         } catch (TelegramApiException e) { e.printStackTrace(); }
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  CALLBACKS
-    // ═══════════════════════════════════════════════════════════════════════════
+    // ── Callbacks (inline buttons — kept for future use) ──────────────────────
     private void handleCallbackQuery(Update update) {
         String callbackData = update.getCallbackQuery().getData();
         String chatId       = String.valueOf(update.getCallbackQuery().getMessage().getChatId());
         String userId       = String.valueOf(update.getCallbackQuery().getFrom().getId());
         boolean isPrivate   = update.getCallbackQuery().getMessage().getChatId() > 0;
 
-        try { telegramClient.execute(AnswerCallbackQuery.builder()
-                .callbackQueryId(update.getCallbackQuery().getId()).build()); }
+        try { telegramClient.execute(AnswerCallbackQuery.builder().callbackQueryId(update.getCallbackQuery().getId()).build()); }
         catch (TelegramApiException e) { e.printStackTrace(); }
 
-        switch (callbackData) {
-            case "action:enroll"         -> handleEnroll(chatId, userId, isPrivate);
-            case "action:get_schedule"   -> handleGetSchedule(chatId, userId, isPrivate);
-            case "action:my_enrollments" -> handleMyEnrollments(chatId, userId);
-            case "action:help"           -> handleHelp(chatId);
-            default                      -> sendMessage(chatId, "Unknown action.");
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  ENROLL FLOW
-    // ═══════════════════════════════════════════════════════════════════════════
-    private void handleEnroll(String chatId, String userId, boolean isPrivate) {
-        if (isPrivate) {
-            userState.put(userId, "awaiting_course_name");
-            sendMessage(chatId, "📚 Loading available courses...");
-            sendCourseCards(chatId);
-            sendMarkdownMessage(chatId, "*Step 1:* Please type the *course name* you want to enroll in:\nType /cancel to cancel.");
+        if (callbackData.startsWith("course:")) {
+            String courseName = callbackData.substring("course:".length());
+            handleCourseSelected(chatId, userId, courseName);
+        } else if (callbackData.startsWith("shift:")) {
+            String shift = callbackData.substring("shift:".length());
+            handleShiftSelected(chatId, userId, shift);
         } else {
-            userGroupOrigin.put(userId, chatId);
-            userState.put(userId, "awaiting_course_name");
-            sendMessage(chatId, "📨 I've sent you a private message to complete your enrollment!\nPlease check your DM with me to continue.");
-            sendMessage(userId, "📚 Loading available courses...");
-            sendCourseCards(userId);
-            sendMarkdownMessage(userId, "*Step 1:* Please type the *course name* you want to enroll in:\nType /cancel to cancel.\n\n_(Triggered from group chat)_");
+            switch (callbackData) {
+                case "action:enroll"         -> handleEnroll(chatId, userId, isPrivate);
+                case "action:get_schedule"   -> handleGetSchedule(chatId, userId, isPrivate);
+                case "action:my_enrollments" -> handleMyEnrollments(chatId, userId);
+                case "action:help"           -> handleHelp(chatId);
+                default                      -> sendMessage(chatId, "Unknown action.");
+            }
         }
     }
 
-    private void handleEnrollmentInput(String chatId, String userId, String input) {
+    // ── Enroll flow ───────────────────────────────────────────────────────────
+    private void handleEnroll(String chatId, String userId, boolean isPrivate) {
+        String target = isPrivate ? chatId : userId;
+
+        if (!isPrivate) {
+            userGroupOrigin.put(userId, chatId);
+            sendMessage(chatId, "I've sent you a private message to complete your enrollment!\nPlease check your DM with me to continue.");
+        }
+
+        // Send each course as its own card
+        List<String> cards = buildCourseCards();
+        for (String card : cards) {
+            sendMarkdownMessage(target, card);
+        }
+
+        // Build inline buttons — one per course name
+        List<String> courseNames = fetchCourseNames();
+        if (courseNames.isEmpty()) {
+            sendMessage(target, "No courses available at the moment.");
+            return;
+        }
+
+        InlineKeyboardMarkup.InlineKeyboardMarkupBuilder keyboardBuilder = InlineKeyboardMarkup.builder();
+        for (String name : courseNames) {
+            keyboardBuilder.keyboardRow(new InlineKeyboardRow(
+                    InlineKeyboardButton.builder()
+                            .text(name)
+                            .callbackData("course:" + name)
+                            .build()
+            ));
+        }
+
+        try {
+            var sent = telegramClient.execute(SendMessage.builder()
+                    .chatId(target)
+                    .text("*Step 1:* Select a course to enroll in:")
+                    .parseMode("Markdown")
+                    .replyMarkup(keyboardBuilder.build())
+                    .build());
+            trackMessage(target, sent.getMessageId());
+        } catch (TelegramApiException e) { e.printStackTrace(); }
+    }
+
+    private List<String> fetchCourseNames() {
+        List<String> names = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement("SELECT course_name FROM course ORDER BY course_id");
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) names.add(rs.getString("course_name"));
+        } catch (Exception e) { e.printStackTrace(); }
+        return names;
+    }
+
+    private void handleCourseSelected(String chatId, String userId, String courseName) {
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(COURSE_QUERY);
              ResultSet rs = stmt.executeQuery()) {
 
-            boolean found = false;
             while (rs.next()) {
-                String courseName = rs.getString("course_name");
-                if (!courseName.equalsIgnoreCase(input)) continue;
-                found = true;
+                if (!rs.getString("course_name").equalsIgnoreCase(courseName)) continue;
 
                 String morning   = nullToDash(rs.getString("morning"));
                 String afternoon = nullToDash(rs.getString("afternoon"));
                 String evening   = nullToDash(rs.getString("evening"));
 
-                StringBuilder shiftMsg = new StringBuilder("Course found!\n\n*Available Shifts:*\n");
-                if (!morning.equals("-"))   shiftMsg.append("Morning: ").append(morning).append("\n");
-                if (!afternoon.equals("-")) shiftMsg.append("Afternoon: ").append(afternoon).append("\n");
-                if (!evening.equals("-"))   shiftMsg.append("Evening: ").append(evening).append("\n");
-                shiftMsg.append("\n*Step 2:* Please type your preferred shift:\n`morning` / `afternoon` / `evening`\nType /cancel to cancel.");
-
                 userSelectedCourse.put(userId, courseName);
-                userState.put(userId, "awaiting_shift");
-                sendMarkdownMessage(chatId, shiftMsg.toString());
-                break;
-            }
 
-            if (!found) {
-                sendMarkdownMessage(chatId,
-                        "Course *\"" + input + "\"* not found.\n\nPlease check the name and try again.\nType /cancel to go back to the menu.");
-            }
+                // Build shift inline buttons for only available shifts
+                InlineKeyboardMarkup.InlineKeyboardMarkupBuilder kb = InlineKeyboardMarkup.builder();
+                InlineKeyboardRow shiftRow = new InlineKeyboardRow();
+                if (!morning.equals("-"))   shiftRow.add(InlineKeyboardButton.builder().text("Morning ("   + morning   + ")").callbackData("shift:morning").build());
+                if (!afternoon.equals("-")) shiftRow.add(InlineKeyboardButton.builder().text("Afternoon (" + afternoon + ")").callbackData("shift:afternoon").build());
+                if (!evening.equals("-"))   shiftRow.add(InlineKeyboardButton.builder().text("Evening ("   + evening   + ")").callbackData("shift:evening").build());
 
+                if (shiftRow.isEmpty()) {
+                    sendMessage(chatId, "No shifts are currently available for " + courseName + ". Please choose another course.");
+                    return;
+                }
+                kb.keyboardRow(shiftRow);
+
+                try {
+                    var sent = telegramClient.execute(SendMessage.builder()
+                            .chatId(chatId)
+                            .text("*" + courseName + "* selected.\n\n*Step 2:* Choose your preferred shift:")
+                            .parseMode("Markdown")
+                            .replyMarkup(kb.build())
+                            .build());
+                    trackMessage(chatId, sent.getMessageId());
+                } catch (TelegramApiException e) { e.printStackTrace(); }
+                return;
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            userState.remove(userId);
-            userGroupOrigin.remove(userId);
-            sendMessage(chatId, "Something went wrong. Please try again later.");
+            sendMessage(chatId, "Something went wrong. Please try again.");
         }
     }
 
-    private void handleShiftInput(String chatId, String userId, String input) {
-        String shift = input.toLowerCase().trim();
-        if (!shift.equals("morning") && !shift.equals("afternoon") && !shift.equals("evening")) {
-            sendMarkdownMessage(chatId,
-                    "Invalid shift. Please type one of:\n`morning` / `afternoon` / `evening`\nType /cancel to cancel.");
-            return;
-        }
 
+
+    private void handleShiftSelected(String chatId, String userId, String shift) {
         String courseName = userSelectedCourse.get(userId);
         if (courseName == null) {
             sendMessage(chatId, "Something went wrong. Please use /start to try again.");
-            userState.remove(userId);
             return;
         }
 
@@ -252,8 +302,7 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
                 };
 
                 if (shiftTime == null || shiftTime.equalsIgnoreCase("Null")) {
-                    sendMarkdownMessage(chatId,
-                            "The *" + shift + "* shift is not available for *" + courseName + "*.\n\nPlease choose another shift or type /cancel to go back.");
+                    sendMarkdownMessage(chatId, "The *" + shift + "* shift is not available for *" + courseName + "*.\n\nPlease choose another shift or type /cancel to go back.");
                     return;
                 }
 
@@ -286,13 +335,10 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
                 userEnrollments.computeIfAbsent(userId, k -> new ArrayList<>()).add(summary);
                 userState.remove(userId);
                 userSelectedCourse.remove(userId);
-                sendMarkdownMessage(chatId,
-                        "*Enrollment Successful!*\n\n" + summary + "\n\nGood luck with your studies!\nUse /start to go back to the menu.");
+                sendMarkdownMessage(chatId, "*Enrollment Successful!* ✅\n\n" + summary + "\n\nGood luck with your studies!\n ---->>> Tap [Get Schedule] below to view or download your full schedule.");
 
                 String groupChatId = userGroupOrigin.remove(userId);
-                if (groupChatId != null)
-                    sendMarkdownMessage(groupChatId,
-                            "A member has successfully enrolled in *" + courseName + "* (" + shiftLabel + " shift)!");
+                if (groupChatId != null) sendMarkdownMessage(groupChatId, "A member has successfully enrolled in *" + courseName + "* (" + shiftLabel + " shift)!");
                 return;
             }
 
@@ -305,244 +351,11 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
         userSelectedCourse.remove(userId);
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  COURSE CARD IMAGE — replaces buildCourseList()
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    /**
-     * Queries DB and sends one image card per course to the given chatId.
-     */
-    private void sendCourseCards(String chatId) {
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-             PreparedStatement stmt = conn.prepareStatement(COURSE_LIST_QUERY);
-             ResultSet rs = stmt.executeQuery()) {
-
-            boolean hasCourses = false;
-            while (rs.next()) {
-                hasCourses = true;
-                String courseId   = rs.getString("course_id");
-                String courseName = rs.getString("course_name");
-                String price      = rs.getString("price");
-                String room       = rs.getString("room");
-                String startDate  = rs.getString("start_date");
-                String endDate    = rs.getString("end_date");
-                String morning    = nullToDash(rs.getString("morning"));
-                String afternoon  = nullToDash(rs.getString("afternoon"));
-                String evening    = nullToDash(rs.getString("evening"));
-
-                byte[] imageBytes = renderCourseCard(
-                        courseId, courseName, price, room,
-                        startDate, endDate, morning, afternoon, evening);
-
-                if (imageBytes != null) {
-                    sendCourseCardImage(chatId, imageBytes, courseId);
-                }
-            }
-
-            if (!hasCourses) {
-                sendMessage(chatId, "⚠️ No courses available at the moment.");
-            }
-
-        } catch (SQLException e) {
-            log.error("Failed to load course list", e);
-            sendMessage(chatId, "⚠️ Could not load courses. Please try again later.");
-        }
-    }
-
-    /**
-     * Sends a single card image to Telegram.
-     */
-    private void sendCourseCardImage(String chatId, byte[] imageBytes, String courseId) {
-        try {
-            InputStream is = new ByteArrayInputStream(imageBytes);
-            SendPhoto photo = SendPhoto.builder()
-                    .chatId(chatId)
-                    .photo(new InputFile(is, "course_" + courseId + ".png"))
-                    .build();
-            var sent = telegramClient.execute(photo);
-            trackMessage(chatId, sent.getMessageId());
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Renders a course card as PNG bytes using Java2D.
-     * Matches the design: white card, blue accent bar, badge, price, time slots.
-     */
-    private byte[] renderCourseCard(String courseId,   String courseName,
-                                    String price,      String room,
-                                    String startDate,  String endDate,
-                                    String morning,    String afternoon,
-                                    String evening) {
-        final int W = 800, H = 290;
-        final int PAD = 40;
-        final int R   = 22;   // corner radius
-
-        // ── Colours ────────────────────────────────────────────────────────────
-        Color cBg          = new Color(0xFFFFFF);
-        Color cBorder      = new Color(0xDDE3EE);
-        Color cAccent      = new Color(0x93C5FD);   // light-blue top bar
-        Color cDark        = new Color(0x0F172A);
-        Color cGray        = new Color(0x64748B);
-        Color cMuted       = new Color(0x94A3B8);
-        Color cBadgeBg     = new Color(0xDBEAFE);
-        Color cBadgeTx     = new Color(0x1E40AF);
-        Color cDivider     = new Color(0xF1F5F9);
-        Color cSlotActBg   = new Color(0xF0FDF4);
-        Color cSlotActBd   = new Color(0x86EFAC);
-        Color cSlotActTx   = new Color(0x15803D);
-        Color cSlotOffBg   = new Color(0xF8FAFC);
-        Color cSlotOffBd   = new Color(0xE2E8F0);
-        Color cSlotOffTx   = new Color(0xCBD5E1);
-
-        try {
-            BufferedImage img = new BufferedImage(W, H, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g = img.createGraphics();
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,      RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-            g.setRenderingHint(RenderingHints.KEY_RENDERING,         RenderingHints.VALUE_RENDER_QUALITY);
-            g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-
-            // ── Transparent background ─────────────────────────────────────────
-            g.setColor(new Color(0, 0, 0, 0));
-            g.fillRect(0, 0, W, H);
-
-            // ── Soft drop shadow ───────────────────────────────────────────────
-            for (int i = 7; i >= 1; i--) {
-                g.setColor(new Color(0, 0, 0, i * 4));
-                g.fill(new RoundRectangle2D.Float(8 - i, 8 + i, W - 16 + i * 2, H - 20, R + 2, R + 2));
-            }
-
-            // ── Card body ──────────────────────────────────────────────────────
-            Shape card = new RoundRectangle2D.Float(8, 8, W - 16, H - 20, R, R);
-            g.setColor(cBg);
-            g.fill(card);
-            g.setColor(cBorder);
-            g.setStroke(new BasicStroke(1.3f));
-            g.draw(card);
-
-            // ── Top accent bar (3 px) ──────────────────────────────────────────
-            g.setClip(card);
-            g.setColor(cAccent);
-            g.fillRect(8, 8, W - 16, 4);
-            g.setClip(null);
-
-            int x = PAD + 8;
-            int y = PAD + 14;
-
-            // ── Course ID ──────────────────────────────────────────────────────
-            g.setFont(new Font("SansSerif", Font.BOLD, 13));
-            g.setColor(cMuted);
-            g.drawString(courseId, x, y);
-            int idW = g.getFontMetrics().stringWidth(courseId);
-
-            // ── Category badge ─────────────────────────────────────────────────
-            int bx = x + idW + 14, by = y - 14;
-            int bw = 130, bh = 22;
-            g.setColor(cBadgeBg);
-            g.fill(new RoundRectangle2D.Float(bx, by, bw, bh, bh, bh));
-            g.setFont(new Font("SansSerif", Font.BOLD, 11));
-            g.setColor(cBadgeTx);
-            g.drawString("Computer Science", bx + 10, by + 15);
-
-            // ── "PRICE" label top-right ────────────────────────────────────────
-            g.setFont(new Font("SansSerif", Font.PLAIN, 11));
-            g.setColor(cMuted);
-            int plW = g.getFontMetrics().stringWidth("PRICE");
-            g.drawString("PRICE", W - PAD - 8 - plW, y);
-
-            // ── Course name ────────────────────────────────────────────────────
-            y += 32;
-            g.setFont(new Font("Serif", Font.BOLD, 24));
-            g.setColor(cDark);
-            g.drawString(courseName, x, y);
-
-            // ── Price value ────────────────────────────────────────────────────
-            String priceStr = "$" + price;
-            g.setFont(new Font("Serif", Font.BOLD, 28));
-            int pvW = g.getFontMetrics().stringWidth(priceStr);
-            g.drawString(priceStr, W - PAD - 8 - pvW, y);
-
-            // ── Date & Room ────────────────────────────────────────────────────
-            y += 34;
-            g.setFont(new Font("SansSerif", Font.PLAIN, 13));
-            g.setColor(cGray);
-            String dateLine = "📅  " + safeVal(startDate) + "  →  " + safeVal(endDate)
-                    + "      🏫  " + safeVal(room);
-            g.drawString(dateLine, x, y);
-
-            // ── Divider ────────────────────────────────────────────────────────
-            y += 18;
-            g.setColor(cDivider);
-            g.setStroke(new BasicStroke(1f));
-            g.drawLine(x, y, W - PAD - 8, y);
-
-            // ── Time slots ─────────────────────────────────────────────────────
-            y += 14;
-            int slotW = 150, slotH = 64, gap = 14;
-            drawTimeSlot(g, "MORNING",   morning,   x,                         y, slotW, slotH,
-                    cSlotActBg, cSlotActBd, cSlotActTx, cSlotOffBg, cSlotOffBd, cSlotOffTx);
-            drawTimeSlot(g, "AFTERNOON", afternoon, x + slotW + gap,           y, slotW, slotH,
-                    cSlotActBg, cSlotActBd, cSlotActTx, cSlotOffBg, cSlotOffBd, cSlotOffTx);
-            drawTimeSlot(g, "EVENING",   evening,   x + (slotW + gap) * 2,     y, slotW, slotH,
-                    cSlotActBg, cSlotActBd, cSlotActTx, cSlotOffBg, cSlotOffBd, cSlotOffTx);
-
-            g.dispose();
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(img, "PNG", baos);
-            return baos.toByteArray();
-
-        } catch (IOException e) {
-            log.error("Failed to render course card for {}", courseId, e);
-            return null;
-        }
-    }
-
-    /**
-     * Draws a single morning / afternoon / evening slot box.
-     */
-    private void drawTimeSlot(Graphics2D g,
-                              String label, String time,
-                              int x, int y, int w, int h,
-                              Color actBg, Color actBd, Color actTx,
-                              Color offBg, Color offBd, Color offTx) {
-        boolean active = time != null && !time.equals("-") && !time.isBlank();
-        Color bg = active ? actBg : offBg;
-        Color bd = active ? actBd : offBd;
-        Color tx = active ? actTx : offTx;
-
-        // Box fill
-        g.setColor(bg);
-        g.fill(new RoundRectangle2D.Float(x, y, w, h, 14, 14));
-        // Box border
-        g.setColor(bd);
-        g.setStroke(new BasicStroke(1.3f));
-        g.draw(new RoundRectangle2D.Float(x, y, w, h, 14, 14));
-
-        // Label (e.g. "MORNING")
-        g.setFont(new Font("SansSerif", Font.BOLD, 10));
-        g.setColor(tx);
-        FontMetrics fm = g.getFontMetrics();
-        g.drawString(label, x + (w - fm.stringWidth(label)) / 2, y + 20);
-
-        // Time value (e.g. "9:00–11:00" or "—")
-        String display = active ? time : "—";
-        g.setFont(new Font("Monospaced", Font.BOLD, 15));
-        fm = g.getFontMetrics();
-        g.setColor(tx);
-        g.drawString(display, x + (w - fm.stringWidth(display)) / 2, y + 44);
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  GET SCHEDULE
-    // ═══════════════════════════════════════════════════════════════════════════
+    // ── Get Schedule ──────────────────────────────────────────────────────────
     private void handleGetSchedule(String chatId, String userId, boolean isPrivate) {
         List<Map<String, String>> enrollments = userEnrollmentData.getOrDefault(userId, new ArrayList<>());
         if (enrollments.isEmpty()) {
-            sendMarkdownMessage(chatId,
-                    "📅 *Get Schedule*\n\nYou have no enrollments yet.\nPlease enroll in a course first using *📚 Enroll in a Course*.\n\nUse /start to go back.");
+            sendMarkdownMessage(chatId, "📅 *Get Schedule*\n\nYou have no enrollments yet.\nPlease enroll in a course first using the *📚 Enroll in a Course* button.");
             return;
         }
         if (isPrivate) {
@@ -580,9 +393,7 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
         else sendMessage(chatId, "❌ Could not generate PDF file. Please try again later.");
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  PDF GENERATION
-    // ═══════════════════════════════════════════════════════════════════════════
+    // ── PDF Generation ────────────────────────────────────────────────────────
     private File generateSchedulePDF(String userId, List<Map<String, String>> enrollments) {
         try {
             PDDocument document = new PDDocument();
@@ -642,6 +453,7 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
 
             for (int rowIdx = 0; rowIdx < enrollments.size(); rowIdx++) {
                 Map<String, String> d = enrollments.get(rowIdx);
+
                 String[] values = {
                         String.valueOf(rowIdx + 1),
                         safe(d.get("courseId")),
@@ -661,19 +473,20 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
                 List<List<String>> wrappedCells = new ArrayList<>();
                 int maxLines = 1;
                 for (int col = 0; col < values.length; col++) {
-                    List<String> lines = wrapText(values[col], fontRegular, fontSize,
-                            colWidths[col] - 2 * cellPadding);
+                    List<String> lines = wrapText(values[col], fontRegular, fontSize, colWidths[col] - 2 * cellPadding);
                     wrappedCells.add(lines);
                     if (lines.size() > maxLines) maxLines = lines.size();
                 }
 
                 float rowHeight = maxLines * lineSpacing + 2 * cellPadding;
 
+                // Page break if needed
                 if (y - rowHeight < margin + 20) {
                     cs.setStrokingColor(0.2f, 0.4f, 0.7f);
                     cs.setLineWidth(1.5f);
                     cs.addRect(margin, y, contentWidth, (pageHeight - margin - titleHeight) - y);
                     cs.stroke();
+
                     cs.beginText();
                     cs.setFont(fontRegular, 8);
                     cs.setNonStrokingColor(0.5f, 0.5f, 0.5f);
@@ -686,11 +499,13 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
                     document.addPage(page);
                     cs = new PDPageContentStream(document, page);
                     y = pageHeight - margin;
+
                     cs = drawHeaderRow(cs, fontBold, colHeaders, colWidths,
                             margin, y, headerHeight, contentWidth, headerFontSize);
                     y -= headerHeight;
                 }
 
+                // Alternating row background
                 float[] bg = (rowIdx % 2 == 0)
                         ? new float[]{0.93f, 0.96f, 1f}
                         : new float[]{1f, 1f, 1f};
@@ -698,6 +513,7 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
                 cs.addRect(margin, y - rowHeight, contentWidth, rowHeight);
                 cs.fill();
 
+                // Cell text (multi-line)
                 float xPos = margin;
                 cs.setNonStrokingColor(0.1f, 0.1f, 0.1f);
                 for (int col = 0; col < values.length; col++) {
@@ -713,6 +529,7 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
                     xPos += colWidths[col];
                 }
 
+                // Row grid lines
                 cs.setStrokingColor(0.8f, 0.8f, 0.85f);
                 cs.setLineWidth(0.4f);
                 cs.moveTo(margin, y - rowHeight);
@@ -720,19 +537,25 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
                 cs.stroke();
                 xPos = margin;
                 for (float w : colWidths) {
-                    cs.moveTo(xPos, y);  cs.lineTo(xPos, y - rowHeight); cs.stroke();
+                    cs.moveTo(xPos, y);
+                    cs.lineTo(xPos, y - rowHeight);
+                    cs.stroke();
                     xPos += w;
                 }
-                cs.moveTo(xPos, y); cs.lineTo(xPos, y - rowHeight); cs.stroke();
+                cs.moveTo(xPos, y);
+                cs.lineTo(xPos, y - rowHeight);
+                cs.stroke();
 
                 y -= rowHeight;
             }
 
+            // Outer border
             cs.setStrokingColor(0.2f, 0.4f, 0.7f);
             cs.setLineWidth(1.5f);
             cs.addRect(margin, y, contentWidth, (pageHeight - margin - titleHeight) - y);
             cs.stroke();
 
+            // Footer
             cs.beginText();
             cs.setFont(fontRegular, 8);
             cs.setNonStrokingColor(0.5f, 0.5f, 0.5f);
@@ -742,6 +565,7 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
             cs.close();
 
             File tempFile = File.createTempFile("schedule_" + userId + "_", ".pdf");
+            tempFile.delete();
             document.save(tempFile);
             document.close();
             return tempFile;
@@ -752,10 +576,18 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
         }
     }
 
-    private PDPageContentStream drawHeaderRow(PDPageContentStream cs, PDFont fontBold,
-                                              String[] colHeaders, float[] colWidths,
-                                              float margin, float y, float headerHeight,
-                                              float contentWidth, float headerFontSize) throws IOException {
+    // ── Draw header row ───────────────────────────────────────────────────────
+    private PDPageContentStream drawHeaderRow(
+            PDPageContentStream cs,
+            PDFont fontBold,
+            String[] colHeaders,
+            float[] colWidths,
+            float margin,
+            float y,
+            float headerHeight,
+            float contentWidth,
+            float headerFontSize) throws IOException {
+
         cs.setNonStrokingColor(52 / 255f, 120 / 255f, 210 / 255f);
         cs.addRect(margin, y - headerHeight, contentWidth, headerHeight);
         cs.fill();
@@ -776,18 +608,26 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
         cs.setLineWidth(0.5f);
         xPos = margin;
         for (float w : colWidths) {
-            cs.moveTo(xPos, y); cs.lineTo(xPos, y - headerHeight); cs.stroke();
+            cs.moveTo(xPos, y);
+            cs.lineTo(xPos, y - headerHeight);
+            cs.stroke();
             xPos += w;
         }
-        cs.moveTo(xPos, y); cs.lineTo(xPos, y - headerHeight); cs.stroke();
+        cs.moveTo(xPos, y);
+        cs.lineTo(xPos, y - headerHeight);
+        cs.stroke();
+
         return cs;
     }
 
+    // ── Word-wrap ─────────────────────────────────────────────────────────────
     private List<String> wrapText(String text, PDFont font, float fontSize, float maxWidth) throws IOException {
         List<String> lines = new ArrayList<>();
         if (text == null || text.isEmpty()) { lines.add(""); return lines; }
+
         String[] words = text.split(" ");
         StringBuilder currentLine = new StringBuilder();
+
         for (String word : words) {
             String testLine = currentLine.length() == 0 ? word : currentLine + " " + word;
             float testWidth = font.getStringWidth(testLine) / 1000f * fontSize;
@@ -802,77 +642,15 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
         return lines;
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  OTHER HANDLERS
-    // ═══════════════════════════════════════════════════════════════════════════
-    private void handleMyEnrollments(String chatId, String userId) {
-        List<String> enrollments = userEnrollments.getOrDefault(userId, new ArrayList<>());
-        if (enrollments.isEmpty()) {
-            sendMessage(chatId, "🎓 You have no enrollments yet.\n\nUse /start to go back.");
-            return;
-        }
-        StringBuilder sb = new StringBuilder("🎓 *My Enrollments:*\n\n");
-        for (int i = 0; i < enrollments.size(); i++)
-            sb.append(i + 1).append(". ").append(enrollments.get(i)).append("\n─────────────────\n");
-        sb.append("\nUse /start to go back.");
-        sendMarkdownMessage(chatId, sb.toString());
+    private String safe(String val) {
+        return (val == null || val.isBlank()) ? "N/A" : val;
     }
 
-    private void handleHelp(String chatId) {
-        sendMarkdownMessage(chatId,
-                "❓ *Help*\n\n• /start — show the main menu\n• /cancel — cancel current action\n• /hello — greet the bot\n• /clear — delete all bot messages\n\n" +
-                        "*Features:*\n• 📚 Enroll in a Course\n• 📅 Get Schedule — view & download PDF\n• 🎓 My Enrollments");
+    private String nullToDash(String val) {
+        return (val == null || val.equalsIgnoreCase("Null") || val.isBlank()) ? "-" : val;
     }
 
-    private void handleHello(String chatId, Update update) {
-        String name = update.getMessage().getFrom().getUserName();
-        name = (name != null) ? "@" + name : update.getMessage().getFrom().getFirstName();
-        sendMessage(chatId, "Hello " + name + "!");
-    }
-
-    private void handleCancel(String chatId, String userId) {
-        userGroupOrigin.remove(userId);
-        userSelectedCourse.remove(userId);
-        if (userState.containsKey(userId)) {
-            userState.remove(userId);
-            sendMessage(chatId, "❌ Action cancelled. Use /start to go back to the menu.");
-        } else {
-            sendMessage(chatId, "Nothing to cancel. Use /start to see the menu.");
-        }
-    }
-
-    private void clearBotMessages(String chatId) {
-        List<Integer> ids = botMessageIds.getOrDefault(chatId, new ArrayList<>());
-        if (ids.isEmpty()) { sendMessage(chatId, "No messages to clear."); return; }
-        for (Integer id : new ArrayList<>(ids)) {
-            try { telegramClient.execute(new DeleteMessage(chatId, id)); }
-            catch (TelegramApiException e) { e.printStackTrace(); }
-        }
-        ids.clear();
-        sendMessage(chatId, "✅ Bot messages cleared!");
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  MESSAGING HELPERS
-    // ═══════════════════════════════════════════════════════════════════════════
-    private void sendMessage(String chatId, String text) {
-        try {
-            var sent = telegramClient.execute(SendMessage.builder().chatId(chatId).text(text).build());
-            trackMessage(chatId, sent.getMessageId());
-        } catch (TelegramApiException e) {
-            System.err.println("⚠️ Could not send message to " + chatId);
-            e.printStackTrace();
-        }
-    }
-
-    private void sendMarkdownMessage(String chatId, String text) {
-        try {
-            var sent = telegramClient.execute(
-                    SendMessage.builder().chatId(chatId).text(text).parseMode("Markdown").build());
-            trackMessage(chatId, sent.getMessageId());
-        } catch (TelegramApiException e) { e.printStackTrace(); }
-    }
-
+    // ── Send PDF ──────────────────────────────────────────────────────────────
     private void sendPdfFile(String chatId, File file, String fileName) {
         try {
             telegramClient.execute(SendDocument.builder().chatId(chatId)
@@ -881,23 +659,129 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
         } catch (TelegramApiException e) { e.printStackTrace(); }
     }
 
+    // ── Build course list as a list of individual course cards ────────────────
+    private List<String> buildCourseCards() {
+        List<String> cards = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(COURSE_LIST_QUERY);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String morning   = nullToDash(rs.getString("morning"));
+                String afternoon = nullToDash(rs.getString("afternoon"));
+                String evening   = nullToDash(rs.getString("evening"));
+
+                String card =
+                        "*" + rs.getString("course_id") + ". " + rs.getString("course_name") + "*\n" +
+                                "┌─────────────────────────\n" +
+                                "│ Price     : `$" + rs.getString("price") + "`\n" +
+                                "│ Room      : `" + rs.getString("room") + "`\n" +
+                                "│ Start     : `" + rs.getString("start_date") + "`\n" +
+                                "│ End       : `" + rs.getString("end_date") + "`\n" +
+                                "│ Morning   : `" + morning + "`\n" +
+                                "│ Afternoon : `" + afternoon + "`\n" +
+                                "│ Evening   : `" + evening + "`\n" +
+                                "└─────────────────────────";
+                cards.add(card);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            cards.add("❌ Could not load courses. Please try again later.");
+        }
+        return cards;
+    }
+
+    // ── My Enrollments ────────────────────────────────────────────────────────
+    private void handleMyEnrollments(String chatId, String userId) {
+        List<String> enrollments = userEnrollments.getOrDefault(userId, new ArrayList<>());
+        if (enrollments.isEmpty()) {
+            sendMessage(chatId, "🎓 You have no enrollments yet.\n\nTap 📚 Enroll in a Course to get started.");
+            return;
+        }
+        StringBuilder sb = new StringBuilder("🎓 *My Enrollments:*\n\n");
+        for (int i = 0; i < enrollments.size(); i++)
+            sb.append(i + 1).append(". ").append(enrollments.get(i)).append("\n─────────────────\n");
+        sendMarkdownMessage(chatId, sb.toString());
+    }
+
+    // ── Help ──────────────────────────────────────────────────────────────────
+    private void handleHelp(String chatId) {
+        sendMarkdownMessage(chatId,
+                "❓ *Help*\n\n" +
+                        "Use the buttons at the bottom of the screen:\n\n" +
+                        "📚 *Enroll in a Course* — Browse and enroll in available courses\n" +
+                        "📅 *Get Schedule* — View your schedule and download as PDF\n" +
+                        "🎓 *My Enrollments* — See all your enrolled courses\n" +
+                        "❓ *Help* — Show this help message\n\n" +
+                        "*Commands:*\n" +
+                        "• /start — Show welcome message & keyboard\n" +
+                        "• /cancel — Cancel current action\n" +
+                        "• /hello — Greet the bot\n" +
+                        "• /clear — Delete bot messages");
+    }
+
+    // ── Hello ─────────────────────────────────────────────────────────────────
+    private void handleHello(String chatId, Update update) {
+        String name = update.getMessage().getFrom().getUserName();
+        name = (name != null) ? "@" + name : update.getMessage().getFrom().getFirstName();
+        sendMessage(chatId, "Hello " + name + "! 👋");
+    }
+
+    // ── Cancel ────────────────────────────────────────────────────────────────
+    private void handleCancel(String chatId, String userId) {
+        userGroupOrigin.remove(userId);
+        userSelectedCourse.remove(userId);
+        if (userState.containsKey(userId)) {
+            userState.remove(userId);
+            sendMessage(chatId, "❌ Action cancelled. Use the menu buttons below to continue.");
+        } else {
+            sendMessage(chatId, "Nothing to cancel. Use the menu buttons below.");
+        }
+    }
+
+    // ── Clear messages ────────────────────────────────────────────────────────
+    private void clearBotMessages(String chatId) {
+        List<Integer> ids = botMessageIds.getOrDefault(chatId, new ArrayList<>());
+        if (ids.isEmpty()) { sendMessage(chatId, "No messages to clear."); return; }
+        for (Integer id : new ArrayList<>(ids)) {
+            try { telegramClient.execute(new DeleteMessage(chatId, id)); } catch (TelegramApiException e) { e.printStackTrace(); }
+        }
+        ids.clear();
+        sendMessage(chatId, "✅ Bot messages cleared!");
+    }
+
+    // ── Messaging helpers ─────────────────────────────────────────────────────
+    private void sendMessage(String chatId, String text) {
+        try {
+            var sent = telegramClient.execute(SendMessage.builder().chatId(chatId).text(text).build());
+            trackMessage(chatId, sent.getMessageId());
+        } catch (TelegramApiException e) {
+            System.err.println("⚠️ Could not send message to " + chatId + ". User may need to start the bot privately first.");
+            e.printStackTrace();
+        }
+    }
+
+    private void sendMarkdownMessage(String chatId, String text) {
+        try {
+            var sent = telegramClient.execute(SendMessage.builder().chatId(chatId).text(text).parseMode("Markdown").build());
+            trackMessage(chatId, sent.getMessageId());
+        } catch (TelegramApiException e) { e.printStackTrace(); }
+    }
+
     private void trackMessage(String chatId, int messageId) {
         botMessageIds.computeIfAbsent(chatId, k -> new ArrayList<>()).add(messageId);
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
-    //  UTILITIES
-    // ═══════════════════════════════════════════════════════════════════════════
-    private String nullToDash(String val) {
-        return (val == null || val.equalsIgnoreCase("Null") || val.isBlank()) ? "-" : val;
+    // ── Utility (kept for compatibility) ──────────────────────────────────────
+    private String getCellValue(Cell cell) {
+        if (cell == null) return "N/A";
+        return switch (cell.getCellType()) {
+            case STRING  -> cell.getStringCellValue().trim();
+            case NUMERIC -> DateUtil.isCellDateFormatted(cell)
+                    ? cell.getLocalDateTimeCellValue().toLocalDate().toString()
+                    : String.valueOf((long) cell.getNumericCellValue());
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            default      -> "N/A";
+        };
     }
-
-    private String safeVal(String val) {
-        return (val == null || val.isBlank()) ? "N/A" : val;
-    }
-
-    private String safe(String val) {
-        return (val == null || val.isBlank()) ? "N/A" : val;
-    }
-
 }
