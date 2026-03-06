@@ -18,6 +18,8 @@ public class RoadmapResponseDto {
     private String sub_name;
     private Integer capacity;
     private Double price;
+    private Double  discount;             // 20.0 or 50.0
+    private Double  price_after_discount; // computed by DB
     private Long hour;
 
 //rs.getString("course_name"),

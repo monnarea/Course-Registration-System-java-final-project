@@ -17,6 +17,7 @@ public class SubjectService {
     private final Scanner scanner= new Scanner(System.in);
     private  final SubjectDao subjectDao =new SubjectDaoImpl();
 
+
     public boolean createSubject(SubjectResponseDto subject) {
         if (subject == null) {
             System.err.println("[SERVICE - CREATE] Subject cannot be null.");
@@ -68,7 +69,7 @@ public class SubjectService {
     }
 
     public void getSubjectsByCourseId(int courseId) {
-        List<SubjectResponseDto> list = subjectDao.getSubjectById(courseId);
+        List<SubjectResponseDto> list = subjectDao.getSubjectsByCourseId(courseId);
 
         if (list == null || list.isEmpty()) {
             System.err.println("[SERVICE - READ BY ID] No subject found with course_id = " + courseId);

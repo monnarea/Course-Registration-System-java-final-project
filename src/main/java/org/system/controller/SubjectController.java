@@ -12,21 +12,28 @@ import static jdk.internal.jimage.decompressor.CompressIndexes.readInt;
 public class SubjectController {
     private final Scanner scanner = new Scanner(System.in);
     private final SubjectService subjectService = new SubjectService();
+    public static final String green = "\u001B[32m";
+    public static final String blue = "\u001B[34m";
+    public static final String yellow = "\u001B[33m";
+    public static final String purple = "\u001B[35m";
+    public static final String red = "\u001B[31m";
+    public static final String cyan = "\u001B[36m";
+    public static final String white = "\u001B[37m";
 
     public void createSubject() {
-        System.out.println("\n--- CREATE SUBJECT ---");
+        System.out.println(cyan+"\n--- CREATE SUBJECT ---");
         boolean validInput;
 
         // ── Subject Name ─────────────────────────────────────────
         String name = "";
         validInput = false;
         while (!validInput) {
-            System.out.print("Subject Name : ");
+            System.out.print(yellow+"Subject Name : ");
             name = scanner.nextLine().trim();
             if (!name.isBlank() && name.matches("^[a-zA-Z\\s]+$")) {
                 validInput = true;
             } else {
-                System.out.println("Invalid! Name must be letters only and not empty.");
+                System.out.println(red+"Invalid! Name must be letters only and not empty.");
             }
         }
 
@@ -34,12 +41,12 @@ public class SubjectController {
         String desc = "";
         validInput = false;
         while (!validInput) {
-            System.out.print("Description  : ");
+            System.out.print(yellow+"Description  : ");
             desc = scanner.nextLine().trim();
             if (!desc.isBlank()) {
                 validInput = true;
             } else {
-                System.out.println("Invalid! Description cannot be empty.");
+                System.out.println(red+"Invalid! Description cannot be empty.");
             }
         }
 
@@ -48,11 +55,11 @@ public class SubjectController {
         validInput = false;
         while (!validInput) {
             try {
-                System.out.print("Hours        : ");
+                System.out.print(yellow+"Hours        : ");
                 hour = Double.parseDouble(scanner.nextLine().trim());
                 validInput = true;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid! Please enter a valid number.");
+                System.out.println(red+"Invalid! Please enter a valid number.");
             }
         }
 
@@ -61,20 +68,20 @@ public class SubjectController {
         validInput = false;
         while (!validInput) {
             try {
-                System.out.print("Course ID    : ");
+                System.out.print(yellow+"Course ID    : ");
                 courseId = Integer.parseInt(scanner.nextLine().trim());
                 validInput = true;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid! Please enter a valid number.");
+                System.out.println(red+"Invalid! Please enter a valid number.");
             }
         }
 
         SubjectResponseDto subject = new SubjectResponseDto(0, name, desc, hour, courseId);
         boolean success = subjectService.createSubject(subject);
         if (success) {
-            System.out.println("[CONTROLLER] Subject created successfully! sub_id = " + subject.getSub_id());
+            System.out.println(green+"[CONTROLLER] Subject created successfully! sub_id = " + subject.getSub_id());
         } else {
-            System.out.println("[CONTROLLER] Failed to create subject.");
+            System.out.println(red+"[CONTROLLER] Failed to create subject.");
         }
     }
 
@@ -85,7 +92,7 @@ public class SubjectController {
     public void displaySubjectById() {
         boolean validInput;
         while (true) {
-            System.out.println("""
+            System.out.println(cyan+"""
                 Do you want to Display One Subject:
                 1. Display By Subject Id
                 2. Display By Course Id
@@ -96,11 +103,11 @@ public class SubjectController {
             validInput = false;
             while (!validInput) {
                 try {
-                    System.out.print("Enter option: ");
+                    System.out.print(yellow+"Enter option: ");
                     option = Integer.parseInt(scanner.nextLine().trim());
                     validInput = true;
                 } catch (NumberFormatException e) {
-                    System.out.println("Invalid! Please enter a valid number.");
+                    System.out.println(red+"Invalid! Please enter a valid number.");
                 }
             }
 
@@ -108,7 +115,7 @@ public class SubjectController {
                 case 1 -> displaySubjectBySubjectId();
                 case 2 -> displaySubjectsByCourse();
                 case 0 -> { return; }
-                default -> System.out.println("Please enter option (0-2)");
+                default -> System.out.println(yellow+"Please enter option (0-2)");
             }
         }
     }
@@ -118,11 +125,11 @@ public class SubjectController {
         int id = 0;
         while (!validInput) {
             try {
-                System.out.print("Enter sub_id : ");
+                System.out.print(yellow+"Enter sub_id : ");
                 id = Integer.parseInt(scanner.nextLine().trim());
                 validInput = true;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid! Please enter a valid number.");
+                System.out.println(red+"Invalid! Please enter a valid number.");
             }
         }
         subjectService.getSubjectById(id);
@@ -133,18 +140,18 @@ public class SubjectController {
         int courseId = 0;
         while (!validInput) {
             try {
-                System.out.print("Enter course_id : ");
+                System.out.print(yellow+"Enter course_id : ");
                 courseId = Integer.parseInt(scanner.nextLine().trim());
                 validInput = true;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid! Please enter a valid number.");
+                System.out.println(red+"Invalid! Please enter a valid number.");
             }
         }
         subjectService.getSubjectsByCourseId(courseId);
     }
 
     public void updateSubject() {
-        System.out.println("\n--- UPDATE SUBJECT ---");
+        System.out.println(cyan+"\n--- UPDATE SUBJECT ---");
         boolean validInput;
 
         // ── Sub ID ───────────────────────────────────────────────
@@ -152,33 +159,33 @@ public class SubjectController {
         validInput = false;
         while (!validInput) {
             try {
-                System.out.print("Enter sub_id to update : ");
+                System.out.print(yellow+"Enter sub_id to update : ");
                 id = Integer.parseInt(scanner.nextLine().trim());
                 validInput = true;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid! Please enter a valid number.");
+                System.out.println(red+"Invalid! Please enter a valid number.");
             }
         }
 
-        System.out.println("Current data:");
+        System.out.println(yellow+"Current data:");
         subjectService.getSubjectById(id);
-        System.out.println("(Press Enter to keep current value)\n");
+        System.out.println(red+"(Press Enter to keep current value)\n");
 
         // ── Subject Name ─────────────────────────────────────────
         String name = "";
         validInput = false;
         while (!validInput) {
-            System.out.print("New Subject Name : ");
+            System.out.print(yellow+"New Subject Name : ");
             name = scanner.nextLine().trim();
             if (name.isEmpty() || name.matches("^[a-zA-Z\\s]+$")) {
                 validInput = true;
             } else {
-                System.out.println("Invalid! Name must be letters only.");
+                System.out.println(red+"Invalid! Name must be letters only.");
             }
         }
 
         // ── Description ──────────────────────────────────────────
-        System.out.print("New Description  : ");
+        System.out.print(yellow+"New Description  : ");
         String desc = scanner.nextLine().trim();
 
         // ── Hours ────────────────────────────────────────────────
@@ -186,12 +193,12 @@ public class SubjectController {
         validInput = false;
         while (!validInput) {
             try {
-                System.out.print("New Hours        : ");
+                System.out.print(yellow+"New Hours        : ");
                 String hourInput = scanner.nextLine().trim();
                 hour = hourInput.isEmpty() ? 0 : Double.parseDouble(hourInput);
                 validInput = true;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid! Please enter a valid number.");
+                System.out.println(red+"Invalid! Please enter a valid number.");
             }
         }
 
@@ -200,12 +207,12 @@ public class SubjectController {
         validInput = false;
         while (!validInput) {
             try {
-                System.out.print("New Course ID    : ");
+                System.out.print(yellow+"New Course ID    : ");
                 String courseInput = scanner.nextLine().trim();
                 courseId = courseInput.isEmpty() ? 0 : Integer.parseInt(courseInput);
                 validInput = true;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid! Please enter a valid number.");
+                System.out.println(red+"Invalid! Please enter a valid number.");
             }
         }
 
@@ -219,14 +226,14 @@ public class SubjectController {
 
         boolean success = subjectService.updateSubject(updated);
         if (success) {
-            System.out.println("[CONTROLLER] Subject updated successfully.");
+            System.out.println(green+"[CONTROLLER] Subject updated successfully.");
         } else {
-            System.out.println("[CONTROLLER] Failed to update subject.");
+            System.out.println(red+"[CONTROLLER] Failed to update subject.");
         }
     }
 
     public void deleteSubject() {
-        System.out.println("\n--- DELETE SUBJECT ---");
+        System.out.println(cyan+"\n--- DELETE SUBJECT ---");
         boolean validInput;
 
         // ── Sub ID ───────────────────────────────────────────────
@@ -234,36 +241,36 @@ public class SubjectController {
         validInput = false;
         while (!validInput) {
             try {
-                System.out.print("Enter sub_id to delete : ");
+                System.out.print(yellow+"Enter sub_id to delete : ");
                 id = Integer.parseInt(scanner.nextLine().trim());
                 validInput = true;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid! Please enter a valid number.");
+                System.out.println(red+"Invalid! Please enter a valid number.");
             }
         }
 
-        System.out.println("Subject to delete:");
+        System.out.println(yellow+"Subject to delete:");
         subjectService.getSubjectById(id);
 
         // ── Confirm ──────────────────────────────────────────────
         validInput = false;
         while (!validInput) {
-            System.out.print("Are you sure? (yes/no) : ");
+            System.out.print(yellow+"Are you sure? (y/n) : ");
             String confirm = scanner.nextLine().trim().toLowerCase();
-            if (confirm.equals("yes") || confirm.equals("no")) {
+            if (confirm.equals("y") || confirm.equals("n")) {
                 validInput = true;
-                if (confirm.equals("yes")) {
+                if (confirm.equals("y")) {
                     boolean success = subjectService.deleteSubject(id);
                     if (success) {
-                        System.out.println("[CONTROLLER] Subject deleted successfully.");
+                        System.out.println(green+"[CONTROLLER] Subject deleted successfully.");
                     } else {
-                        System.out.println("[CONTROLLER] Failed to delete subject.");
+                        System.out.println(red+"[CONTROLLER] Failed to delete subject.");
                     }
                 } else {
-                    System.out.println("[CONTROLLER] Delete cancelled.");
+                    System.out.println(red+"[CONTROLLER] Delete cancelled.");
                 }
             } else {
-                System.out.println("Invalid! Please enter 'yes' or 'no'.");
+                System.out.println(yellow+"Invalid! Please enter 'y' or 'n'.");
             }
         }
     }
@@ -272,7 +279,7 @@ public class SubjectController {
             try {
                 return Integer.parseInt(scanner.nextLine().trim());
             } catch (NumberFormatException e) {
-                System.out.print("[ERROR] Please enter a valid integer: ");
+                System.out.print(red+"[ERROR] Please enter a valid integer: ");
             }
         }
     }
@@ -282,7 +289,7 @@ public class SubjectController {
             try {
                 return Double.parseDouble(scanner.nextLine().trim());
             } catch (NumberFormatException e) {
-                System.out.print("[ERROR] Please enter a valid number: ");
+                System.out.print(red+"[ERROR] Please enter a valid number: ");
             }
         }
     }

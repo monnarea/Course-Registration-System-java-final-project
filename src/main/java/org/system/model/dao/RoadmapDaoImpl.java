@@ -13,171 +13,108 @@ import java.util.List;
 
 public class RoadmapDaoImpl implements RoadmapDao {
 
+    // ── shared SELECT fragment ──────────────────────────────────────────────
+    private static final String SELECT_COLS = """
+            SELECT
+                ar.roadmap_id,
+                c.major_id,
+                m.major_name,
+                c.level,
+                c.course_id,
+                c.course_name,
+                c.price,
+                c.discount,
+                c.price_after_discount,
+                c.capacity,
+                s.sub_id,
+                s.sub_name,
+                s.hour
+            FROM academic_roadmap ar
+            JOIN course  c ON ar.course_id = c.course_id
+            JOIN subject s ON ar.sub_id    = s.sub_id
+            JOIN major   m ON c.major_id   = m.major_id
+            """;
+
+    /** Map one ResultSet row → RoadmapResponseDto */
+    private RoadmapResponseDto map(ResultSet rs) throws SQLException {
+        return new RoadmapResponseDto(
+                rs.getInt("roadmap_id"),
+                rs.getInt("major_id"),
+                rs.getString("major_name"),
+                rs.getInt("level"),
+                rs.getInt("course_id"),
+                rs.getString("course_name"),
+                rs.getInt("sub_id"),
+                rs.getString("sub_name"),
+                rs.getInt("capacity"),
+                rs.getDouble("price"),
+                rs.getDouble("discount"),
+                rs.getDouble("price_after_discount"),
+                rs.getLong("hour")
+        );
+    }
+
+    // ══════════════════════════════════════════════
+    // READ — all
+    // ══════════════════════════════════════════════
     @Override
     public List<RoadmapResponseDto> getAll() throws SQLException {
-
-        String sql = """
-        SELECT 
-            ar.roadmap_id,
-            c.major_id,
-            m.major_id,
-            c.level,
-            m.major_name,
-            c.course_id,
-            c.course_name,
-            c.price,
-            c.capacity,
-            s.sub_id,
-            s.sub_name,
-            s.hour
-        FROM academic_roadmap ar
-        JOIN course c ON ar.course_id = c.course_id
-        JOIN subject s ON ar.sub_id = s.sub_id
-        JOIN major m ON c.major_id = m.major_id
-        """;
-
+        String sql = SELECT_COLS + "ORDER BY m.major_id ASC, c.level ASC, s.sub_id ASC";
         List<RoadmapResponseDto> list = new ArrayList<>();
 
-        try (Connection connection = DatabaseConfig.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+        try (Connection conn  = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs         = ps.executeQuery()) {
 
-            while (rs.next()) {
-
-                RoadmapResponseDto dto = new RoadmapResponseDto(
-                        rs.getInt("roadmap_id"),
-                        rs.getInt("major_id"),
-                        rs.getString("major_name"),
-                        rs.getInt("level"),
-                        rs.getInt("course_id"),
-                        rs.getString("course_name"),
-                        rs.getInt("sub_id"),
-                        rs.getString("sub_name"),
-                        rs.getInt("capacity"),
-                        rs.getDouble("price"),
-                        rs.getLong("hour")
-                );
-
-                list.add(dto);
-            }
+            while (rs.next()) list.add(map(rs));
 
         } catch (SQLException e) {
             throw new SQLException("Error fetching roadmap data", e);
         }
-
         return list;
     }
 
-
+    // ══════════════════════════════════════════════
+    // READ — by major_id
+    // ══════════════════════════════════════════════
     @Override
     public List<RoadmapResponseDto> getByMajorId(int major_id) throws SQLException {
-
-        String sql = """
-        SELECT 
-            ar.roadmap_id,
-            c.major_id,
-            m.major_name,
-            c.level,
-            c.course_id,
-            c.course_name,
-            c.price,
-            c.capacity,
-            s.sub_id,
-            s.sub_name,
-            s.hour
-        FROM academic_roadmap ar
-        JOIN course c ON ar.course_id = c.course_id
-        JOIN subject s ON ar.sub_id = s.sub_id
-        JOIN major m ON c.major_id = m.major_id
-        WHERE c.major_id = ?
-        ORDER BY c.level ASC
-        """;
-
+        String sql = SELECT_COLS + "WHERE c.major_id = ? ORDER BY c.level ASC, s.sub_id ASC";
         List<RoadmapResponseDto> list = new ArrayList<>();
 
-        try (Connection connection = DatabaseConfig.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (Connection conn  = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            pstmt.setInt(1, major_id);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-
-                while (rs.next()) {
-
-                    RoadmapResponseDto dto = new RoadmapResponseDto(
-                            rs.getInt("roadmap_id"),
-                            rs.getInt("major_id"),
-                            rs.getString("major_name"),
-                            rs.getInt("level"),
-                            rs.getInt("course_id"),
-                            rs.getString("course_name"),
-                            rs.getInt("sub_id"),
-                            rs.getString("sub_name"),
-                            rs.getInt("capacity"),
-                            rs.getDouble("price"),
-                            rs.getLong("hour")
-
-                    );
-
-                    list.add(dto);
-                }
+            ps.setInt(1, major_id);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
             }
 
         } catch (SQLException e) {
-            throw new SQLException("Error finding roadmap with ID: " + major_id, e);
+            throw new SQLException("Error finding roadmap for major ID: " + major_id, e);
         }
-
         return list;
     }
 
+    // ══════════════════════════════════════════════
+    // READ — by roadmap_id
+    // ══════════════════════════════════════════════
     @Override
     public List<RoadmapResponseDto> getById(int id) throws SQLException {
-        String sql = """
-        SELECT 
-            ar.roadmap_id,
-            c.major_id,
-            m.major_name,
-            c.level,
-            c.course_id,
-            c.course_name,
-            c.price,
-            c.capacity,
-            s.sub_id,
-            s.sub_name,
-            s.hour
-        FROM academic_roadmap ar
-        JOIN course c ON ar.course_id = c.course_id
-        JOIN subject s ON ar.sub_id = s.sub_id
-        JOIN major m ON c.major_id = m.major_id
-        WHERE ar.roadmap_id = ?
-    """;
+        String sql = SELECT_COLS + "WHERE ar.roadmap_id = ?";
         List<RoadmapResponseDto> list = new ArrayList<>();
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn  = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            pstmt.setInt(1, id);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    RoadmapResponseDto dto = new RoadmapResponseDto(
-                            rs.getInt("roadmap_id"),
-                            rs.getInt("major_id"),
-                            rs.getString("major_name"),
-                            rs.getInt("level"),
-                            rs.getInt("course_id"),
-                            rs.getString("course_name"),
-                            rs.getInt("sub_id"),
-                            rs.getString("sub_name"),
-                            rs.getInt("capacity"),
-                            rs.getDouble("price"),
-                            rs.getLong("hour")
-                    );
-                    list.add(dto);
-                }
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
             }
-        }
 
+        } catch (SQLException e) {
+            throw new SQLException("Error finding roadmap with ID: " + id, e);
+        }
         return list;
     }
 

@@ -8,173 +8,113 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+public class CourseDaoImpl implements CourseDao {
 
-public class CourseDaoImpl implements CourseDao{
+    // ── shared SELECT fragment ──────────────────────────────────────────────
+    private static final String SELECT_COLS = """
+            SELECT
+                c.course_id,
+                c.course_name,
+                c.price,
+                c.discount,
+                c.price_after_discount,
+                c.credit_score,
+                c.capacity,
+                c.start_date,
+                c.end_date,
+                c.instructor_id,
+                c.room,
+                c.created_at,
+                c.major_id,
+                c.level,
+                m.major_name
+            FROM course c
+            JOIN major m ON c.major_id = m.major_id
+            """;
+
+    /** Map one ResultSet row → CourseResponseDto */
+    private CourseResponseDto map(ResultSet rs) throws SQLException {
+        return new CourseResponseDto(
+                rs.getInt("course_id"),
+                rs.getString("course_name"),
+                rs.getDouble("price"),
+                rs.getDouble("discount"),
+                rs.getDouble("price_after_discount"),
+                rs.getInt("credit_score"),
+                rs.getInt("capacity"),
+                rs.getObject("start_date", LocalDate.class),
+                rs.getObject("end_date",   LocalDate.class),
+                rs.getInt("instructor_id"),
+                rs.getString("room"),
+                rs.getTimestamp("created_at").toLocalDateTime().toLocalDate(),
+                rs.getInt("major_id"),
+                rs.getString("major_name"),
+                rs.getInt("level")
+        );
+    }
+
+    // ══════════════════════════════════════════════
+    // READ — all
+    // ══════════════════════════════════════════════
     @Override
-    public List<CourseResponseDto> getByMajorId(int major_id) throws SQLException {
-
-        String sql = """
-        SELECT 
-            c.course_id,
-            c.course_name,
-            c.price,
-            c.credit_score,
-            c.capacity,
-            c.start_date,
-            c.end_date,
-            c.instructor_id,
-            c.room,
-            c.created_at,
-            c.major_id,
-            c.level,
-            m.major_name
-        FROM course c
-        JOIN major m ON c.major_id = m.major_id
-        WHERE c.major_id = ?
-        ORDER BY c.level ASC
-    """;
-
+    public List<CourseResponseDto> getAll() throws SQLException {
+        String sql = SELECT_COLS + "ORDER BY c.course_id ASC";
         List<CourseResponseDto> list = new ArrayList<>();
 
-        try (Connection connection = DatabaseConfig.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql)){
-            // Set the ID parameter (replaces the ? in the SQL string)
-            pstmt.setInt(1,major_id);
+        try (Connection conn  = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs         = ps.executeQuery()) {
 
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    CourseResponseDto course = new CourseResponseDto(
-                            rs.getInt("course_id"),
-                            rs.getString("course_name"),
-                            rs.getDouble("price"),
-                            rs.getInt("credit_score"),
-                            rs.getInt("capacity"),
-                            rs.getObject("start_date", LocalDate.class),
-                            rs.getObject("end_date", LocalDate.class),
-                            rs.getInt("instructor_id"),
-                            rs.getString("room"),
-                            rs.getTimestamp("created_at").toLocalDateTime().toLocalDate(),
-                            rs.getInt("major_id"),
-                            rs.getString("major_name"),  // added
-                            rs.getInt("level")
-                    );
-                    list.add(course);
-                }
-            }
+            while (rs.next()) list.add(map(rs));
+
         } catch (SQLException e) {
-            throw new SQLException("Error finding course with ID: " + major_id, e);
+            throw new SQLException("Error fetching all courses", e);
         }
         return list;
     }
 
+    // ══════════════════════════════════════════════
+    // READ — by course_id
+    // ══════════════════════════════════════════════
     @Override
     public List<CourseResponseDto> getById(int course_id) throws SQLException {
-        String sql = """
-        SELECT 
-            c.course_id,
-            c.course_name,
-            c.price,
-            c.credit_score,
-            c.capacity,
-            c.start_date,
-            c.end_date,
-            c.instructor_id,
-            c.room,
-            c.created_at,
-            c.major_id,
-            c.level,
-            m.major_name
-        FROM course c
-        JOIN major m ON c.major_id = m.major_id
-        WHERE c.course_id = ?
-        ORDER BY c.level ASC
-    """;
-
+        String sql = SELECT_COLS + "WHERE c.course_id = ? ORDER BY c.level ASC";
         List<CourseResponseDto> list = new ArrayList<>();
 
-        try (Connection connection = DatabaseConfig.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql)){
-            // Set the ID parameter (replaces the ? in the SQL string)
-            pstmt.setInt(1,course_id);
+        try (Connection conn  = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    CourseResponseDto course = new CourseResponseDto(
-                            rs.getInt("course_id"),
-                            rs.getString("course_name"),
-                            rs.getDouble("price"),
-                            rs.getInt("credit_score"),
-                            rs.getInt("capacity"),
-                            rs.getObject("start_date", LocalDate.class),
-                            rs.getObject("end_date", LocalDate.class),
-                            rs.getInt("instructor_id"),
-                            rs.getString("room"),
-                            rs.getTimestamp("created_at").toLocalDateTime().toLocalDate(),
-                            rs.getInt("major_id"),
-                            rs.getString("major_name"),  // added
-                            rs.getInt("level")
-                    );
-                    list.add(course);
-                }
+            ps.setInt(1, course_id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) list.add(map(rs));
             }
+
         } catch (SQLException e) {
             throw new SQLException("Error finding course with ID: " + course_id, e);
         }
         return list;
     }
 
+    // ══════════════════════════════════════════════
+    // READ — by major_id
+    // ══════════════════════════════════════════════
     @Override
-    public List<CourseResponseDto> getAll() throws SQLException {
-        String sql = """
-        SELECT 
-            c.course_id,
-            c.course_name,
-            c.price,
-            c.credit_score,
-            c.capacity,
-            c.start_date,
-            c.end_date,
-            c.instructor_id,
-            c.room,
-            c.created_at,
-            c.major_id,
-            c.level,
-            m.major_name
-        FROM course c
-        JOIN major m ON c.major_id = m.major_id
-        ORDER BY c.course_id ASC
-    """;
+    public List<CourseResponseDto> getByMajorId(int major_id) throws SQLException {
+        String sql = SELECT_COLS + "WHERE c.major_id = ? ORDER BY c.level ASC";
         List<CourseResponseDto> list = new ArrayList<>();
 
-        try (Connection connection = DatabaseConfig.getConnection();
-             PreparedStatement pstmt = connection.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+        try (Connection conn  = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            // Use 'while' to iterate through every row in the table
-            while (rs.next()) {
-                CourseResponseDto dto = new CourseResponseDto(
-                        rs.getInt("course_id"),
-                        rs.getString("course_name"),
-                        rs.getDouble("price"),
-                        rs.getInt("credit_score"),
-                        rs.getInt("capacity"),
-                        rs.getObject("start_date", LocalDate.class),
-                        rs.getObject("end_date", LocalDate.class),
-                        rs.getInt("instructor_id"),
-                        rs.getString("room"),
-                        rs.getTimestamp("created_at").toLocalDateTime().toLocalDate(),
-                        rs.getInt("major_id"),
-                        rs.getString("major_name"),  // added
-                        rs.getInt("level")
-                );
-                list.add(dto);
+            ps.setInt(1, major_id);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
             }
-        } catch (SQLException e) {
-            throw new SQLException("Error fetching all courses", e);
-        }
 
+        } catch (SQLException e) {
+            throw new SQLException("Error finding courses for major ID: " + major_id, e);
+        }
         return list;
     }
 
@@ -184,37 +124,33 @@ public class CourseDaoImpl implements CourseDao{
     @Override
     public CourseResponseDto create(CourseRequestDto req) throws SQLException {
         String sql = """
-            INSERT INTO course
-                (course_name, price, credit_score, capacity,
-                 start_date, end_date, instructor_id, room, major_id, level)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """;
+                INSERT INTO course
+                    (course_name, price, discount, credit_score, capacity,
+                     start_date, end_date, instructor_id, room, major_id, level)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """;
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn  = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            pstmt.setString(1, req.getCourseName());
-            pstmt.setDouble(2, req.getPrice());
-            pstmt.setInt(3,    req.getCreditScore());
-            pstmt.setInt(4,    req.getCapacity());
-            pstmt.setObject(5, req.getStartDate());
-            pstmt.setObject(6, req.getEndDate());
-            pstmt.setInt(7,    req.getInstructorId());
-            pstmt.setString(8, req.getRoom());
-            pstmt.setInt(9,    req.getMajorId());
-            pstmt.setInt(10,   req.getLevel());
+            ps.setString(1, req.getCourseName());
+            ps.setDouble(2, req.getPrice());
+            ps.setDouble(3, req.getDiscount());   // 20.0 or 50.0
+            ps.setInt   (4, req.getCreditScore());
+            ps.setInt   (5, req.getCapacity());
+            ps.setObject(6, req.getStartDate());
+            ps.setObject(7, req.getEndDate());
+            ps.setInt   (8, req.getInstructorId());
+            ps.setString(9, req.getRoom());
+            ps.setInt   (10, req.getMajorId());
+            ps.setInt   (11, req.getLevel());
 
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Creating course failed, no rows affected.");
-            }
+            int affected = ps.executeUpdate();
+            if (affected == 0) throw new SQLException("Creating course failed, no rows affected.");
 
-            // Retrieve the auto-generated course_id
-            try (ResultSet keys = pstmt.getGeneratedKeys()) {
+            try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
-                    int newId = keys.getInt(1);
-                    // Fetch the full record (including joined major_name) and return it
-                    List<CourseResponseDto> result = getById(newId);
+                    List<CourseResponseDto> result = getById(keys.getInt(1));
                     if (!result.isEmpty()) return result.get(0);
                 }
             }
@@ -231,41 +167,41 @@ public class CourseDaoImpl implements CourseDao{
     @Override
     public CourseResponseDto update(int course_id, CourseRequestDto req) throws SQLException {
         String sql = """
-            UPDATE course SET
-                course_name   = ?,
-                price         = ?,
-                credit_score  = ?,
-                capacity      = ?,
-                start_date    = ?,
-                end_date      = ?,
-                instructor_id = ?,
-                room          = ?,
-                major_id      = ?,
-                level         = ?
-            WHERE course_id = ?
-        """;
+                UPDATE course SET
+                    course_name   = ?,
+                    price         = ?,
+                    discount      = ?,
+                    credit_score  = ?,
+                    capacity      = ?,
+                    start_date    = ?,
+                    end_date      = ?,
+                    instructor_id = ?,
+                    room          = ?,
+                    major_id      = ?,
+                    level         = ?
+                WHERE course_id = ?
+                """;
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn  = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, req.getCourseName());
-            pstmt.setDouble(2, req.getPrice());
-            pstmt.setInt(3,    req.getCreditScore());
-            pstmt.setInt(4,    req.getCapacity());
-            pstmt.setObject(5, req.getStartDate());
-            pstmt.setObject(6, req.getEndDate());
-            pstmt.setInt(7,    req.getInstructorId());
-            pstmt.setString(8, req.getRoom());
-            pstmt.setInt(9,    req.getMajorId());
-            pstmt.setInt(10,   req.getLevel());
-            pstmt.setInt(11,   course_id);
+            ps.setString(1,  req.getCourseName());
+            ps.setDouble(2,  req.getPrice());
+            ps.setDouble(3,  req.getDiscount());
+            ps.setInt   (4,  req.getCreditScore());
+            ps.setInt   (5,  req.getCapacity());
+            ps.setObject(6,  req.getStartDate());
+            ps.setObject(7,  req.getEndDate());
+            ps.setInt   (8,  req.getInstructorId());
+            ps.setString(9,  req.getRoom());
+            ps.setInt   (10, req.getMajorId());
+            ps.setInt   (11, req.getLevel());
+            ps.setInt   (12, course_id);
 
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows == 0) {
+            int affected = ps.executeUpdate();
+            if (affected == 0)
                 throw new SQLException("Update failed — no course found with ID: " + course_id);
-            }
 
-            // Return the updated record
             List<CourseResponseDto> result = getById(course_id);
             if (!result.isEmpty()) return result.get(0);
             throw new SQLException("Could not retrieve updated course with ID: " + course_id);
@@ -282,12 +218,11 @@ public class CourseDaoImpl implements CourseDao{
     public boolean delete(int course_id) throws SQLException {
         String sql = "DELETE FROM course WHERE course_id = ?";
 
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn  = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            pstmt.setInt(1, course_id);
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0; // true = deleted, false = ID not found
+            ps.setInt(1, course_id);
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
             throw new SQLException("Error deleting course with ID: " + course_id, e);

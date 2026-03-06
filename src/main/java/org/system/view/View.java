@@ -30,99 +30,112 @@ public class View {
 
 
 
+// ── paste this into your View.java, replacing the two existing print methods ──
+
     public static void printCourseTable(List<CourseResponseDto> courses) {
 
         if (courses.isEmpty()) {
-            System.out.println(red+"No courses found.");
+            System.out.println(red + "No courses found.");
             return;
         }
 
-        // Create table with 11 columns (like your header)
         System.out.println(reset);
-        Table table = new Table(13, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+        // 15 columns: +2 for discount & price_after_discount
+        Table table = new Table(15, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
-        table.addCell(green+"Course ID");
-        table.addCell(blue+"Course Name");
-        table.addCell(yellow+"Price");
-        table.addCell(purple+"Credit");
-        table.addCell(red+"Cap");
-        table.addCell(cyan+"Start");
-        table.addCell(brightGreen+"End");
-        table.addCell(brightBlue+"Instructor Id");
-        table.addCell(brightYellow+"Room");
-        table.addCell(brightPurple+"Created");
-        table.addCell(brightCyan+"Major Id");
-        table.addCell(green+"Major Name");
-        table.addCell(blue+"Level");
+        // ── headers ──
+        table.addCell(green        + "ID");
+        table.addCell(blue         + "Course Name");
+        table.addCell(yellow       + "Price ($)");
+        table.addCell(brightYellow + "Discount (%)");
+        table.addCell(brightGreen  + "After Discount ($)");
+        table.addCell(purple       + "Credit");
+        table.addCell(red          + "Cap");
+        table.addCell(cyan         + "Start");
+        table.addCell(brightGreen  + "End");
+        table.addCell(brightBlue   + "Instructor ID");
+        table.addCell(brightYellow + "Room");
+        table.addCell(brightPurple + "Created");
+        table.addCell(brightCyan   + "Major ID");
+        table.addCell(green        + "Major Name");
+        table.addCell(blue         + "Level");
 
+        // ── rows ──
         for (CourseResponseDto c : courses) {
-            table.addCell(green+String.valueOf(c.getCourse_id()));
-            table.addCell(blue+c.getCourse_name());
-            table.addCell(yellow+String.valueOf(c.getPrice()));
-            table.addCell(purple+String.valueOf(c.getCredit_score()));
-            table.addCell(red+String.valueOf(c.getCapacity()));
-            table.addCell(cyan+c.getStart_date() != null ? cyan+c.getStart_date().toString() : "");
-            table.addCell(brightGreen+c.getEnd_date() != null ? brightGreen+c.getEnd_date().toString() : "");
-            table.addCell(brightBlue+String.valueOf(c.getInstructor_id()));
-            table.addCell(brightYellow+c.getRoom() != null ? c.getRoom() : "");
-            table.addCell(brightPurple+c.getCreated_at() != null ? c.getCreated_at().toString() : "");
-            table.addCell(brightCyan+String.valueOf(c.getMajor_id()));
-            table.addCell(green+String.valueOf(c.getMajor_name()));
-            table.addCell(blue+String.valueOf(c.getLevel()));
+            table.addCell(green        + c.getCourse_id());
+            table.addCell(blue         + c.getCourse_name());
+            table.addCell(yellow       + String.format("%.2f", c.getPrice()));
+            table.addCell(brightYellow + String.format("%.0f%%", c.getDiscount()));
+            table.addCell(brightGreen  + String.format("%.2f", c.getPrice_after_discount()));
+            table.addCell(purple       + c.getCredit_score());
+            table.addCell(red          + c.getCapacity());
+            table.addCell(cyan         + (c.getStart_date() != null ? c.getStart_date().toString() : ""));
+            table.addCell(brightGreen  + (c.getEnd_date()   != null ? c.getEnd_date().toString()   : ""));
+            table.addCell(brightBlue   + c.getInstructor_id());
+            table.addCell(brightYellow + (c.getRoom()       != null ? c.getRoom()                  : ""));
+            table.addCell(brightPurple + (c.getCreated_at() != null ? c.getCreated_at().toString() : ""));
+            table.addCell(brightCyan   + c.getMajor_id());
+            table.addCell(green        + c.getMajor_name());
+            table.addCell(blue         + c.getLevel());
         }
-
-        // Print table
         System.out.println(table.render());
     }
 
     public static void printSingleCourseTable(List<CourseResponseDto> courses) {
 
         if (courses.isEmpty()) {
-            System.out.println("No courses found.");
+            System.out.println(red + "No courses found.");
             return;
         }
 
-        // 11 columns
         System.out.println(reset);
-        Table table = new Table(11, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+        // 13 columns
+        Table table = new Table(13, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
-        // First row: Major ID (1 col) + Major Name (10 cols)
+        // ── merged header row: Major ID (1 col) + Major Name (12 cols) ──
         if (!courses.isEmpty()) {
             table.addCell("Major ID: " + courses.get(0).getMajor_id(),
                     new CellStyle(CellStyle.HorizontalAlign.center), 1);
             table.addCell(courses.get(0).getMajor_name(),
-                    new CellStyle(CellStyle.HorizontalAlign.center), 10);
+                    new CellStyle(CellStyle.HorizontalAlign.center), 12);
         }
 
-        // Headers
-        table.addCell(purple+"Course ID");
-        table.addCell(green+"Course Name");
-        table.addCell(blue+"Price");
-        table.addCell(red+"Credit");
-        table.addCell(cyan+"Capacity");
-        table.addCell(purple+"Start");
-        table.addCell(green+"End");
-        table.addCell(blue+"Instructor Id");
-        table.addCell(red+"Room");
-        table.addCell(cyan+"Created");
-        table.addCell(purple+"Level Course In Major");
+        // ── column headers ──
+        table.addCell(purple       + "Course ID");
+        table.addCell(green        + "Course Name");
+        table.addCell(blue         + "Price ($)");
+        table.addCell(brightYellow + "Discount (%)");
+        table.addCell(brightGreen  + "After Discount ($)");
+        table.addCell(red          + "Credit");
+        table.addCell(cyan         + "Capacity");
+        table.addCell(purple       + "Start");
+        table.addCell(green        + "End");
+        table.addCell(blue         + "Instructor ID");
+        table.addCell(red          + "Room");
+        table.addCell(cyan         + "Created");
+        table.addCell(purple       + "Level");
 
+        // ── rows ──
         for (CourseResponseDto c : courses) {
             table.addCell(String.valueOf(c.getCourse_id()));
             table.addCell(c.getCourse_name());
-            table.addCell(String.valueOf(c.getPrice()));
+            table.addCell(String.format("%.2f", c.getPrice()));
+            table.addCell(String.format("%.0f%%", c.getDiscount()));
+            table.addCell(String.format("%.2f", c.getPrice_after_discount()));
             table.addCell(String.valueOf(c.getCredit_score()));
             table.addCell(String.valueOf(c.getCapacity()));
             table.addCell(c.getStart_date() != null ? c.getStart_date().toString() : "");
-            table.addCell(c.getEnd_date() != null ? c.getEnd_date().toString() : "");
+            table.addCell(c.getEnd_date()   != null ? c.getEnd_date().toString()   : "");
             table.addCell(String.valueOf(c.getInstructor_id()));
-            table.addCell(c.getRoom() != null ? c.getRoom() : "");
+            table.addCell(c.getRoom()       != null ? c.getRoom()                  : "");
             table.addCell(c.getCreated_at() != null ? c.getCreated_at().toString() : "");
             table.addCell(String.valueOf(c.getLevel()));
         }
 
         System.out.println(table.render());
     }
+
+// ── paste this into your View.java, replacing the two existing roadmap print methods ──
 
     public static void printRoadmapTable(List<RoadmapResponseDto> roadmapList) {
         if (roadmapList == null || roadmapList.isEmpty()) {
@@ -131,88 +144,98 @@ public class View {
         }
 
         System.out.println(reset);
-        Table table = new Table(9, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+        // 11 columns: +2 for discount & price_after_discount
+        Table table = new Table(11, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
-        // Title spanning all columns
-        table.addCell(cyan+"Road map", new CellStyle(CellStyle.HorizontalAlign.center), 9);
+        // ── title row ──
+        table.addCell(cyan + "Road Map", new CellStyle(CellStyle.HorizontalAlign.center), 11);
 
-        // Headers
-        table.addCell(yellow+"Roadmap Id",        new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell(green+"Major Id",        new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell(red+"Major",        new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell(blue+"Course ID",    new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell(purple+"Course Name",  new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell(brightYellow+"Subject ID",   new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell(brightGreen+"Subject Name", new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell(brightRed+"Price",        new CellStyle(CellStyle.HorizontalAlign.center));
-        table.addCell(brightBlue+"Hour",         new CellStyle(CellStyle.HorizontalAlign.center));
+        // ── headers ──
+        table.addCell(yellow       + "Roadmap ID",         new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell(green        + "Major ID",           new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell(red          + "Major",              new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell(blue         + "Course ID",          new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell(purple       + "Course Name",        new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell(brightYellow + "Subject ID",         new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell(brightGreen  + "Subject Name",       new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell(brightRed    + "Price ($)",          new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell(brightYellow + "Discount (%)",       new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell(brightGreen  + "After Discount ($)", new CellStyle(CellStyle.HorizontalAlign.center));
+        table.addCell(brightBlue   + "Hour",               new CellStyle(CellStyle.HorizontalAlign.center));
 
-        String lastMajor  = null;
-        String lastCourse = null;
+        // ── rows ──
+        String  lastMajor   = null;
+        String  lastCourse  = null;
         Integer lastMajorId = null;
 
-        for (RoadmapResponseDto roadmap : roadmapList) {
+        for (RoadmapResponseDto r : roadmapList) {
 
-            boolean sameMajor  = roadmap.getMajor_name().equals(lastMajor);
-            boolean sameCourse = sameMajor && String.valueOf(roadmap.getCourse_id()).equals(lastCourse);
-            boolean sameMajorId = lastMajorId != null && roadmap.getMajor_id().equals(lastMajorId);
-            table.addCell(String.valueOf(roadmap.getRoadmap_id()),   new CellStyle(CellStyle.HorizontalAlign.center));
-//            table.addCell(String.valueOf(roadmap.getMajor_id()),   new CellStyle(CellStyle.HorizontalAlign.center));
-            // Major: blank if same as previous row
-            table.addCell(
-                    sameMajorId ? "" : String.valueOf(roadmap.getMajor_id()),
-                    new CellStyle(CellStyle.HorizontalAlign.center)
-            );
-            table.addCell(
-                    sameMajor ? "" : roadmap.getMajor_name(),
-                    new CellStyle(CellStyle.HorizontalAlign.left)
-            );
+            boolean sameMajorId = lastMajorId != null && r.getMajor_id().equals(lastMajorId);
+            boolean sameMajor   = r.getMajor_name().equals(lastMajor);
+            boolean sameCourse  = sameMajor && String.valueOf(r.getCourse_id()).equals(lastCourse);
 
-            // Course ID: blank if same course
-            table.addCell(
-                    sameCourse ? "" : String.valueOf(roadmap.getCourse_id()),
-                    new CellStyle(CellStyle.HorizontalAlign.center)
-            );
+            table.addCell(String.valueOf(r.getRoadmap_id()),
+                    new CellStyle(CellStyle.HorizontalAlign.center));
 
-            // Course Name: blank if same course
-            table.addCell(
-                    sameCourse ? "" : roadmap.getCourse_name(),
-                    new CellStyle(CellStyle.HorizontalAlign.left)
-            );
+            table.addCell(sameMajorId ? "" : String.valueOf(r.getMajor_id()),
+                    new CellStyle(CellStyle.HorizontalAlign.center));
 
-            // Subject columns: always display
-            table.addCell(String.valueOf(roadmap.getSub_id()),   new CellStyle(CellStyle.HorizontalAlign.center));
-            table.addCell(roadmap.getSub_name(),                 new CellStyle(CellStyle.HorizontalAlign.left));
-            table.addCell(String.valueOf(roadmap.getPrice()),    new CellStyle(CellStyle.HorizontalAlign.center));
-            table.addCell(String.valueOf(roadmap.getHour()),     new CellStyle(CellStyle.HorizontalAlign.center));
+            table.addCell(sameMajor ? "" : r.getMajor_name(),
+                    new CellStyle(CellStyle.HorizontalAlign.left));
 
-            // Update trackers
-            lastMajor  = roadmap.getMajor_name();
-            lastCourse = String.valueOf(roadmap.getCourse_id());
-            lastMajorId = roadmap.getMajor_id();
+            table.addCell(sameCourse ? "" : String.valueOf(r.getCourse_id()),
+                    new CellStyle(CellStyle.HorizontalAlign.center));
+
+            table.addCell(sameCourse ? "" : r.getCourse_name(),
+                    new CellStyle(CellStyle.HorizontalAlign.left));
+
+            // subject columns — always show
+            table.addCell(String.valueOf(r.getSub_id()),
+                    new CellStyle(CellStyle.HorizontalAlign.center));
+            table.addCell(r.getSub_name(),
+                    new CellStyle(CellStyle.HorizontalAlign.left));
+
+            // price / discount — show only on first row of each course group
+            table.addCell(sameCourse ? "" : String.format("%.2f", r.getPrice()),
+                    new CellStyle(CellStyle.HorizontalAlign.center));
+            table.addCell(sameCourse ? "" : String.format("%.0f%%", r.getDiscount()),
+                    new CellStyle(CellStyle.HorizontalAlign.center));
+            table.addCell(sameCourse ? "" : String.format("%.2f", r.getPrice_after_discount()),
+                    new CellStyle(CellStyle.HorizontalAlign.center));
+
+            table.addCell(String.valueOf(r.getHour()),
+                    new CellStyle(CellStyle.HorizontalAlign.center));
+
+            // update trackers
+            lastMajorId = r.getMajor_id();
+            lastMajor   = r.getMajor_name();
+            lastCourse  = String.valueOf(r.getCourse_id());
         }
 
         System.out.println(table.render());
     }
 
 
+    // ── paste this into your View.java, replacing printSingleRoadmapTable ──
+
     public static void printSingleRoadmapTable(List<RoadmapResponseDto> roadmapList) {
         if (roadmapList == null || roadmapList.isEmpty()) {
-            System.out.println(reset+"No roadmap data to display.");
+            System.out.println(reset + "No roadmap data to display.");
             return;
         }
 
         final String RESET = "\u001B[0m";
 
-        int totalWidth = 60;
-        String majorName = roadmapList.get(0).getMajor_name();
+        int    totalWidth = 60;
+        String majorName  = roadmapList.get(0).getMajor_name();
 
+        // Group subjects by course_id (preserving insertion order)
         Map<String, List<RoadmapResponseDto>> grouped = new LinkedHashMap<>();
         for (RoadmapResponseDto r : roadmapList) {
             grouped.computeIfAbsent(String.valueOf(r.getCourse_id()), k -> new ArrayList<>()).add(r);
         }
 
-        // Major Name Header — cyan
+        // ── Major Name header ──
         printTopBorder(totalWidth, cyan);
         printRow(cyan + majorName + RESET, totalWidth, true, cyan);
         printBottomBorder(totalWidth, cyan);
@@ -220,7 +243,6 @@ public class View {
 
         for (List<RoadmapResponseDto> group : grouped.values()) {
             RoadmapResponseDto first = group.get(0);
-            RoadmapResponseDto last  = group.get(group.size() - 1);
 
             int col1  = totalWidth / 3;
             int col2  = totalWidth - col1 - 1;
@@ -229,7 +251,7 @@ public class View {
 
             printTopBorder(totalWidth, purple);
 
-            // Level | Course Name — yellow text
+            // Level | Course Name
             printTwoColRow(
                     yellow + "Level: " + first.getLevel() + RESET,
                     yellow + first.getCourse_name() + RESET,
@@ -237,25 +259,35 @@ public class View {
             );
             printMidBorderTwoCol(totalWidth, col1, purple);
 
-            // Subjects label — green
+            // Subjects label
             printRow(green + "Subjects:" + RESET, totalWidth, false, purple);
 
             // Each subject — alternating white / blue
             String[] subjectColors = {white, blue};
-            int colorIndex = 0;
+            int colorIdx = 0;
             for (RoadmapResponseDto r : group) {
-                String color = subjectColors[colorIndex % 2];
+                String color = subjectColors[colorIdx % 2];
                 printRow(color + "- " + r.getSub_name() + RESET, totalWidth, false, purple);
-                colorIndex++;
+                colorIdx++;
             }
 
             printMidBorderThreeCol(totalWidth, w, w, purple);
 
-            // Capacity | Hour | Price — red, green, yellow
+            // Row 1: Capacity | Hour | Original Price
             printThreeColRow(
-                    red    + "Capacity: " + last.getCapacity() + RESET,
-                    green  + "Hour: "     + last.getHour()     + RESET,
-                    yellow + "Price: $"   + last.getPrice()    + RESET,
+                    red    + "Capacity: " + first.getCapacity() + RESET,
+                    green  + "Hour: "     + first.getHour()     + RESET,
+                    yellow + "Price: $"   + String.format("%.2f", first.getPrice()) + RESET,
+                    w, w, wLast, purple
+            );
+
+            printMidBorderThreeCol(totalWidth, w, w, purple);
+
+            // Row 2: (empty) | (empty) | Discount % + Price after discount
+            printThreeColRow(
+                    "",
+                    brightYellow + "Discount: " + String.format("%.0f%%", first.getDiscount()) + RESET,
+                    brightGreen  + "Final: $"   + String.format("%.2f", first.getPrice_after_discount()) + RESET,
                     w, w, wLast, purple
             );
 
