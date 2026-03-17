@@ -125,7 +125,7 @@ public class InstructorController {
 
         boolean success = instructorService.createInstructor(instructor);
         System.out.println(success
-                ? green+"[CONTROLLER] Instructor created successfully! ID = " + instructor.getInstructorId()
+                ? green+"[CONTROLLER] Instructor created successfully! ID = " + instructor.getInstructor_id()
                 : green +"[CONTROLLER] Failed to create instructor.");
     }
 

@@ -424,12 +424,12 @@ public class View {
 
         // Rows
         for (InstructorResponseDto i : instructors) {
-            table.addCell(String.valueOf(i.getInstructorId()));
-            table.addCell(i.getInstructorName());
+            table.addCell(String.valueOf(i.getInstructor_id()));
+            table.addCell(i.getInstructor_name());
             table.addCell(i.getGender() != null ? i.getGender() : "-");
             table.addCell(String.valueOf(i.getAge()));
             table.addCell(i.getEmail());
-            table.addCell(i.getPhoneNumber() != null ? i.getPhoneNumber() : "-");
+            table.addCell(i.getPhone_number() != null ? i.getPhone_number() : "-");
             table.addCell(i.getAddress() != null ? i.getAddress() : "-");
             table.addCell(i.getQualification() != null ? i.getQualification() : "-");
         }

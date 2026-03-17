@@ -20,19 +20,19 @@ public class InstructorDaoImpl implements InstructorDao {
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setString(1, instructor.getInstructorName());
+            ps.setString(1, instructor.getInstructor_name());
             ps.setString(2, instructor.getGender());
             ps.setInt(3, instructor.getAge());
             ps.setString(4, instructor.getEmail());
-            ps.setString(5, instructor.getPhoneNumber());
+            ps.setString(5, instructor.getPhone_number());
             ps.setString(6, instructor.getAddress());
             ps.setString(7, instructor.getQualification());
 
             int rows = ps.executeUpdate();
             if (rows > 0) {
                 ResultSet keys = ps.getGeneratedKeys();
-                if (keys.next()) instructor.setInstructorId(keys.getInt(1));
-                System.out.println("[CREATE] Instructor created with ID: " + instructor.getInstructorId());
+                if (keys.next()) instructor.setInstructor_id(keys.getInt(1));
+                System.out.println("[CREATE] Instructor created with ID: " + instructor.getInstructor_id());
                 return true;
             }
         } catch (SQLException e) {
@@ -106,11 +106,11 @@ public class InstructorDaoImpl implements InstructorDao {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
 
-            pstmt.setString(1,instructor.getInstructorName());
+            pstmt.setString(1,instructor.getInstructor_name());
             pstmt.setString(2,instructor.getGender());
             pstmt.setInt(3,instructor.getAge());
             pstmt.setString(4,instructor.getEmail());
-            pstmt.setString(5,instructor.getPhoneNumber());
+            pstmt.setString(5,instructor.getPhone_number());
             pstmt.setString(6,instructor.getAddress());
             pstmt.setString(7,instructor.getQualification());
             pstmt.setInt(8,id);

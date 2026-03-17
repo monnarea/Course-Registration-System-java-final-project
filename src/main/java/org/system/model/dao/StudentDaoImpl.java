@@ -13,16 +13,17 @@ public class StudentDaoImpl implements StudentDao {
     private final Connection connection;
 
     public StudentDaoImpl() {
-        DatabaseConfig ConnectionUtil = null;
-        this.connection = ConnectionUtil.getConnection();
+        // FIX: was "DatabaseConfig ConnectionUtil = null" which causes NullPointerException
+        DatabaseConfig connectionUtil = new DatabaseConfig();
+        this.connection = connectionUtil.getConnection();
     }
 
     // ================= INSERT =================
     @Override
     public void insert(StudentResponseDto student) {
         String sql = """
-                INSERT INTO student
-                (student_name, gender, age, email, phone_number, score, address, semester, year)
+                INSERT INTO public.student
+                (student_name, gender, date_of_birth, email, phone_number, address, semester, year, university)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
@@ -30,13 +31,13 @@ public class StudentDaoImpl implements StudentDao {
 
             ps.setString(1, student.getStudent_name());
             ps.setString(2, student.getGender());
-            ps.setInt(3, student.getAge());
+            ps.setString(3, student.getDate_of_birth());  // FIX: was getAge()
             ps.setString(4, student.getEmail());
-            ps.setInt(5, student.getPhone_number());
-            ps.setInt(6, student.getScore());
-            ps.setString(7, student.getAddress());
-            ps.setString(8, student.getSemester());
-            ps.setInt(9, student.getYear());
+            ps.setInt(5, student.getPhone_number());       // FIX: was getScore()
+            ps.setString(6, student.getAddress());         // FIX: was getScore()
+            ps.setString(7, student.getSemester());        // FIX: was getAddress()
+            ps.setInt(8, student.getYear());               // FIX: was getSemester()
+            ps.setString(9, student.getUniversity());      // FIX: was getYear()
 
             ps.executeUpdate();
 
@@ -60,13 +61,13 @@ public class StudentDaoImpl implements StudentDao {
                         rs.getInt("student_id"),
                         rs.getString("student_name"),
                         rs.getString("gender"),
-                        rs.getInt("age"),
+                        rs.getString("date_of_birth"),
                         rs.getString("email"),
                         rs.getInt("phone_number"),
-                        rs.getInt("score"),
                         rs.getString("address"),
                         rs.getString("semester"),
-                        rs.getInt("year")
+                        rs.getInt("year"),
+                        rs.getString("university")
                 );
 
                 students.add(student);
@@ -83,7 +84,7 @@ public class StudentDaoImpl implements StudentDao {
     @Override
     public StudentResponseDto findById(Integer id) {
 
-        String sql = "SELECT * FROM student WHERE student_id = ?";
+        String sql = "SELECT * FROM student WHERE id = ?";
         StudentResponseDto student = null;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -96,13 +97,13 @@ public class StudentDaoImpl implements StudentDao {
                             rs.getInt("student_id"),
                             rs.getString("student_name"),
                             rs.getString("gender"),
-                            rs.getInt("age"),
+                            rs.getString("date_of_birth"),
                             rs.getString("email"),
                             rs.getInt("phone_number"),
-                            rs.getInt("score"),
                             rs.getString("address"),
                             rs.getString("semester"),
-                            rs.getInt("year")
+                            rs.getInt("year"),
+                            rs.getString("university")
                     );
                 }
             }
@@ -120,22 +121,22 @@ public class StudentDaoImpl implements StudentDao {
 
         String sql = """
                 UPDATE student
-                SET student_name = ?, gender = ?, age = ?, email = ?,
-                    phone_number = ?, score = ?, address = ?, semester = ?, year = ?
-                WHERE student_id = ?
+                SET student_name = ?, gender = ?, date_of_birth = ?, email = ?,
+                    phone_number = ?, address = ?, semester = ?, year = ?, university = ?
+                WHERE id = ?
                 """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setString(1, student.getStudent_name());
             ps.setString(2, student.getGender());
-            ps.setInt(3, student.getAge());
+            ps.setString(3, student.getDate_of_birth());
             ps.setString(4, student.getEmail());
             ps.setInt(5, student.getPhone_number());
-            ps.setInt(6, student.getScore());
-            ps.setString(7, student.getAddress());
-            ps.setString(8, student.getSemester());
-            ps.setInt(9, student.getYear());
+            ps.setString(6, student.getAddress());
+            ps.setString(7, student.getSemester());
+            ps.setInt(8, student.getYear());
+            ps.setString(9, student.getUniversity());
             ps.setInt(10, student.getStudent_id());
 
             ps.executeUpdate();
@@ -149,7 +150,7 @@ public class StudentDaoImpl implements StudentDao {
     @Override
     public void delete(Integer id) {
 
-        String sql = "DELETE FROM student WHERE student_id = ?";
+        String sql = "DELETE FROM student WHERE id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 

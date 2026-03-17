@@ -10,6 +10,8 @@ import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
 
+//import static sun.security.jgss.GSSToken.readInt;
+
 public class AdminMenu {
     private final Scanner scanner = new Scanner(System.in);
     private final CourseController courseController = new CourseController();
@@ -18,6 +20,7 @@ public class AdminMenu {
     private final InstructorController instructorController = new InstructorController();
     private final MajorController majorController = new MajorController();
     private final CourseTimeController courseTimeController = new CourseTimeController();
+    private final EnrollmentController enrollmentController = new EnrollmentController();
     public static final String green = "\u001B[32m";
     public static final String blue = "\u001B[34m";
     public static final String yellow = "\u001B[33m";
@@ -34,12 +37,13 @@ public class AdminMenu {
                     ╠═════════════════════════════════╣
                     ║ 1. Manage Course                ║
                     ║ 2. Manage Course Time           ║
-                    ║ 3. Manage Roadmap               ║
-                    ║ 4. Manage Instructor            ║
-                    ║ 5. Manage Transcript            ║
-                    ║ 6. Manage Student               ║
-                    ║ 7. Manage Subject               ║
-                    ║ 8. Manage Major                 ║
+                    ║ 3. Manage Enrollment            ║
+                    ║ 4. Manage Roadmap               ║
+                    ║ 5. Manage Instructor            ║
+                    ║ 6. Manage Transcript            ║
+                    ║ 7. Manage Student               ║
+                    ║ 8. Manage Subject               ║
+                    ║ 9. Manage Major                 ║
                     ║ 0. Back                         ║
                     ╚═════════════════════════════════╝
                     """);
@@ -51,12 +55,12 @@ public class AdminMenu {
                 switch (option) {
                     case 1 -> courseMenu();
                     case 2 -> courseTimeMenu();
-                    case 3 -> roadmapMenu();
-                    case 4 -> instructorMenu();
-                    case 5 -> transcriptMenu();
-                    case 6 -> studentMenu();
-                    case 7 -> subjectMenu();
-                    case 8 -> majorMenu();
+                    case 4 -> roadmapMenu();
+                    case 5 -> instructorMenu();
+                    case 6 -> transcriptMenu();
+                    case 7 -> studentMenu();
+                    case 8 -> subjectMenu();
+                    case 9 -> majorMenu();
                     case 0 -> {
                         return;
                     }
@@ -327,6 +331,42 @@ public class AdminMenu {
                     ║  5. Delete Major                 ║
                     ║  0. Back                         ║
                     ╚══════════════════════════════════╝""");
+            try {
+                System.out.print(yellow+"Please Enter Option: ");
+                int option = scanner.nextInt();
+                switch (option) {
+                    case 1 -> majorController.displayAllMajor();
+                    case 2 -> majorController.displayMajorById();
+                    case 3 -> majorController.create();
+                    case 4 -> majorController.update();
+                    case 5 -> majorController.delete();
+                    case 0 -> running = false;
+                    default -> System.out.println(red+"Invalid option. Please enter 0–5.");
+                }
+            }catch (InputMismatchException e){
+                System.out.println(red+"Invalid input! Please input number");
+                scanner.nextLine();
+            }
+        }
+
+    }
+    public void enrollmentMenu() {
+        boolean running = true;
+        while (true) {
+            System.out.println("\n╔══════════════════════════════════╗");
+            System.out.println("║       ENROLLMENT SYSTEM          ║");
+            System.out.println("╠══════════════════════════════════╣");
+            System.out.println("║  1. Enroll a Student             ║");
+            System.out.println("║  2. View All Enrollments         ║");
+            System.out.println("║  3. Find Enrollment by ID        ║");
+            System.out.println("║  4. Find Enrollments by Student  ║");
+            System.out.println("║  5. Update Enrollment            ║");
+            System.out.println("║  6. Delete Enrollment            ║");
+            System.out.println("║  7. Get Telegram Bot Link        ║");
+            System.out.println("║  0. Exit                         ║");
+            System.out.println("╚══════════════════════════════════╝");
+            System.out.print("Choose an option: ");
+
             try {
                 System.out.print(yellow+"Please Enter Option: ");
                 int option = scanner.nextInt();

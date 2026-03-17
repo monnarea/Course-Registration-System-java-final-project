@@ -1,76 +1,66 @@
 package org.system.controller;
 
-import org.system.model.dao.StudentDao;
-import org.system.model.dto.response.StudentResponseDto;
+
+import org.system.model.dto.request.StudentRequestDto;
+
+import org.system.service.StudentService;
 
 import java.util.List;
+import java.util.Scanner;
 
 public class StudentController {
 
-    private final StudentDao studentDao;
+     static void main(String[] args) {
 
-    public StudentController(StudentDao studentDao) {
-        this.studentDao = studentDao;
-    }
+        StudentService service = new StudentService();
+        Scanner sc = new Scanner(System.in);
 
-    // Create new student
-    public void createStudent(StudentResponseDto student) {
-        if (student == null) {
-            System.out.println("Student cannot be null.");
-            return;
-        }
-        studentDao.insert(student);
-        System.out.println("Student created successfully.");
-    }
+        while (true) {
+            System.out.println("\n===== STUDENT MANAGEMENT =====");
+            System.out.println("1. Add Student");
+            System.out.println("2. View All Students");
+            System.out.println("3. Find Student by ID");
+            System.out.println("4. Update Student");
+            System.out.println("5. Delete Student");
+            System.out.println("0. Exit");
+            System.out.print("Choose: ");
 
-    // Get all students
-    public List<StudentResponseDto> getAllStudents() {
-        List<StudentResponseDto> students = studentDao.findAll();
-        if (students.isEmpty()) {
-            System.out.println("No students found.");
-        }
-        return students;
-    }
+            int choice = sc.nextInt();
 
-    // Get student by ID
-    public StudentResponseDto getStudentById(Integer id) {
-        if (id == null || id <= 0) {
-            System.out.println("Invalid student ID.");
-            return null;
-        }
-        StudentResponseDto student = studentDao.findById(id);
-        if (student == null) {
-            System.out.println("Student with ID " + id + " not found.");
-        }
-        return student;
-    }
+            switch (choice) {
 
-    // Update student
-    public void updateStudent(Integer id, StudentResponseDto student) {
-        if (id == null || id <= 0) {
-            System.out.println("Invalid student ID.");
-            return;
-        }
-        StudentResponseDto existing = studentDao.findById(id);
-        if (existing == null) {
-            System.out.println("Student with ID " + id + " not found.");
-            return;
-        }
+                case 1:
+                    service.createStudent();
+                    break;
 
-    }
+                case 2:
+                    List<StudentRequestDto> students = service.getAllStudents();
+                    students.forEach(System.out::println);
+                    break;
 
-    // Delete student by ID
-    public void deleteStudent(Integer id) {
-        if (id == null || id <= 0) {
-            System.out.println("Invalid student ID.");
-            return;
+                case 3:
+                    System.out.print("Enter ID: ");
+                    int id = sc.nextInt();
+                    System.out.println(service.getStudentById(id));
+                    break;
+
+                case 4:
+                    System.out.print("Enter ID to update: ");
+                    service.updateStudent(sc.nextInt());
+                    break;
+
+                case 5:
+                    System.out.print("Enter ID to delete: ");
+                    service.deleteStudent(sc.nextInt());
+                    break;
+
+                case 0:
+                    System.out.println("Goodbye 👋");
+                    return;
+
+                default:
+                    System.out.println("Invalid choice!");
+            }
         }
-        StudentResponseDto existing = studentDao.findById(id);
-        if (existing == null) {
-            System.out.println("Student with ID " + id + " not found.");
-            return;
-        }
-        studentDao.delete(id);
-        System.out.println("Student with ID " + id + " deleted successfully.");
     }
 }

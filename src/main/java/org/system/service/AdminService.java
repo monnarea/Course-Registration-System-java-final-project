@@ -42,7 +42,7 @@ public class AdminService {
             }
 
             // Step 4: Return admin info on success
-            System.out.println(green+"Login successful! Welcome, " + adminOpt.get().getFullName());
+            System.out.println(green+"Login successful! Welcome, " + adminOpt.get().getFull_name());
             return adminOpt.get();
 
         } catch (SQLException e) {

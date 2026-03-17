@@ -16,7 +16,7 @@ public class TranscriptDaoImpl implements TranscriptDao {
     }
 
     @Override
-    public void insert(TranscriptResponseDto transcript) {
+    public boolean insert(TranscriptResponseDto transcript) {
         String sql = "INSERT INTO transcript (student_id, generated_at) VALUES (?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -25,10 +25,12 @@ public class TranscriptDaoImpl implements TranscriptDao {
             ps.setDate(2, Date.valueOf(transcript.getGenerated_at()));
 
             ps.executeUpdate();
+            return true;
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     @Override
@@ -57,9 +59,9 @@ public class TranscriptDaoImpl implements TranscriptDao {
     }
 
     @Override
-    public TranscriptResponseDto findById(int id) {
+    public List<TranscriptResponseDto> findById(int id) {
         String sql = "SELECT * FROM transcript WHERE transcript_id = ?";
-        TranscriptResponseDto transcript = null;
+        List<TranscriptResponseDto> list = new ArrayList<>();
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
@@ -68,7 +70,7 @@ public class TranscriptDaoImpl implements TranscriptDao {
             try (ResultSet rs = ps.executeQuery()) {
 
                 if (rs.next()) {
-                    transcript = new TranscriptResponseDto(
+                    TranscriptResponseDto transcript = new TranscriptResponseDto(
                             rs.getInt("transcript_id"),
                             rs.getInt("student_id"),
                             rs.getDate("generated_at").toLocalDate()
@@ -80,11 +82,11 @@ public class TranscriptDaoImpl implements TranscriptDao {
             e.printStackTrace();
         }
 
-        return transcript;
+        return list;
     }
 
     @Override
-    public void update(TranscriptResponseDto transcript) {
+    public boolean update(TranscriptResponseDto transcript) {
         String sql = "UPDATE transcript SET student_id = ?, generated_at = ? WHERE transcript_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -94,23 +96,27 @@ public class TranscriptDaoImpl implements TranscriptDao {
             ps.setInt(3, transcript.getTranscript_id());
 
             ps.executeUpdate();
+            return true;
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     @Override
-    public void delete(int id) {
+    public boolean delete(int id) {
         String sql = "DELETE FROM transcript WHERE transcript_id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setInt(1, id);
-            ps.executeUpdate();
+
+            return true;
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false;
     }
 }

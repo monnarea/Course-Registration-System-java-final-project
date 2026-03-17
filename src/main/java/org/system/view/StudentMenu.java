@@ -1,9 +1,11 @@
 
 package org.system.view;
 
+import org.system.config.TelegramBotConfig;
 import org.system.controller.CourseController;
 import org.system.controller.RoadmapController;
 import org.system.controller.SubjectController;
+import org.system.service.StudentService;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -13,6 +15,7 @@ public class StudentMenu {
     private final RoadmapController roadmapController = new RoadmapController();
     private final CourseController courseController = new CourseController();
     private final SubjectController subjectController = new SubjectController();
+    private final StudentService studentService = new StudentService();
     public static final String green = "\u001B[32m";
     public static final String blue = "\u001B[34m";
     public static final String yellow = "\u001B[33m";
@@ -48,7 +51,8 @@ public class StudentMenu {
                         subjectController.displaySubjectById();
                     }
                     case 3 -> {
-                        System.out.println("Ot tn mean te bach jol merl te");
+                        studentService.createStudent();
+                        TelegramBotConfig.startBot();
                     }
                     case 4 -> roadmapController.chooseIdOrAllRoadmap();
                     case 5 -> System.out.println("Ot tn mean te bach jol merl te");
@@ -58,6 +62,8 @@ public class StudentMenu {
             }catch (InputMismatchException e){
                 System.out.println(red+"Invalid input ! Please input number");
                 scanner.nextLine();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
     }

@@ -9,7 +9,7 @@ public class DatabaseConfig {
             return DriverManager.getConnection(
                     "jdbc:postgresql://localhost:5432/student",
                     "postgres",
-                    "1234");
+                    "128028");
         } catch (SQLException e) {
             System.out.println("Connection failed: " + e.getMessage());
             return null;

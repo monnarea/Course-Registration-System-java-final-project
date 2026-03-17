@@ -35,8 +35,8 @@ public class AdminLoginController {
 
         if (loggedInAdmin != null) {
             System.out.println(purple+"---------------------------------");
-            System.out.println(purple+"Admin ID : " + loggedInAdmin.getAdminId());
-            System.out.println(purple+"Full Name: " + loggedInAdmin.getFullName());
+            System.out.println(purple+"Admin ID : " + loggedInAdmin.getAdmin_id());
+            System.out.println(purple+"Full Name: " + loggedInAdmin.getFull_name());
             System.out.println(purple+"=================================");
         }
 
