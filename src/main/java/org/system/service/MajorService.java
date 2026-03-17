@@ -109,7 +109,7 @@ public class MajorService {
 
 
             MajorRequestDto request = new MajorRequestDto(
-                    MajorName, Description
+                    null,MajorName, Description
             );
 
             MajorResponseDto created = majorDao.create(request);
@@ -153,7 +153,7 @@ public class MajorService {
             String description = descriptionInput.isEmpty() ? current.getDescription() : descriptionInput;
 
             MajorRequestDto request = new MajorRequestDto(
-                    majorName,description
+                    null,majorName,description
             );
 
             MajorResponseDto updated = majorDao.update(majorId,request);

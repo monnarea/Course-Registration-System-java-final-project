@@ -20,4 +20,5 @@ public class InstructorResponseDto {
     private String address;
     private String qualification;
 
+
 }

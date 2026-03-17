@@ -21,16 +21,18 @@ public class StudentRequestDto {
 
     private String gender;
 
-    private Integer age;
+    private String date_of_birth;  // FIX: was "Integer age"
 
     private String email;
 
     private Integer phone_number;
 
-    private Integer score;
+    private String address;        // FIX: removed "Integer score" (not in DB schema)
 
     private String semester;
 
     private Integer year;
+
+    private String university;
 
 }

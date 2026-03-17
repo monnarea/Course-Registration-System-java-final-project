@@ -115,7 +115,7 @@ public class CourseTimeDaoImpl implements CourseTimeDao{
     @Override
     public CourseTimeResponseDto update(int id,CourseTimeResponseDto courseTimeResponseDto) throws SQLException {
         String sql = """
-            UPDATE course SET
+            UPDATE course_time SET
                 time_id = ?,
                 course_id = ? ,
                 day_of_week = ?,

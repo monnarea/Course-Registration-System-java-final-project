@@ -7,13 +7,15 @@ import java.util.List;
 
 public interface TranscriptDao {
 
-    void insert(TranscriptResponseDto transcript);
+    boolean insert(TranscriptResponseDto transcript);
 
     List<TranscriptResponseDto> findAll();
 
-    TranscriptResponseDto findById(int id);
+    List<TranscriptResponseDto> findById(int id);
 
-    void update(TranscriptResponseDto transcript);
+//    TranscriptResponseDto findById(int id);
 
-    void delete(int id);
+    boolean update(TranscriptResponseDto transcript);
+
+    boolean delete(int id);
 }

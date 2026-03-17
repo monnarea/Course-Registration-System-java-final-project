@@ -31,7 +31,7 @@ public class InstructorService {
             System.err.println("[SERVICE - CREATE] Instructor cannot be null.");
             return false;
         }
-        if (instructor.getInstructorName() == null || instructor.getInstructorName().trim().isEmpty()) {
+        if (instructor.getInstructor_name() == null || instructor.getInstructor_name().trim().isEmpty()) {
             System.err.println("[SERVICE - CREATE] Instructor name cannot be empty.");
             return false;
         }
@@ -99,9 +99,9 @@ public class InstructorService {
         String name = "";
         validInput = false;
         while (!validInput) {
-            System.out.print(yellow + "Name          [" + current.getInstructorName() + "]: ");
+            System.out.print(yellow + "Name          [" + current.getInstructor_name() + "]: ");
             String nameInput = scanner.nextLine().trim();
-            name = nameInput.isEmpty() ? current.getInstructorName() : nameInput;
+            name = nameInput.isEmpty() ? current.getInstructor_name() : nameInput;
             if (!name.isBlank() && name.matches("^[a-zA-Z\\s]+$")) {
                 validInput = true;
             } else {
@@ -159,9 +159,9 @@ public class InstructorService {
         String phone = "";
         validInput = false;
         while (!validInput) {
-            System.out.print(yellow + "Phone Number  [" + current.getPhoneNumber() + "]: ");
+            System.out.print(yellow + "Phone Number  [" + current.getPhone_number() + "]: ");
             String phoneInput = scanner.nextLine().trim();
-            phone = phoneInput.isEmpty() ? current.getPhoneNumber() : phoneInput;
+            phone = phoneInput.isEmpty() ? current.getPhone_number() : phoneInput;
             if (!phone.isBlank() && phone.matches("^[0-9+\\-\\s]{7,15}$")) {
                 validInput = true;
             } else {
