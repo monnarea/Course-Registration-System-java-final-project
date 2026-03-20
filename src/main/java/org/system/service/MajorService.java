@@ -14,8 +14,8 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.system.view.View.printCourseTable;
-import static org.system.view.View.printMajorTable;
+import static org.system.view.View.*;
+import org.system.util.Pagination;
 
 public class MajorService {
     private final Scanner scanner = new Scanner(System.in);
@@ -36,7 +36,7 @@ public class MajorService {
             } else {
                 System.out.println(cyan+"Total Major found: " + allMajor.size());
 
-                printMajorTable(allMajor);
+                printMajorTablePaginated(allMajor);
 
             }
         } catch (SQLException e) {

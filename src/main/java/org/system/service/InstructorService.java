@@ -9,7 +9,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.system.view.View.printInstructorTable;
+import static org.system.view.View.*;
+import org.system.util.Pagination;
 
 public class InstructorService {
 
@@ -55,7 +56,7 @@ public class InstructorService {
             System.err.println("[SERVICE - READ ALL] No instructors found.");
             return;
         }
-        printInstructorTable(list);
+        printInstructorTablePaginated(list);
     }
 
     // =========================================================

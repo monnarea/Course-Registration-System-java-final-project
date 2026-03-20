@@ -4,6 +4,7 @@ import org.system.model.dao.TranscriptDao;
 import org.system.model.dao.TranscriptDaoImpl;
 import org.system.model.dto.response.TranscriptResponseDto;
 import org.system.view.View;
+import org.system.util.Pagination;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class TranscriptService {
     public List<TranscriptResponseDto> getAllTranscripts() {
         List<TranscriptResponseDto> list = transcriptDao.findAll();
         if (list != null && !list.isEmpty()) {
-            View.printTranscriptTable(list);
+            View.printTranscriptTablePaginated(list);
         }
         return list;
     }

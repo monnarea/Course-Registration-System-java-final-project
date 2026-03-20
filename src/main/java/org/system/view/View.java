@@ -7,6 +7,7 @@ import org.nocrala.tools.texttablefmt.Table;
 import org.system.model.dao.EnrollmentDao;
 import org.system.model.dto.request.EnrollmentRequestDto;
 import org.system.model.dto.response.*;
+import org.system.util.Pagination;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -31,10 +32,14 @@ public class View {
     public static final String brightWhite = "\u001B[97m";
     public static final String reset = "\u001B[0m";
 
+    // ══════════════════════════════════════════════════════════════════════════
+    // COURSE
+    // ══════════════════════════════════════════════════════════════════════════
 
-
-// ── paste this into your View.java, replacing the two existing print methods ──
-
+    /**
+     * Renders ONE page of courses (called by the paginator).
+     * Unchanged rendering logic — only the list it receives is a sub-list.
+     */
     public static void printCourseTable(List<CourseResponseDto> courses) {
 
         if (courses.isEmpty()) {
@@ -43,7 +48,6 @@ public class View {
         }
 
         System.out.println(reset);
-        // 15 columns: +2 for discount & price_after_discount
         Table table = new Table(15, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
         // ── headers ──
@@ -84,6 +88,15 @@ public class View {
         System.out.println(table.render());
     }
 
+    /**
+     * Paginated wrapper — call this from services that show ALL courses.
+     */
+    public static void printCourseTablePaginated(List<CourseResponseDto> courses) {
+        Pagination.paginate(courses, View::printCourseTable);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+
     public static void printSingleCourseTable(List<CourseResponseDto> courses) {
 
         if (courses.isEmpty()) {
@@ -92,10 +105,8 @@ public class View {
         }
 
         System.out.println(reset);
-        // 13 columns
         Table table = new Table(13, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
-        // ── merged header row: Major ID (1 col) + Major Name (12 cols) ──
         if (!courses.isEmpty()) {
             table.addCell("Major ID: " + courses.get(0).getMajor_id(),
                     new CellStyle(CellStyle.HorizontalAlign.center), 1);
@@ -103,7 +114,6 @@ public class View {
                     new CellStyle(CellStyle.HorizontalAlign.center), 12);
         }
 
-        // ── column headers ──
         table.addCell(purple       + "Course ID");
         table.addCell(green        + "Course Name");
         table.addCell(blue         + "Price ($)");
@@ -118,7 +128,6 @@ public class View {
         table.addCell(cyan         + "Created");
         table.addCell(purple       + "Level");
 
-        // ── rows ──
         for (CourseResponseDto c : courses) {
             table.addCell(String.valueOf(c.getCourse_id()));
             table.addCell(c.getCourse_name());
@@ -138,7 +147,13 @@ public class View {
         System.out.println(table.render());
     }
 
-// ── paste this into your View.java, replacing the two existing roadmap print methods ──
+    public static void printSingleCourseTablePaginated(List<CourseResponseDto> courses) {
+        Pagination.paginate(courses, View::printSingleCourseTable);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // ROADMAP
+    // ══════════════════════════════════════════════════════════════════════════
 
     public static void printRoadmapTable(List<RoadmapResponseDto> roadmapList) {
         if (roadmapList == null || roadmapList.isEmpty()) {
@@ -147,13 +162,10 @@ public class View {
         }
 
         System.out.println(reset);
-        // 11 columns: +2 for discount & price_after_discount
         Table table = new Table(11, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
-        // ── title row ──
         table.addCell(cyan + "Road Map", new CellStyle(CellStyle.HorizontalAlign.center), 11);
 
-        // ── headers ──
         table.addCell(yellow       + "Roadmap ID",         new CellStyle(CellStyle.HorizontalAlign.center));
         table.addCell(green        + "Major ID",           new CellStyle(CellStyle.HorizontalAlign.center));
         table.addCell(red          + "Major",              new CellStyle(CellStyle.HorizontalAlign.center));
@@ -166,7 +178,6 @@ public class View {
         table.addCell(brightGreen  + "After Discount ($)", new CellStyle(CellStyle.HorizontalAlign.center));
         table.addCell(brightBlue   + "Hour",               new CellStyle(CellStyle.HorizontalAlign.center));
 
-        // ── rows ──
         String  lastMajor   = null;
         String  lastCourse  = null;
         Integer lastMajorId = null;
@@ -179,37 +190,27 @@ public class View {
 
             table.addCell(String.valueOf(r.getRoadmap_id()),
                     new CellStyle(CellStyle.HorizontalAlign.center));
-
             table.addCell(sameMajorId ? "" : String.valueOf(r.getMajor_id()),
                     new CellStyle(CellStyle.HorizontalAlign.center));
-
             table.addCell(sameMajor ? "" : r.getMajor_name(),
                     new CellStyle(CellStyle.HorizontalAlign.left));
-
             table.addCell(sameCourse ? "" : String.valueOf(r.getCourse_id()),
                     new CellStyle(CellStyle.HorizontalAlign.center));
-
             table.addCell(sameCourse ? "" : r.getCourse_name(),
                     new CellStyle(CellStyle.HorizontalAlign.left));
-
-            // subject columns — always show
             table.addCell(String.valueOf(r.getSub_id()),
                     new CellStyle(CellStyle.HorizontalAlign.center));
             table.addCell(r.getSub_name(),
                     new CellStyle(CellStyle.HorizontalAlign.left));
-
-            // price / discount — show only on first row of each course group
             table.addCell(sameCourse ? "" : String.format("%.2f", r.getPrice()),
                     new CellStyle(CellStyle.HorizontalAlign.center));
             table.addCell(sameCourse ? "" : String.format("%.0f%%", r.getDiscount()),
                     new CellStyle(CellStyle.HorizontalAlign.center));
             table.addCell(sameCourse ? "" : String.format("%.2f", r.getPrice_after_discount()),
                     new CellStyle(CellStyle.HorizontalAlign.center));
-
             table.addCell(String.valueOf(r.getHour()),
                     new CellStyle(CellStyle.HorizontalAlign.center));
 
-            // update trackers
             lastMajorId = r.getMajor_id();
             lastMajor   = r.getMajor_name();
             lastCourse  = String.valueOf(r.getCourse_id());
@@ -218,8 +219,11 @@ public class View {
         System.out.println(table.render());
     }
 
+    public static void printRoadmapTablePaginated(List<RoadmapResponseDto> roadmapList) {
+        Pagination.paginate(roadmapList, View::printRoadmapTable);
+    }
 
-    // ── paste this into your View.java, replacing printSingleRoadmapTable ──
+    // ──────────────────────────────────────────────────────────────────────────
 
     public static void printSingleRoadmapTable(List<RoadmapResponseDto> roadmapList) {
         if (roadmapList == null || roadmapList.isEmpty()) {
@@ -232,13 +236,11 @@ public class View {
         int    totalWidth = 60;
         String majorName  = roadmapList.get(0).getMajor_name();
 
-        // Group subjects by course_id (preserving insertion order)
         Map<String, List<RoadmapResponseDto>> grouped = new LinkedHashMap<>();
         for (RoadmapResponseDto r : roadmapList) {
             grouped.computeIfAbsent(String.valueOf(r.getCourse_id()), k -> new ArrayList<>()).add(r);
         }
 
-        // ── Major Name header ──
         printTopBorder(totalWidth, cyan);
         printRow(cyan + majorName + RESET, totalWidth, true, cyan);
         printBottomBorder(totalWidth, cyan);
@@ -254,7 +256,6 @@ public class View {
 
             printTopBorder(totalWidth, purple);
 
-            // Level | Course Name
             printTwoColRow(
                     yellow + "Level: " + first.getLevel() + RESET,
                     yellow + first.getCourse_name() + RESET,
@@ -262,10 +263,8 @@ public class View {
             );
             printMidBorderTwoCol(totalWidth, col1, purple);
 
-            // Subjects label
             printRow(green + "Subjects:" + RESET, totalWidth, false, purple);
 
-            // Each subject — alternating white / blue
             String[] subjectColors = {white, blue};
             int colorIdx = 0;
             for (RoadmapResponseDto r : group) {
@@ -276,7 +275,6 @@ public class View {
 
             printMidBorderThreeCol(totalWidth, w, w, purple);
 
-            // Row 1: Capacity | Hour | Original Price
             printThreeColRow(
                     red    + "Capacity: " + first.getCapacity() + RESET,
                     green  + "Hour: "     + first.getHour()     + RESET,
@@ -286,7 +284,6 @@ public class View {
 
             printMidBorderThreeCol(totalWidth, w, w, purple);
 
-            // Row 2: (empty) | (empty) | Discount % + Price after discount
             printThreeColRow(
                     "",
                     brightYellow + "Discount: " + String.format("%.0f%%", first.getDiscount()) + RESET,
@@ -299,7 +296,11 @@ public class View {
         }
     }
 
-// ── Border helpers ───────────────────────────────────────────
+    public static void printSingleRoadmapTablePaginated(List<RoadmapResponseDto> roadmapList) {
+        Pagination.paginate(roadmapList, View::printSingleRoadmapTable);
+    }
+
+    // ── Border helpers ───────────────────────────────────────────────────────
 
     private static void printTopBorder(int width, String borderColor) {
         System.out.println(borderColor + "╔" + "═".repeat(width) + "╗" + "\u001B[0m");
@@ -322,7 +323,6 @@ public class View {
     }
 
     private static void printRow(String text, int width, boolean center, String borderColor) {
-        // Strip ANSI codes to calculate visible length for padding
         String stripped = text.replaceAll("\u001B\\[[;\\d]*m", "");
         String content;
         if (center) {
@@ -331,7 +331,6 @@ public class View {
         } else {
             content = " " + text;
         }
-        // Pad based on stripped length, but print with color codes
         int visibleLen = stripped.length() + (center ? (width - stripped.length()) / 2 : 1);
         int padding = width - visibleLen;
         System.out.println(borderColor + "║" + "\u001B[0m" + content + " ".repeat(Math.max(0, padding)) + borderColor + "║" + "\u001B[0m");
@@ -345,7 +344,6 @@ public class View {
         System.out.println(borderColor + "║" + "\u001B[0m" + l + borderColor + "║" + "\u001B[0m" + r + borderColor + "║" + "\u001B[0m");
     }
 
-
     private static void printThreeColRow(String c1, String c2, String c3, int w1, int w2, int w3, String borderColor) {
         String s1 = c1.replaceAll("\u001B\\[[;\\d]*m", "");
         String s2 = c2.replaceAll("\u001B\\[[;\\d]*m", "");
@@ -356,9 +354,11 @@ public class View {
         System.out.println(borderColor + "║" + "\u001B[0m" + p1 + borderColor + "║" + "\u001B[0m" + p2 + borderColor + "║" + "\u001B[0m" + p3 + borderColor + "║" + "\u001B[0m");
     }
 
-    //    ---------------------------------------------------------------------------
+    // ══════════════════════════════════════════════════════════════════════════
+    // SUBJECT
+    // ══════════════════════════════════════════════════════════════════════════
 
-    public static void printSubjectTable(List<SubjectResponseDto> subject){
+    public static void printSubjectTable(List<SubjectResponseDto> subject) {
         if (subject.isEmpty()) {
             System.out.println("No courses found.");
             return;
@@ -366,44 +366,29 @@ public class View {
         System.out.println(reset);
         Table table = new Table(5, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
-        table.addCell(green+"Subject ID");
-        table.addCell(red+"Subject Name");
-        table.addCell(blue+"Description");
-        table.addCell(purple+"Hours");
-        table.addCell(cyan+"Course Id");
+        table.addCell(green  + "Subject ID");
+        table.addCell(red    + "Subject Name");
+        table.addCell(blue   + "Description");
+        table.addCell(purple + "Hours");
+        table.addCell(cyan   + "Course Id");
 
-        for (SubjectResponseDto s : subject){
-            table.addCell(green+String.valueOf(s.getSub_id()));
-            table.addCell(red+String.valueOf(s.getSub_name()));
-            table.addCell(blue+String.valueOf(s.getDescription()));
-            table.addCell(purple+String.valueOf(s.getHour()));
-            table.addCell(cyan+String.valueOf(s.getCourseId()));
+        for (SubjectResponseDto s : subject) {
+            table.addCell(green  + String.valueOf(s.getSub_id()));
+            table.addCell(red    + String.valueOf(s.getSub_name()));
+            table.addCell(blue   + String.valueOf(s.getDescription()));
+            table.addCell(purple + String.valueOf(s.getHour()));
+            table.addCell(cyan   + String.valueOf(s.getCourseId()));
         }
         System.out.println(table.render());
     }
 
-//    public static void printSingleSubjectTable(List<SubjectResponseDto> subject){
-//        if (subject.isEmpty()) {
-//            System.out.println("No courses found.");
-//            return;
-//        }
-//        System.out.println(reset);
-//        Table table = new Table(5, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
-//
-//        table.addCell("Subject ID");
-//        table.addCell("Subject Name");
-//        table.addCell("Description");
-//        table.addCell("Hours");
-//        table.addCell("Course Id");
-//
-//        for (SubjectResponseDto s : subject){
-//            table.addCell(String.valueOf(s.getSub_id()));
-//            table.addCell(String.valueOf(s.getSub_name()));
-//            table.addCell(String.valueOf(s.getDescription()));
-//            table.addCell(String.valueOf(s.getHour()));
-//            table.addCell(String.valueOf(s.getCourseId()));
-//        }
-//    }
+    public static void printSubjectTablePaginated(List<SubjectResponseDto> subject) {
+        Pagination.paginate(subject, View::printSubjectTable);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // INSTRUCTOR
+    // ══════════════════════════════════════════════════════════════════════════
 
     public static void printInstructorTable(List<InstructorResponseDto> instructors) {
         if (instructors.isEmpty()) {
@@ -414,30 +399,36 @@ public class View {
         System.out.println(reset);
         Table table = new Table(8, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
-        // Headers
-        table.addCell(blue+"ID");
-        table.addCell(purple+"Name");
-        table.addCell(green+"Gender");
-        table.addCell(cyan+"Age");
-        table.addCell(red+"Email");
-        table.addCell(blue+"Phone");
-        table.addCell(purple+"Address");
-        table.addCell(green+"Qualification");
+        table.addCell(blue   + "ID");
+        table.addCell(purple + "Name");
+        table.addCell(green  + "Gender");
+        table.addCell(cyan   + "Age");
+        table.addCell(red    + "Email");
+        table.addCell(blue   + "Phone");
+        table.addCell(purple + "Address");
+        table.addCell(green  + "Qualification");
 
-        // Rows
         for (InstructorResponseDto i : instructors) {
-            table.addCell(blue+String.valueOf(i.getInstructor_id()));
-            table.addCell(purple+i.getInstructor_name());
-            table.addCell(green+i.getGender() != null ? i.getGender() : "-");
-            table.addCell(cyan+String.valueOf(i.getAge()));
-            table.addCell(red+i.getEmail());
-            table.addCell(blue+i.getPhone_number() != null ? i.getPhone_number() : "-");
-            table.addCell(purple+i.getAddress() != null ? i.getAddress() : "-");
-            table.addCell(green+i.getQualification() != null ? i.getQualification() : "-");
+            table.addCell(blue   + String.valueOf(i.getInstructor_id()));
+            table.addCell(purple + i.getInstructor_name());
+            table.addCell(green  + i.getGender() != null ? i.getGender() : "-");
+            table.addCell(cyan   + String.valueOf(i.getAge()));
+            table.addCell(red    + i.getEmail());
+            table.addCell(blue   + i.getPhone_number() != null ? i.getPhone_number() : "-");
+            table.addCell(purple + i.getAddress() != null ? i.getAddress() : "-");
+            table.addCell(green  + i.getQualification() != null ? i.getQualification() : "-");
         }
 
-        System.out.println(table.render()); // ← Don't forget this!
+        System.out.println(table.render());
     }
+
+    public static void printInstructorTablePaginated(List<InstructorResponseDto> instructors) {
+        Pagination.paginate(instructors, View::printInstructorTable);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // MAJOR
+    // ══════════════════════════════════════════════════════════════════════════
 
     public static void printMajorTable(List<MajorResponseDto> majorResponseDto) {
         if (majorResponseDto.isEmpty()) {
@@ -448,38 +439,42 @@ public class View {
         System.out.println(reset);
         Table table = new Table(3, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
-        // Headers
-        table.addCell(green+"Major ID");
-        table.addCell(purple+"Major Name");
-        table.addCell(blue+"Description");
+        table.addCell(green  + "Major ID");
+        table.addCell(purple + "Major Name");
+        table.addCell(blue   + "Description");
 
-        // Rows
         for (MajorResponseDto m : majorResponseDto) {
-            table.addCell(green+String.valueOf(m.getMajor_id()));
-            table.addCell(purple+m.getMajor_name());
-            table.addCell(blue+m.getDescription());
+            table.addCell(green  + String.valueOf(m.getMajor_id()));
+            table.addCell(purple + m.getMajor_name());
+            table.addCell(blue   + m.getDescription());
         }
 
         System.out.println(table.render());
     }
 
-    public static void printCourseTimeTable(List<CourseTimeResponseDto> courseTime) {
+    public static void printMajorTablePaginated(List<MajorResponseDto> majorResponseDto) {
+        Pagination.paginate(majorResponseDto, View::printMajorTable);
+    }
 
+    // ══════════════════════════════════════════════════════════════════════════
+    // COURSE TIME
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public static void printCourseTimeTable(List<CourseTimeResponseDto> courseTime) {
         if (courseTime.isEmpty()) {
-            System.out.println(red+"No course time found.");
+            System.out.println(red + "No course time found.");
             return;
         }
 
-        // Create table with 11 columns (like your header)
         System.out.println(reset);
         Table table = new Table(6, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
-        table.addCell(green+"Course Time ID");
-        table.addCell(blue+"Course ID");
-        table.addCell(yellow+"Day of Week ");
-        table.addCell(purple+"Morning Time");
-        table.addCell(red+"Afternoon Time");
-        table.addCell(cyan+"Evening Time");
+        table.addCell(green  + "Course Time ID");
+        table.addCell(blue   + "Course ID");
+        table.addCell(yellow + "Day of Week ");
+        table.addCell(purple + "Morning Time");
+        table.addCell(red    + "Afternoon Time");
+        table.addCell(cyan   + "Evening Time");
 
         for (CourseTimeResponseDto c : courseTime) {
             table.addCell(String.valueOf(c.getTime_id()));
@@ -490,24 +485,29 @@ public class View {
             table.addCell(c.getEvening());
         }
 
-        // Print table
         System.out.println(table.render());
     }
+
+    public static void printCourseTimeTablePaginated(List<CourseTimeResponseDto> courseTime) {
+        Pagination.paginate(courseTime, View::printCourseTimeTable);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // TRANSCRIPT
+    // ══════════════════════════════════════════════════════════════════════════
+
     public static void printTranscriptTable(List<TranscriptResponseDto> list) {
 
         System.out.println(reset);
 
-        // ── Layout constants ─────────────────────────────────────────────────────
         final int W  = 90;
         final int C1 = 40;
         final int C2 = 7;
         final int C3 = 13;
         final int C4 = W - C1 - C2 - C3 - 5;
 
-        // ── Row colors cycle ─────────────────────────────────────────────────────
         final String[] rowColors = { green, cyan, yellow, purple, brightCyan, brightGreen, brightYellow };
 
-        // ── Box-drawing characters (always blue) ─────────────────────────────────
         final String H  = blue + "─";
         final String V  = blue + "│";
         final String TL = blue + "┌", TR = blue + "┐";
@@ -515,7 +515,6 @@ public class View {
         final String ML = blue + "├", MR = blue + "┤";
         final String TT = blue + "┬", CT = blue + "┼";
 
-        // ── Utility lambdas ───────────────────────────────────────────────────────
         java.util.function.Function<Object, String> safe = val -> val != null ? val.toString() : "-";
         java.util.function.Function<Integer, String> str = val -> String.valueOf(val);
         java.util.function.BiFunction<String, Integer, String> truncate = (s, maxLen) -> {
@@ -535,7 +534,6 @@ public class View {
                 plain = plain.substring(0, W - 5) + "...";
                 fill  = 0;
             }
-            // label in white, value in rc, borders in blue
             String colored = String.format("  " + white + "%-16s" + reset + ": " + rc + "%s" + reset, label, value);
             System.out.println(V + colored + " ".repeat(fill) + V);
         };
@@ -544,30 +542,24 @@ public class View {
 
             rowIdx[0] = 0;
 
-            // ── TOP BORDER ───────────────────────────────────────────────────────
             System.out.println();
             System.out.println(TL + H.repeat(W - 2) + TR + reset);
 
-            // ── TITLE ────────────────────────────────────────────────────────────
             String titleText = "TRANSCRIPT";
             int leftPad      = (W - 2 - titleText.length()) / 2;
             int rightPad     = W - 2 - leftPad - titleText.length();
             System.out.println(V + " ".repeat(leftPad) + brightWhite + titleText + reset + " ".repeat(rightPad) + V);
 
-            // ── FULL DIVIDER ─────────────────────────────────────────────────────
             System.out.println(ML + H.repeat(W - 2) + MR + reset);
 
-            // ── STUDENT INFO (each row gets next color) ───────────────────────────
-            printLabelRow.accept("Transcript ID", str.apply(t.getTranscriptId()));   // green
-            printLabelRow.accept("ID",            str.apply(t.getStudentId()));       // cyan
-            printLabelRow.accept("Full Name",     safe.apply(t.getStudentName()));    // yellow
-            printLabelRow.accept("Gender",        safe.apply(t.getGender()));         // purple
-            printLabelRow.accept("Date of Birth", safe.apply(t.getDateOfBirth()));    // brightCyan
+            printLabelRow.accept("Transcript ID", str.apply(t.getTranscriptId()));
+            printLabelRow.accept("ID",            str.apply(t.getStudentId()));
+            printLabelRow.accept("Full Name",     safe.apply(t.getStudentName()));
+            printLabelRow.accept("Gender",        safe.apply(t.getGender()));
+            printLabelRow.accept("Date of Birth", safe.apply(t.getDateOfBirth()));
 
-            // ── COURSE TABLE TOP DIVIDER (┬) ─────────────────────────────────────
             System.out.println(ML + H.repeat(C1) + TT + H.repeat(C2) + TT + H.repeat(C3) + TT + H.repeat(C4) + MR + reset);
 
-            // ── COURSE HEADER (brightWhite) ───────────────────────────────────────
             System.out.printf(
                     V + " " + brightWhite + "%-" + (C1 - 2) + "s" + reset + " " + V +
                             " " + brightWhite + "%-" + (C2 - 2) + "s" + reset + " " + V +
@@ -576,17 +568,14 @@ public class View {
                     "Course", "Grade", "Grade Point", "Result Status"
             );
 
-            // ── COURSE TABLE CROSS DIVIDER (┼) ───────────────────────────────────
             System.out.println(ML + H.repeat(C1) + CT + H.repeat(C2) + CT + H.repeat(C3) + CT + H.repeat(C4) + MR + reset);
 
-            // ── COURSE DATA ROWS — each cell a different color ────────────────────
             String courseIdCell   = truncate.apply("ID   : " + t.getCourseId(),               C1 - 2);
             String courseNameCell = truncate.apply("Name : " + safe.apply(t.getCourseName()), C1 - 2);
             String gradeCell      = truncate.apply(safe.apply(t.getGrade()),                  C2 - 2);
             String gradePointCell = truncate.apply(String.format("%.2f", t.getGrandePoint()), C3 - 2);
             String resultCell     = truncate.apply(safe.apply(t.getResultStatus()),           C4 - 2);
 
-            // Row 1 — course id + grade values
             System.out.printf(
                     V + " " + green  + "%-" + (C1 - 2) + "s" + reset + " " + V +
                             " " + cyan   + "%-" + (C2 - 2) + "s" + reset + " " + V +
@@ -595,7 +584,6 @@ public class View {
                     courseIdCell, gradeCell, gradePointCell, resultCell
             );
 
-            // Row 2 — course name (grade columns blank)
             System.out.printf(
                     V + " " + brightGreen + "%-" + (C1 - 2) + "s" + reset + " " + V +
                             " " + "%-" + (C2 - 2) + "s" + " " + V +
@@ -604,42 +592,49 @@ public class View {
                     courseNameCell, "", "", ""
             );
 
-            // ── FULL DIVIDER ─────────────────────────────────────────────────────
             System.out.println(ML + H.repeat(W - 2) + MR + reset);
 
-            // ── FOOTER INFO (continues color cycle) ──────────────────────────────
-            printLabelRow.accept("Completion Date", safe.apply(t.getCompletionDate()));  // brightGreen
-            printLabelRow.accept("Remark",          safe.apply(t.getRemarks()));          // brightYellow
+            printLabelRow.accept("Completion Date", safe.apply(t.getCompletionDate()));
+            printLabelRow.accept("Remark",          safe.apply(t.getRemarks()));
 
-            // ── BOTTOM BORDER ────────────────────────────────────────────────────
             System.out.println(BL + H.repeat(W - 2) + BR + reset);
             System.out.println();
         }
     }
-    public static void printEnrollmentTable(List<EnrollmentRequestDto> enrollmentRequestDtos){
+
+    public static void printTranscriptTablePaginated(List<TranscriptResponseDto> list) {
+        Pagination.paginate(list, View::printTranscriptTable);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // ENROLLMENT
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public static void printEnrollmentTable(List<EnrollmentRequestDto> enrollmentRequestDtos) {
         if (enrollmentRequestDtos.isEmpty()) {
-            System.out.println(red+"No Enrollment found.");
+            System.out.println(red + "No Enrollment found.");
             return;
         }
 
         System.out.println(reset);
         Table table = new Table(4, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
 
-        // Headers
-        table.addCell(green+"Enrollment Id");
-        table.addCell(purple+"Student Id");
-        table.addCell(blue+"Course Id");
-        table.addCell(cyan+"Shift");
+        table.addCell(green  + "Enrollment Id");
+        table.addCell(purple + "Student Id");
+        table.addCell(blue   + "Course Id");
+        table.addCell(cyan   + "Shift");
 
-        // Rows
         for (EnrollmentRequestDto m : enrollmentRequestDtos) {
-            table.addCell(String.valueOf(green+m.getEnrollment_id()));
-            table.addCell(String.valueOf(purple+m.getStudent_id()));
-            table.addCell(String.valueOf(blue+m.getCourse_id()));
-            table.addCell(String.valueOf(cyan+m.getShift()));
+            table.addCell(String.valueOf(green  + m.getEnrollment_id()));
+            table.addCell(String.valueOf(purple + m.getStudent_id()));
+            table.addCell(String.valueOf(blue   + m.getCourse_id()));
+            table.addCell(String.valueOf(cyan   + m.getShift()));
         }
 
         System.out.println(table.render());
     }
-}
 
+    public static void printEnrollmentTablePaginated(List<EnrollmentRequestDto> enrollmentRequestDtos) {
+        Pagination.paginate(enrollmentRequestDtos, View::printEnrollmentTable);
+    }
+}

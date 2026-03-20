@@ -8,7 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.system.view.View.printSubjectTable;
+import static org.system.view.View.*;
+import org.system.util.Pagination;
 
 public class SubjectService {
     private final Scanner scanner= new Scanner(System.in);
@@ -46,7 +47,7 @@ public class SubjectService {
             System.out.println("[SERVICE - READ ALL] No subjects found.");
             return;
         }
-        printSubjectTable(list);
+        printSubjectTablePaginated(list);
     }
 
     // =========================================================

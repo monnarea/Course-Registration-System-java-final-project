@@ -11,8 +11,8 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.system.view.View.printRoadmapTable;
-import static org.system.view.View.printSingleRoadmapTable;
+import static org.system.view.View.*;
+import org.system.util.Pagination;
 
 public class RoadmapService {
     private final Scanner scanner = new Scanner(System.in);
@@ -35,7 +35,7 @@ public class RoadmapService {
             }
 
             System.out.println(cyan+"Total roadmap records: " + list.size());
-            printRoadmapTable(list);
+            printRoadmapTablePaginated(list);
 
         } catch (SQLException e) {
             System.out.println(red+"Error retrieving roadmap data.");

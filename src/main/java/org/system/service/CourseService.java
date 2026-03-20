@@ -14,8 +14,8 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.system.view.View.printCourseTable;
-import static org.system.view.View.printSingleCourseTable;
+import static org.system.view.View.*;
+import org.system.util.Pagination;
 
 public class CourseService {
 
@@ -42,7 +42,7 @@ public class CourseService {
                 System.out.println(red + "No courses found in database.");
             } else {
                 System.out.println(cyan + "Total courses found: " + all.size() + reset);
-                printCourseTable(all);
+                printCourseTablePaginated(all);
             }
         } catch (SQLException e) {
             System.err.println(red + "getAll() failed: " + e.getMessage());
@@ -77,7 +77,7 @@ public class CourseService {
             if (result.isEmpty()) {
                 System.out.println(red + "No courses found for Major ID: " + major_id);
             } else {
-                printSingleCourseTable(result);
+                printSingleCourseTablePaginated(result);
             }
         } catch (SQLException e) {
             System.err.println(red + "getByMajorId() failed: " + e.getMessage());

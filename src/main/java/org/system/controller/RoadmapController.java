@@ -26,11 +26,14 @@ public class RoadmapController {
     public void chooseIdOrAllRoadmap() {
         while (true) {
             try {
-                System.out.println(cyan+"""
-                Choose roadmap:
-                1. Show Roadmap By Major Is
-                2. Show By Road Id
-                0. Back
+                System.out.println(cyan + """
+                ╔════════╦══════════════════════════════╗
+                ║ Option ║ Description                  ║
+                ╠════════╩══════════════════════════════╣
+                ║   [1]  Show Roadmap By Major Id       ║
+                ║   [2]  Show By Road Id                ║
+                ║   [0]  Back                           ║
+                ╚═══════════════════════════════════════╝
                 """);
                 System.out.print(yellow+"Enter option: ");
                 int option = Integer.parseInt(scanner.nextLine());

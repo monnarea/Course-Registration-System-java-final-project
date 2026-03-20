@@ -9,8 +9,8 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.system.view.View.printCourseTable;
-import static org.system.view.View.printCourseTimeTable;
+import static org.system.view.View.*;
+import org.system.util.Pagination;
 
 public class CourseTimeService {
     private final Scanner scanner = new Scanner(System.in);
@@ -33,7 +33,7 @@ public class CourseTimeService {
             } else {
                 System.out.println(cyan+"Total courses Time found: " + allCourses.size());
 
-                printCourseTimeTable(allCourses);
+                printCourseTimeTablePaginated(allCourses);
 
             }
         } catch (SQLException e) {

@@ -92,12 +92,15 @@ public class SubjectController {
     public void displaySubjectById() {
         boolean validInput;
         while (true) {
-            System.out.println(cyan+"""
-                Do you want to Display One Subject:
-                1. Display By Subject Id
-                2. Display By Course Id
-                0. Back
-                """);
+            System.out.println(cyan + """
+            ╔════════╦══════════════════════════╗
+            ║ Option ║ Description              ║
+            ╠════════╩══════════════════════════╣
+            ║   [1]     Display By Subject Id   ║
+            ║   [2]     Display By Course Id    ║
+            ║   [0]     Back                    ║
+            ╚═══════════════════════════════════╝
+            """);
 
             int option = -1;
             validInput = false;

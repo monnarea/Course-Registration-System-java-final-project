@@ -5,6 +5,7 @@ import org.system.model.dto.request.StudentRequestDto;
 
 import java.sql.*;
 import java.util.*;
+import org.system.util.Pagination;
 
 public class StudentService {
 
@@ -155,12 +156,37 @@ public class StudentService {
                     );
                 }
                 System.out.println("└────┴──────────────────────┴─────────┴──────────────┴───────────────────────────────┴──────────────┴──────────────────────┴──────────┴──────┴────────────────────┘");
-                System.out.println("Total records: " + students.size());
+                // Pagination handled below
             }
 
         } catch (Exception e) {
             System.out.println("❌ Database error: " + e.getMessage());
             e.printStackTrace();
+            return students;
+        }
+
+        if (!students.isEmpty()) {
+            Pagination.paginate(students, page -> {
+                System.out.println("\n┌────┬──────────────────────┬─────────┬──────────────┬───────────────────────────────┬──────────────┬──────────────────────┬──────────┬──────┬────────────────────┐");
+                System.out.printf("│ %-2s │ %-20s │ %-7s │ %-12s │ %-29s │ %-12s │ %-20s │ %-8s │ %-4s │ %-18s │%n",
+                        "ID", "Name", "Gender", "DOB", "Email", "Phone", "Address", "Semester", "Year", "University");
+                System.out.println("├────┼──────────────────────┼─────────┼──────────────┼───────────────────────────────┼──────────────┼──────────────────────┼──────────┼──────┼────────────────────┤");
+                for (StudentRequestDto s : page) {
+                    System.out.printf("│ %-2s │ %-20s │ %-7s │ %-12s │ %-29s │ %-12s │ %-20s │ %-8s │ %-4s │ %-18s │%n",
+                            s.getStudent_id(),
+                            truncate(s.getStudent_name(), 20),
+                            truncate(s.getGender(), 7),
+                            s.getDate_of_birth() != null ? s.getDate_of_birth() : "N/A",
+                            truncate(s.getEmail(), 29),
+                            truncate(s.getPhone_number(), 12),
+                            truncate(s.getAddress(), 20),
+                            truncate(s.getSemester(), 8),
+                            s.getYear() != null ? s.getYear() : "N/A",
+                            truncate(s.getUniversity(), 18));
+                }
+                System.out.println("└────┴──────────────────────┴─────────┴──────────────┴───────────────────────────────┴──────────────┴──────────────────────┴──────────┴──────┴────────────────────┘");
+                System.out.println("Showing " + page.size() + " of " + students.size() + " students");
+            });
         }
         return students;
     }

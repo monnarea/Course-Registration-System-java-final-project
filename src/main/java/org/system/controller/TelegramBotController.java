@@ -298,7 +298,6 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
                             .shift(shiftLabel + " (" + shiftTime + ")")
                             .build();
                     enrollmentService.insertEnrollment(dto);
-                    System.out.println("✅ DB saved: student_id=" + studentId + ", course_id=" + data.get("courseId"));
                 } catch (EnrollmentException dbEx) {
                     System.err.println("❌ DB Error: " + dbEx.getMessage());
                     sendMessage(chatId, "⚠️ Saved in session but DB write failed. Contact support.");
@@ -456,11 +455,9 @@ public class TelegramBotController implements LongPollingSingleThreadUpdateConsu
                 int rows = deletePs.executeUpdate();
 
                 if (rows > 0) {
-                    System.out.println("✅ Withdrawn: enrollment_id=" + enrollmentId + ", student_id=" + studentId);
                     sendMarkdownMessage(chatId,
                             "✅ *Withdrawal Successful!*\n\n" +
                                     "You have been removed from:\n📘 *" + courseName + "*\n\n" +
-                                    "Enrollment ID `" + enrollmentId + "` deleted from database.\n\n" +
                                     "Tap 🎓 *My Enrollments* to see your updated list.");
                 } else {
                     sendMessage(chatId, "❌ Withdrawal failed. Please try again.");

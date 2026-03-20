@@ -23,6 +23,7 @@ public class AdminMenu {
     private final CourseTimeController courseTimeController = new CourseTimeController();
     private final EnrollmentController enrollmentController = new EnrollmentController();
     private final StudentController studentController = new StudentController();
+    private final TranscriptController transcriptController = new TranscriptController();
     public static final String green = "\u001B[32m";
     public static final String blue = "\u001B[34m";
     public static final String yellow = "\u001B[33m";
@@ -89,7 +90,7 @@ public class AdminMenu {
 
                     }
                     case 0 -> {
-
+                        new MainMenu().start();
                     }
                     default -> System.out.println(red+"Invalid option. Please enter 0–9.");
                 }
@@ -262,15 +263,15 @@ public class AdminMenu {
                     ╚══════════════════════════════════╝""");
             System.out.print(yellow+"Please Enter Option: ");
             int option = scanner.nextInt();
-//            switch (option) {
-//                case 1 -> courseService.displayAllCourse();
-//                case 2 -> courseService.displayCourseById();
-//                case 3 -> courseService.createCourse();
-//                case 4 -> courseService.deleteCourse(scanner.nextInt());
-//                case 5 -> courseService.updateCourse(scanner.nextInt());
-//                case 0 -> running = false;
-//                default -> System.out.println("Invalid option. Please enter 0–5.");
-//            }
+            switch (option) {
+                case 1 -> transcriptController.displayAll();
+                case 2 -> transcriptController.displayById();
+                case 3 -> transcriptController.create();
+                case 4 -> transcriptController.update();
+                case 5 -> transcriptController.delete();
+                case 0 -> new AdminMenu();
+                default -> System.out.println("Invalid option. Please enter 0–5.");
+            }
             return;
         }
     }

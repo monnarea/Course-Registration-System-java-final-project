@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Scanner;
 
 import static org.system.view.View.printEnrollmentTable;
+import static org.system.view.View.printEnrollmentTablePaginated;
+import org.system.util.Pagination;
 
 public class EnrollmentController {
 
@@ -52,7 +54,7 @@ public class EnrollmentController {
     public void viewAllEnrollments() {
         try {
             List<EnrollmentRequestDto> list = enrollmentService.getAllEnrollments();
-            printEnrollmentTable(list);
+            printEnrollmentTablePaginated(list);
         } catch (EnrollmentException e) {
             System.out.println(red + "Error [" + e.getStatusCode() + "]: " + e.getMessage());
         }
