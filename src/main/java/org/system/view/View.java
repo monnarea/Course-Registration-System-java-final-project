@@ -4,6 +4,8 @@ package org.system.view;
 import org.nocrala.tools.texttablefmt.BorderStyle;
 import org.nocrala.tools.texttablefmt.CellStyle;
 import org.nocrala.tools.texttablefmt.Table;
+import org.system.model.dao.EnrollmentDao;
+import org.system.model.dto.request.EnrollmentRequestDto;
 import org.system.model.dto.response.*;
 
 import java.util.ArrayList;
@@ -371,37 +373,37 @@ public class View {
         table.addCell(cyan+"Course Id");
 
         for (SubjectResponseDto s : subject){
-            table.addCell(String.valueOf(s.getSub_id()));
-            table.addCell(String.valueOf(s.getSub_name()));
-            table.addCell(String.valueOf(s.getDescription()));
-            table.addCell(String.valueOf(s.getHour()));
-            table.addCell(String.valueOf(s.getCourseId()));
+            table.addCell(green+String.valueOf(s.getSub_id()));
+            table.addCell(red+String.valueOf(s.getSub_name()));
+            table.addCell(blue+String.valueOf(s.getDescription()));
+            table.addCell(purple+String.valueOf(s.getHour()));
+            table.addCell(cyan+String.valueOf(s.getCourseId()));
         }
         System.out.println(table.render());
     }
 
-    public static void printSingleSubjectTable(List<SubjectResponseDto> subject){
-        if (subject.isEmpty()) {
-            System.out.println("No courses found.");
-            return;
-        }
-        System.out.println(reset);
-        Table table = new Table(5, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
-
-        table.addCell("Subject ID");
-        table.addCell("Subject Name");
-        table.addCell("Description");
-        table.addCell("Hours");
-        table.addCell("Course Id");
-
-        for (SubjectResponseDto s : subject){
-            table.addCell(String.valueOf(s.getSub_id()));
-            table.addCell(String.valueOf(s.getSub_name()));
-            table.addCell(String.valueOf(s.getDescription()));
-            table.addCell(String.valueOf(s.getHour()));
-            table.addCell(String.valueOf(s.getCourseId()));
-        }
-    }
+//    public static void printSingleSubjectTable(List<SubjectResponseDto> subject){
+//        if (subject.isEmpty()) {
+//            System.out.println("No courses found.");
+//            return;
+//        }
+//        System.out.println(reset);
+//        Table table = new Table(5, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+//
+//        table.addCell("Subject ID");
+//        table.addCell("Subject Name");
+//        table.addCell("Description");
+//        table.addCell("Hours");
+//        table.addCell("Course Id");
+//
+//        for (SubjectResponseDto s : subject){
+//            table.addCell(String.valueOf(s.getSub_id()));
+//            table.addCell(String.valueOf(s.getSub_name()));
+//            table.addCell(String.valueOf(s.getDescription()));
+//            table.addCell(String.valueOf(s.getHour()));
+//            table.addCell(String.valueOf(s.getCourseId()));
+//        }
+//    }
 
     public static void printInstructorTable(List<InstructorResponseDto> instructors) {
         if (instructors.isEmpty()) {
@@ -424,14 +426,14 @@ public class View {
 
         // Rows
         for (InstructorResponseDto i : instructors) {
-            table.addCell(String.valueOf(i.getInstructor_id()));
-            table.addCell(i.getInstructor_name());
-            table.addCell(i.getGender() != null ? i.getGender() : "-");
-            table.addCell(String.valueOf(i.getAge()));
-            table.addCell(i.getEmail());
-            table.addCell(i.getPhone_number() != null ? i.getPhone_number() : "-");
-            table.addCell(i.getAddress() != null ? i.getAddress() : "-");
-            table.addCell(i.getQualification() != null ? i.getQualification() : "-");
+            table.addCell(blue+String.valueOf(i.getInstructor_id()));
+            table.addCell(purple+i.getInstructor_name());
+            table.addCell(green+i.getGender() != null ? i.getGender() : "-");
+            table.addCell(cyan+String.valueOf(i.getAge()));
+            table.addCell(red+i.getEmail());
+            table.addCell(blue+i.getPhone_number() != null ? i.getPhone_number() : "-");
+            table.addCell(purple+i.getAddress() != null ? i.getAddress() : "-");
+            table.addCell(green+i.getQualification() != null ? i.getQualification() : "-");
         }
 
         System.out.println(table.render()); // ← Don't forget this!
@@ -453,9 +455,9 @@ public class View {
 
         // Rows
         for (MajorResponseDto m : majorResponseDto) {
-            table.addCell(String.valueOf(m.getMajor_id()));
-            table.addCell(m.getMajor_name());
-            table.addCell(m.getDescription());
+            table.addCell(green+String.valueOf(m.getMajor_id()));
+            table.addCell(purple+m.getMajor_name());
+            table.addCell(blue+m.getDescription());
         }
 
         System.out.println(table.render());
@@ -491,4 +493,153 @@ public class View {
         // Print table
         System.out.println(table.render());
     }
+    public static void printTranscriptTable(List<TranscriptResponseDto> list) {
+
+        System.out.println(reset);
+
+        // ── Layout constants ─────────────────────────────────────────────────────
+        final int W  = 90;
+        final int C1 = 40;
+        final int C2 = 7;
+        final int C3 = 13;
+        final int C4 = W - C1 - C2 - C3 - 5;
+
+        // ── Row colors cycle ─────────────────────────────────────────────────────
+        final String[] rowColors = { green, cyan, yellow, purple, brightCyan, brightGreen, brightYellow };
+
+        // ── Box-drawing characters (always blue) ─────────────────────────────────
+        final String H  = blue + "─";
+        final String V  = blue + "│";
+        final String TL = blue + "┌", TR = blue + "┐";
+        final String BL = blue + "└", BR = blue + "┘";
+        final String ML = blue + "├", MR = blue + "┤";
+        final String TT = blue + "┬", CT = blue + "┼";
+
+        // ── Utility lambdas ───────────────────────────────────────────────────────
+        java.util.function.Function<Object, String> safe = val -> val != null ? val.toString() : "-";
+        java.util.function.Function<Integer, String> str = val -> String.valueOf(val);
+        java.util.function.BiFunction<String, Integer, String> truncate = (s, maxLen) -> {
+            if (s == null) return "-";
+            return s.length() <= maxLen ? s : s.substring(0, maxLen - 1) + "…";
+        };
+
+        final int[] rowIdx = {0};
+
+        java.util.function.BiConsumer<String, String> printLabelRow = (label, value) -> {
+            String rc      = rowColors[rowIdx[0] % rowColors.length];
+            rowIdx[0]++;
+
+            String plain   = String.format("  %-16s: %s", label, value);
+            int fill       = W - 2 - plain.length();
+            if (fill < 0) {
+                plain = plain.substring(0, W - 5) + "...";
+                fill  = 0;
+            }
+            // label in white, value in rc, borders in blue
+            String colored = String.format("  " + white + "%-16s" + reset + ": " + rc + "%s" + reset, label, value);
+            System.out.println(V + colored + " ".repeat(fill) + V);
+        };
+
+        for (TranscriptResponseDto t : list) {
+
+            rowIdx[0] = 0;
+
+            // ── TOP BORDER ───────────────────────────────────────────────────────
+            System.out.println();
+            System.out.println(TL + H.repeat(W - 2) + TR + reset);
+
+            // ── TITLE ────────────────────────────────────────────────────────────
+            String titleText = "TRANSCRIPT";
+            int leftPad      = (W - 2 - titleText.length()) / 2;
+            int rightPad     = W - 2 - leftPad - titleText.length();
+            System.out.println(V + " ".repeat(leftPad) + brightWhite + titleText + reset + " ".repeat(rightPad) + V);
+
+            // ── FULL DIVIDER ─────────────────────────────────────────────────────
+            System.out.println(ML + H.repeat(W - 2) + MR + reset);
+
+            // ── STUDENT INFO (each row gets next color) ───────────────────────────
+            printLabelRow.accept("Transcript ID", str.apply(t.getTranscriptId()));   // green
+            printLabelRow.accept("ID",            str.apply(t.getStudentId()));       // cyan
+            printLabelRow.accept("Full Name",     safe.apply(t.getStudentName()));    // yellow
+            printLabelRow.accept("Gender",        safe.apply(t.getGender()));         // purple
+            printLabelRow.accept("Date of Birth", safe.apply(t.getDateOfBirth()));    // brightCyan
+
+            // ── COURSE TABLE TOP DIVIDER (┬) ─────────────────────────────────────
+            System.out.println(ML + H.repeat(C1) + TT + H.repeat(C2) + TT + H.repeat(C3) + TT + H.repeat(C4) + MR + reset);
+
+            // ── COURSE HEADER (brightWhite) ───────────────────────────────────────
+            System.out.printf(
+                    V + " " + brightWhite + "%-" + (C1 - 2) + "s" + reset + " " + V +
+                            " " + brightWhite + "%-" + (C2 - 2) + "s" + reset + " " + V +
+                            " " + brightWhite + "%-" + (C3 - 2) + "s" + reset + " " + V +
+                            " " + brightWhite + "%-" + (C4 - 2) + "s" + reset + " " + V + "%n",
+                    "Course", "Grade", "Grade Point", "Result Status"
+            );
+
+            // ── COURSE TABLE CROSS DIVIDER (┼) ───────────────────────────────────
+            System.out.println(ML + H.repeat(C1) + CT + H.repeat(C2) + CT + H.repeat(C3) + CT + H.repeat(C4) + MR + reset);
+
+            // ── COURSE DATA ROWS — each cell a different color ────────────────────
+            String courseIdCell   = truncate.apply("ID   : " + t.getCourseId(),               C1 - 2);
+            String courseNameCell = truncate.apply("Name : " + safe.apply(t.getCourseName()), C1 - 2);
+            String gradeCell      = truncate.apply(safe.apply(t.getGrade()),                  C2 - 2);
+            String gradePointCell = truncate.apply(String.format("%.2f", t.getGrandePoint()), C3 - 2);
+            String resultCell     = truncate.apply(safe.apply(t.getResultStatus()),           C4 - 2);
+
+            // Row 1 — course id + grade values
+            System.out.printf(
+                    V + " " + green  + "%-" + (C1 - 2) + "s" + reset + " " + V +
+                            " " + cyan   + "%-" + (C2 - 2) + "s" + reset + " " + V +
+                            " " + yellow + "%-" + (C3 - 2) + "s" + reset + " " + V +
+                            " " + purple + "%-" + (C4 - 2) + "s" + reset + " " + V + "%n",
+                    courseIdCell, gradeCell, gradePointCell, resultCell
+            );
+
+            // Row 2 — course name (grade columns blank)
+            System.out.printf(
+                    V + " " + brightGreen + "%-" + (C1 - 2) + "s" + reset + " " + V +
+                            " " + "%-" + (C2 - 2) + "s" + " " + V +
+                            " " + "%-" + (C3 - 2) + "s" + " " + V +
+                            " " + "%-" + (C4 - 2) + "s" + " " + V + "%n",
+                    courseNameCell, "", "", ""
+            );
+
+            // ── FULL DIVIDER ─────────────────────────────────────────────────────
+            System.out.println(ML + H.repeat(W - 2) + MR + reset);
+
+            // ── FOOTER INFO (continues color cycle) ──────────────────────────────
+            printLabelRow.accept("Completion Date", safe.apply(t.getCompletionDate()));  // brightGreen
+            printLabelRow.accept("Remark",          safe.apply(t.getRemarks()));          // brightYellow
+
+            // ── BOTTOM BORDER ────────────────────────────────────────────────────
+            System.out.println(BL + H.repeat(W - 2) + BR + reset);
+            System.out.println();
+        }
+    }
+    public static void printEnrollmentTable(List<EnrollmentRequestDto> enrollmentRequestDtos){
+        if (enrollmentRequestDtos.isEmpty()) {
+            System.out.println(red+"No Enrollment found.");
+            return;
+        }
+
+        System.out.println(reset);
+        Table table = new Table(4, BorderStyle.UNICODE_BOX_DOUBLE_BORDER);
+
+        // Headers
+        table.addCell(green+"Enrollment Id");
+        table.addCell(purple+"Student Id");
+        table.addCell(blue+"Course Id");
+        table.addCell(cyan+"Shift");
+
+        // Rows
+        for (EnrollmentRequestDto m : enrollmentRequestDtos) {
+            table.addCell(String.valueOf(green+m.getEnrollment_id()));
+            table.addCell(String.valueOf(purple+m.getStudent_id()));
+            table.addCell(String.valueOf(blue+m.getCourse_id()));
+            table.addCell(String.valueOf(cyan+m.getShift()));
+        }
+
+        System.out.println(table.render());
+    }
 }
+

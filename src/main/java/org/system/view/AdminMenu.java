@@ -2,6 +2,7 @@
 package org.system.view;
 
 import org.system.controller.*;
+import org.system.exception.EnrollmentException;
 import org.system.service.CourseService;
 import org.system.service.MajorService;
 
@@ -21,6 +22,7 @@ public class AdminMenu {
     private final MajorController majorController = new MajorController();
     private final CourseTimeController courseTimeController = new CourseTimeController();
     private final EnrollmentController enrollmentController = new EnrollmentController();
+    private final StudentController studentController = new StudentController();
     public static final String green = "\u001B[32m";
     public static final String blue = "\u001B[34m";
     public static final String yellow = "\u001B[33m";
@@ -53,18 +55,43 @@ public class AdminMenu {
                 int option = scanner.nextInt();
 
                 switch (option) {
-                    case 1 -> courseMenu();
-                    case 2 -> courseTimeMenu();
-                    case 4 -> roadmapMenu();
-                    case 5 -> instructorMenu();
-                    case 6 -> transcriptMenu();
-                    case 7 -> studentMenu();
-                    case 8 -> subjectMenu();
-                    case 9 -> majorMenu();
-                    case 0 -> {
-                        return;
+                    case 1 -> {
+                        courseMenu();
                     }
-                    default -> System.out.println(red+"Invalid option. Please enter 0–5.");
+                    case 2 -> {
+                        courseTimeMenu();
+                    }
+                    case 3 -> {
+                        scanner.nextLine();
+                        enrollmentMenu() ;
+                    }
+                    case 4 -> {
+                        roadmapMenu();
+                    }
+                    case 5 -> {
+                        instructorMenu();
+
+                    }
+                    case 6 -> {
+                        transcriptMenu();
+
+                    }
+                    case 7 -> {
+                        scanner.nextLine();
+                        studentMenu();
+
+                    }
+                    case 8 -> {
+                        subjectMenu();
+                    }
+                    case 9 -> {
+                        majorMenu();
+
+                    }
+                    case 0 -> {
+
+                    }
+                    default -> System.out.println(red+"Invalid option. Please enter 0–9.");
                 }
             }catch (InputMismatchException e){
                 System.out.println(red+"Invalid input! Please input number");
@@ -148,33 +175,39 @@ public class AdminMenu {
     }
 
     public void studentMenu() {
-        boolean running = true;
+        while (true) {
+            System.out.println(cyan + """
+                
+                ╔══════════════════════════════════╗
+                ║             STUDENT              ║
+                ╠══════════════════════════════════╣
+                ║  1. Display All Student          ║
+                ║  2. Display Student By ID        ║
+                ║  3. Create New Student           ║
+                ║  4. Update Student               ║
+                ║  5. Delete Student               ║
+                ║  0. Back                         ║
+                ╚══════════════════════════════════╝""");
 
-        while (running) {
-            System.out.println(cyan+"""
-                    
-                    ╔══════════════════════════════════╗
-                    ║             STUDENT              ║
-                    ╠══════════════════════════════════╣
-                    ║  1. Display All Student          ║
-                    ║  2. Display Student By ID        ║
-                    ║  3. Create New Student           ║
-                    ║  4. Update Student               ║
-                    ║  5. Delete Student               ║
-                    ║  0. Back                         ║
-                    ╚══════════════════════════════════╝""");
-            System.out.print(yellow+"Please Enter Option: ");
-            int option = scanner.nextInt();
-//            switch (option) {
-//                case 1 -> courseService.displayAllCourse();
-//                case 2 -> courseService.displayCourseById();
-//                case 3 -> courseService.createCourse();
-//                case 4 -> courseService.deleteCourse(scanner.nextInt());
-//                case 5 -> courseService.updateCourse(scanner.nextInt());
-//                case 0 -> running = false;
-//                default -> System.out.println("Invalid option. Please enter 0–5.");
+            System.out.print(yellow + "Please Enter Option: ");
+            String input = scanner.nextLine().trim(); // ✅ avoid empty line crash
+            if (input.isEmpty()) continue;            // ✅ skip empty input
+
+            try {
+                int option = Integer.parseInt(input);
+                switch (option) {
+                    case 1 -> studentController.displayAllStudents();
+                    case 2 -> studentController.displayStudentById();
+                    case 3 -> studentController.createStudent();
+                    case 4 -> studentController.updateStudent();
+                    case 5 -> studentController.deleteStudent();
+                    case 0 -> { return; } // ✅ return to AdminMenu
+                    default -> System.out.println(red + "Invalid option. Please enter 0–5.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println(red + "Invalid input! Please enter a number.");
+            }
         }
-        return;
     }
 
     public void instructorMenu() {
@@ -351,37 +384,33 @@ public class AdminMenu {
 
     }
     public void enrollmentMenu() {
-        boolean running = true;
         while (true) {
-            System.out.println("\n╔══════════════════════════════════╗");
-            System.out.println("║       ENROLLMENT SYSTEM          ║");
-            System.out.println("╠══════════════════════════════════╣");
-            System.out.println("║  1. Enroll a Student             ║");
-            System.out.println("║  2. View All Enrollments         ║");
-            System.out.println("║  3. Find Enrollment by ID        ║");
-            System.out.println("║  4. Find Enrollments by Student  ║");
-            System.out.println("║  5. Update Enrollment            ║");
-            System.out.println("║  6. Delete Enrollment            ║");
-            System.out.println("║  7. Get Telegram Bot Link        ║");
-            System.out.println("║  0. Exit                         ║");
-            System.out.println("╚══════════════════════════════════╝");
-            System.out.print("Choose an option: ");
+            System.out.println(cyan+"\n╔══════════════════════════════════╗");
+            System.out.println(cyan+"║       ENROLLMENT SYSTEM          ║");
+            System.out.println(cyan+"╠══════════════════════════════════╣");
+            System.out.println(cyan+"║  1. View All Enrollments         ║");
+            System.out.println(cyan+"║  2. Find Enrollment by ID        ║");
+            System.out.println(cyan+"║  3. Update Enrollment            ║");
+            System.out.println(cyan+"║  4. Delete Enrollment            ║");
+            System.out.println(cyan+"║  0. Exit to Admin Menu           ║");
+            System.out.println(cyan+"╚══════════════════════════════════╝");
 
             try {
-                System.out.print(yellow+"Please Enter Option: ");
-                int option = scanner.nextInt();
+                System.out.print(yellow + "Please Enter Option: ");
+                String input = scanner.nextLine().trim();
+                if (input.isEmpty()) continue;
+
+                int option = Integer.parseInt(input);
                 switch (option) {
-                    case 1 -> majorController.displayAllMajor();
-                    case 2 -> majorController.displayMajorById();
-                    case 3 -> majorController.create();
-                    case 4 -> majorController.update();
-                    case 5 -> majorController.delete();
-                    case 0 -> running = false;
-                    default -> System.out.println(red+"Invalid option. Please enter 0–5.");
+                    case 1 -> enrollmentController.viewAllEnrollments();
+                    case 2 -> enrollmentController.findById();
+                    case 3 -> enrollmentController.updateEnrollment();
+                    case 4 -> enrollmentController.deleteEnrollment();
+                    case 0 -> AdminStart();
+                    default -> System.out.println(red + "Invalid option. Please enter 0–6.");
                 }
-            }catch (InputMismatchException e){
-                System.out.println(red+"Invalid input! Please input number");
-                scanner.nextLine();
+            } catch (NumberFormatException e) {
+                System.out.println(red + "Invalid input! Please enter a number.");
             }
         }
     }

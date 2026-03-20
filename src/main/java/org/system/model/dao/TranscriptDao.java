@@ -1,4 +1,3 @@
-
 package org.system.model.dao;
 
 import org.system.model.dto.response.TranscriptResponseDto;
@@ -12,8 +11,6 @@ public interface TranscriptDao {
     List<TranscriptResponseDto> findAll();
 
     List<TranscriptResponseDto> findById(int id);
-
-//    TranscriptResponseDto findById(int id);
 
     boolean update(TranscriptResponseDto transcript);
 

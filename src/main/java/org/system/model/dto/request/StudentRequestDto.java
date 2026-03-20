@@ -25,13 +25,13 @@ public class StudentRequestDto {
 
     private String email;
 
-    private Integer phone_number;
+    private String phone_number;
 
     private String address;        // FIX: removed "Integer score" (not in DB schema)
 
     private String semester;
 
-    private Integer year;
+    private String year;
 
     private String university;
 

@@ -1,65 +1,56 @@
 package org.system.controller;
 
-
-import org.system.model.dto.request.StudentRequestDto;
-
 import org.system.service.StudentService;
-
-import java.util.List;
 import java.util.Scanner;
 
 public class StudentController {
 
-     static void main(String[] args) {
+    private final StudentService service;
+    private final Scanner scanner;
 
-        StudentService service = new StudentService();
-        Scanner sc = new Scanner(System.in);
+    public StudentController() {
+        this.service = new StudentService();
+        this.scanner = new Scanner(System.in);
+    }
 
+    // ── 1. DISPLAY ALL ────────────────────────────────────────────────────────
+    public void displayAllStudents() {
+        service.getAllStudents();
+    }
+
+    // ── 2. DISPLAY BY ID ──────────────────────────────────────────────────────
+    public void displayStudentById() {
+        System.out.print("Enter Student ID: ");
+        int id = readInt();
+        service.getStudentById(id);
+    }
+
+    // ── 3. CREATE ─────────────────────────────────────────────────────────────
+    public void createStudent() {
+        service.createStudent();
+    }
+
+    // ── 4. UPDATE ─────────────────────────────────────────────────────────────
+    public void updateStudent() {
+        System.out.print("Enter Student ID to update: ");
+        int id = readInt();
+        service.updateStudent(id);
+    }
+
+    // ── 5. DELETE ─────────────────────────────────────────────────────────────
+    public void deleteStudent() {
+        System.out.print("Enter Student ID to delete: ");
+        int id = readInt();
+        service.deleteStudent(id);
+    }
+
+    // ── HELPER: safe int read ─────────────────────────────────────────────────
+    private int readInt() {
         while (true) {
-            System.out.println("\n===== STUDENT MANAGEMENT =====");
-            System.out.println("1. Add Student");
-            System.out.println("2. View All Students");
-            System.out.println("3. Find Student by ID");
-            System.out.println("4. Update Student");
-            System.out.println("5. Delete Student");
-            System.out.println("0. Exit");
-            System.out.print("Choose: ");
-
-            int choice = sc.nextInt();
-
-            switch (choice) {
-
-                case 1:
-                    service.createStudent();
-                    break;
-
-                case 2:
-                    List<StudentRequestDto> students = service.getAllStudents();
-                    students.forEach(System.out::println);
-                    break;
-
-                case 3:
-                    System.out.print("Enter ID: ");
-                    int id = sc.nextInt();
-                    System.out.println(service.getStudentById(id));
-                    break;
-
-                case 4:
-                    System.out.print("Enter ID to update: ");
-                    service.updateStudent(sc.nextInt());
-                    break;
-
-                case 5:
-                    System.out.print("Enter ID to delete: ");
-                    service.deleteStudent(sc.nextInt());
-                    break;
-
-                case 0:
-                    System.out.println("Goodbye 👋");
-                    return;
-
-                default:
-                    System.out.println("Invalid choice!");
+            try {
+                return Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.print("Invalid input. Please enter a number: ");
             }
         }
     }
