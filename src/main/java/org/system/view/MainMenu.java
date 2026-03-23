@@ -44,7 +44,8 @@ public class MainMenu {
             switch (choice) {
                 case "1" -> studentMenu.studentStart();
                 case "2" -> loginAdmin();
-                case "0" -> { System.out.println("Goodbye!"); return; }
+                case "0" -> { System.out.println("Goodbye!");return;
+                }
                 default  -> System.out.println(red +"Invalid option.");
             }
         }

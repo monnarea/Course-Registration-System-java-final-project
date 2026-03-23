@@ -73,7 +73,6 @@ public class StudentMenu {
                         transcriptController.format(2);
                     }
                     case 0 -> {
-                        new MainMenu().start();
                         return;
                     }
                     default -> System.out.println(red + "Invalid option." + reset);

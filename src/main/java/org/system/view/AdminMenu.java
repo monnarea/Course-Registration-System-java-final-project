@@ -87,10 +87,10 @@ public class AdminMenu {
                     }
                     case 9 -> {
                         majorMenu();
-
                     }
                     case 0 -> {
-                        new MainMenu().start();
+
+                        return;
                     }
                     default -> System.out.println(red+"Invalid option. Please enter 0–9.");
                 }
@@ -269,10 +269,9 @@ public class AdminMenu {
                 case 3 -> transcriptController.create();
                 case 4 -> transcriptController.update();
                 case 5 -> transcriptController.delete();
-                case 0 -> new AdminMenu();
+                case 0 -> {return;}
                 default -> System.out.println("Invalid option. Please enter 0–5.");
             }
-            return;
         }
     }
 

@@ -58,7 +58,7 @@ public class SubjectService {
             System.err.println("[SERVICE - READ BY ID] Invalid sub_id: " + subId);
             return;
         }
-        List<SubjectResponseDto> list = Collections.singletonList((SubjectResponseDto) subjectDao.getSubjectById(subId));
+        List<SubjectResponseDto> list = subjectDao.getSubjectById(subId);
         if (list.isEmpty()) {
             System.out.println("[SERVICE - READ BY ID] No subject found with sub_id = " + subId);
             return;
@@ -116,7 +116,7 @@ public class SubjectService {
         }
 
         // Check subject exists before deleting
-        List<SubjectResponseDto> existing = Collections.singletonList((SubjectResponseDto) subjectDao.getSubjectById(subId));
+        List<SubjectResponseDto> existing = subjectDao.getSubjectById(subId);
         if (existing.isEmpty()) {
             System.err.println("[SERVICE - DELETE] Subject not found with sub_id: " + subId);
             return false;
